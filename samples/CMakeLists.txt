@@ -20,7 +20,7 @@ function(add_sample SAMPLE_NAME)
 	endif()
 
     set_target_properties(${SAMPLE_NAME} PROPERTIES 
-        LINKER_LANGUAGE C
+        VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${SAMPLE_NAME}>"
         FOLDER "samples"
     )
 endfunction()

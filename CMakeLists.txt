@@ -32,7 +32,12 @@ if (JPH_MASTER_PROJECT)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 endif()
 
-include(CMakeDependentOption)
+if (MSVC AND JPH_MASTER_PROJECT)
+    if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+        set (CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif ()
+endif ()
+
 include(GNUInstallDirs)
 include(FetchContent)
 
@@ -41,9 +46,6 @@ option(USE_ASSERTS "Enable asserts" OFF)
 
 # When turning this option on, the library will be compiled using doubles for positions. This allows for much bigger worlds.
 option(DOUBLE_PRECISION "Use double precision math" OFF)
-
-# When turning this option on, the library will be compiled with debug symbols
-option(GENERATE_DEBUG_SYMBOLS "Generate debug symbols" ON)
 
 # When turning this option on, the library will override the default CMAKE_CXX_FLAGS_DEBUG/RELEASE values, otherwise they will use the platform defaults
 option(OVERRIDE_CXX_FLAGS "Override CMAKE_CXX_FLAGS_DEBUG/RELEASE" ON)
@@ -117,10 +119,6 @@ option(USE_STD_VECTOR "Use std::vector instead of own Array class" OFF)
 # Setting this option will compile the ObjectStream class and RTTI attribute information
 option(ENABLE_OBJECT_STREAM "Compile the ObjectStream class and RTTI attribute information" ON)
 
-# Ability to toggle between the static and DLL versions of the MSVC runtime library
-# Windows Store only supports the DLL version
-cmake_dependent_option(USE_STATIC_MSVC_RUNTIME_LIBRARY "Use the static MSVC runtime library" ON "MSVC;NOT WINDOWS_STORE" OFF)
-
 option(JPH_SAMPLES "Build samples" ${JPH_MASTER_PROJECT})
 
 # Define standard configurations (Debug, Release, Distribution)
@@ -155,22 +153,12 @@ if (MSVC)
 	# 64 bit architecture
 	set(CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE "x64")
 
-	# Set runtime library
-	if (USE_STATIC_MSVC_RUNTIME_LIBRARY)
-		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-	endif()
-
 	# Set general compiler flags
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Gm- /MP /nologo /diagnostics:classic /FC /fp:except- /Zc:inline")
 
 	# Enable warnings
 	if (ENABLE_ALL_WARNINGS)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall /WX")
-	endif()
-
-    # Optionally generate debug symbols
-	if (GENERATE_DEBUG_SYMBOLS)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
 	endif()
 
 	# Set compiler flag for disabling RTTI
@@ -193,18 +181,10 @@ if (MSVC)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
 	endif()
 
-	# Set compiler flags for various configurations
-	if (OVERRIDE_CXX_FLAGS)
-		set(CMAKE_CXX_FLAGS_DEBUG "/GS /Od /Ob0 /RTC1")
-		set(CMAKE_CXX_FLAGS_RELEASE "/GS- /Gy /O2 /Oi /Ot")
-	endif()
 	set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
 
 	# Set linker flags
 	set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS /ignore:4221")
-	if (GENERATE_DEBUG_SYMBOLS)
-		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG")
-	endif()
 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		if (CROSS_PLATFORM_DETERMINISTIC)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:precise")
@@ -219,11 +199,6 @@ else()
 	# Enable warnings
 	if (ENABLE_ALL_WARNINGS)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
-	endif()
-
-    # Optionally generate debug symbols
-	if (GENERATE_DEBUG_SYMBOLS)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 	endif()
 
 	# Set compiler flag for disabling RTTI
@@ -316,11 +291,43 @@ else()
 	add_library(${TARGET_NAME} ${SOURCE_FILES})
 endif()
 
+if(JPH_BUILD_SHARED)
+	target_compile_definitions(${TARGET_NAME} PRIVATE JPH_SHARED_LIBRARY_BUILD=1)
+endif ()
+
 target_include_directories(${TARGET_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	${JoltPhysics_SOURCE_DIR}/..
 )
 target_link_libraries(${TARGET_NAME} PRIVATE Jolt)
+
+if (MSVC)
+    # Debug information
+	target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Debug>:/Zi>)
+
+	# Enable full optimization in dev/release
+	target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Debug>:/Od> $<$<NOT:$<CONFIG:Debug>>:/Ox>)
+
+	# Inline function expansion
+	target_compile_options(${TARGET_NAME} PRIVATE /Ob2)
+
+	 # Enable intrinsic functions in dev/release
+	target_compile_options(${TARGET_NAME} PRIVATE $<$<NOT:$<CONFIG:Debug>>:/Oi>)
+
+    # Favor fast code
+	target_compile_options(${TARGET_NAME} PRIVATE /Ot)
+
+    # Enable fiber-safe optimizations in dev/release
+	target_compile_options(${TARGET_NAME} PRIVATE $<$<NOT:$<CONFIG:Debug>>:/GT>)
+
+	# Enable string pooling
+	target_compile_options(${TARGET_NAME} PRIVATE /GF)
+
+    # Use security checks only in debug
+	target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:DEBUG>:/sdl> $<$<NOT:$<CONFIG:DEBUG>>:/sdl->)
+else()
+
+endif ()
 
 install(TARGETS ${TARGET_NAME}
     EXPORT ${TARGET_NAME}
