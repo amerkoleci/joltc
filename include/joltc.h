@@ -694,6 +694,9 @@ JPH_CAPI JPH_TriangleShape* JPH_TriangleShapeSettings_CreateShape(const JPH_Tria
 
 JPH_CAPI JPH_TriangleShape* JPH_TriangleShape_Create(const JPH_Vec3* v1, const JPH_Vec3* v2, const JPH_Vec3* v3, float convexRadius);
 JPH_CAPI float JPH_TriangleShape_GetConvexRadius(const JPH_TriangleShape* shape);
+JPH_CAPI void JPH_TriangleShape_GetVertex1(const JPH_TriangleShape* shape, JPH_Vec3* result);
+JPH_CAPI void JPH_TriangleShape_GetVertex2(const JPH_TriangleShape* shape, JPH_Vec3* result);
+JPH_CAPI void JPH_TriangleShape_GetVertex3(const JPH_TriangleShape* shape, JPH_Vec3* result);
 
 /* CapsuleShape */
 JPH_CAPI JPH_CapsuleShapeSettings* JPH_CapsuleShapeSettings_Create(float halfHeightOfCylinder, float radius);
@@ -742,6 +745,9 @@ JPH_CAPI uint32_t JPH_HeightFieldShapeSettings_CalculateBitsPerSampleForError(co
 /* TaperedCapsuleShape */
 JPH_CAPI JPH_TaperedCapsuleShapeSettings* JPH_TaperedCapsuleShapeSettings_Create(float halfHeightOfTaperedCylinder, float topRadius, float bottomRadius);
 JPH_CAPI JPH_TaperedCapsuleShape* JPH_TaperedCapsuleShapeSettings_CreateShape(JPH_TaperedCapsuleShapeSettings* settings);
+JPH_CAPI float JPH_TaperedCapsuleShape_GetTopRadius(const JPH_TaperedCapsuleShape* shape);
+JPH_CAPI float JPH_TaperedCapsuleShape_GetBottomRadius(const JPH_TaperedCapsuleShape* shape);
+JPH_CAPI float JPH_TaperedCapsuleShape_GetHalfHeight(const JPH_TaperedCapsuleShape* shape);
 
 /* CompoundShape */
 JPH_CAPI void JPH_CompoundShapeSettings_AddShape(JPH_CompoundShapeSettings* settings, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_ShapeSettings* shape, uint32_t userData);

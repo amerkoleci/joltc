@@ -1025,6 +1025,21 @@ float JPH_TriangleShape_GetConvexRadius(const JPH_TriangleShape* shape)
     return reinterpret_cast<const JPH::TriangleShape*>(shape)->GetConvexRadius();
 }
 
+void JPH_TriangleShape_GetVertex1(const JPH_TriangleShape* shape, JPH_Vec3* result)
+{
+    FromJolt(reinterpret_cast<const JPH::TriangleShape*>(shape)->GetVertex1(), result);
+}
+
+void JPH_TriangleShape_GetVertex2(const JPH_TriangleShape* shape, JPH_Vec3* result)
+{
+    FromJolt(reinterpret_cast<const JPH::TriangleShape*>(shape)->GetVertex2(), result);
+}
+
+void JPH_TriangleShape_GetVertex3(const JPH_TriangleShape* shape, JPH_Vec3* result)
+{
+    FromJolt(reinterpret_cast<const JPH::TriangleShape*>(shape)->GetVertex3(), result);
+}
+
 /* CapsuleShapeSettings */
 JPH_CapsuleShapeSettings* JPH_CapsuleShapeSettings_Create(float halfHeightOfCylinder, float radius)
 {
@@ -1316,6 +1331,21 @@ JPH_TaperedCapsuleShape* JPH_TaperedCapsuleShapeSettings_CreateShape(JPH_Tapered
     shape->AddRef();
 
     return reinterpret_cast<JPH_TaperedCapsuleShape*>(shape);
+}
+
+float JPH_TaperedCapsuleShape_GetTopRadius(const JPH_TaperedCapsuleShape* shape)
+{
+    return reinterpret_cast<const JPH::TaperedCapsuleShape*>(shape)->GetTopRadius();
+}
+
+float JPH_TaperedCapsuleShape_GetBottomRadius(const JPH_TaperedCapsuleShape* shape)
+{
+    return reinterpret_cast<const JPH::TaperedCapsuleShape*>(shape)->GetBottomRadius();
+}
+
+float JPH_TaperedCapsuleShape_GetHalfHeight(const JPH_TaperedCapsuleShape* shape)
+{
+    return reinterpret_cast<const JPH::TaperedCapsuleShape*>(shape)->GetHalfHeight();
 }
 
 /* CompoundShape */
