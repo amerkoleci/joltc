@@ -47,6 +47,9 @@ option(USE_ASSERTS "Enable asserts" OFF)
 # When turning this option on, the library will be compiled using doubles for positions. This allows for much bigger worlds.
 option(DOUBLE_PRECISION "Use double precision math" OFF)
 
+# When turning this option on, the library will be compiled with debug symbols
+option(GENERATE_DEBUG_SYMBOLS "Generate debug symbols" OFF)
+
 # When turning this option on, the library will override the default CMAKE_CXX_FLAGS_DEBUG/RELEASE values, otherwise they will use the platform defaults
 option(OVERRIDE_CXX_FLAGS "Override CMAKE_CXX_FLAGS_DEBUG/RELEASE" ON)
 
