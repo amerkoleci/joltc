@@ -19,7 +19,10 @@ function(add_sample SAMPLE_NAME)
 		target_link_options(${SAMPLE_NAME} PUBLIC "/SUBSYSTEM:CONSOLE")
 	endif()
 
-    set_target_properties(${SAMPLE_NAME} PROPERTIES FOLDER "samples")
+    set_target_properties(${SAMPLE_NAME} PROPERTIES 
+        LINKER_LANGUAGE C
+        FOLDER "samples"
+    )
 endfunction()
 
 # Add samples

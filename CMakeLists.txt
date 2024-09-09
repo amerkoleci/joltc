@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_INSTALL_MESSAGE LAZY)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11" CACHE STRING "Minimum OS X deployment version")
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for OS X")
@@ -42,7 +43,7 @@ option(USE_ASSERTS "Enable asserts" OFF)
 option(DOUBLE_PRECISION "Use double precision math" OFF)
 
 # When turning this option on, the library will be compiled with debug symbols
-option(GENERATE_DEBUG_SYMBOLS "Generate debug symbols" OFF)
+option(GENERATE_DEBUG_SYMBOLS "Generate debug symbols" ON)
 
 # When turning this option on, the library will override the default CMAKE_CXX_FLAGS_DEBUG/RELEASE values, otherwise they will use the platform defaults
 option(OVERRIDE_CXX_FLAGS "Override CMAKE_CXX_FLAGS_DEBUG/RELEASE" ON)
@@ -52,11 +53,6 @@ option(CROSS_PLATFORM_DETERMINISTIC "Cross platform deterministic" OFF)
 
 # When turning this option on, the library will be compiled for ARM (aarch64-linux-gnu), requires compiling with clang
 option(CROSS_COMPILE_ARM "Cross compile to aarch64-linux-gnu" OFF)
-
-# When turning this option on, the library will be compiled with interprocedural optimizations enabled, also known as link-time optimizations or link-time code generation.
-# Note that if you turn this on you need to use SET_INTERPROCEDURAL_OPTIMIZATION() or set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON) to enable LTO specifically for your own project as well.
-# If you don't do this you may get an error: /usr/bin/ld: libJolt.a: error adding symbols: file format not recognized
-option(INTERPROCEDURAL_OPTIMIZATION "Enable interprocedural optimizations" ON)
 
 # When turning this on, in Debug and Release mode, the library will emit extra code to ensure that the 4th component of a 3-vector is kept the same as the 3rd component
 # and will enable floating point exceptions during simulation to detect divisions by zero.
@@ -127,10 +123,16 @@ cmake_dependent_option(USE_STATIC_MSVC_RUNTIME_LIBRARY "Use the static MSVC runt
 
 option(JPH_SAMPLES "Build samples" ${JPH_MASTER_PROJECT})
 
-# Determine which configurations exist
-if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR) # Only do this when we're at the top level, see: https://gitlab.kitware.com/cmake/cmake/-/issues/24181
-	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
-endif()
+# Define standard configurations (Debug, Release, Distribution)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
+
+# Set the default CMAKE_BUILD_TYPE to Release.
+# This should be done before the project command since the latter can set
+# CMAKE_BUILD_TYPE itself (it does so for nmake).
+if (JPH_MASTER_PROJECT AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Distribution" CACHE STRING "The default build type" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
+endif ()
 
 FetchContent_Declare(
         JoltPhysics
@@ -180,11 +182,6 @@ if (MSVC)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR")
 	endif()
 
-	# Set compiler flag for disabling RTTI
-	if (NOT CPP_RTTI_ENABLED)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR-")
-	endif()
-
 	if (NOT CPP_EXCEPTIONS_ENABLED)
 		# Remove any existing compiler flag that enables exceptions
 		string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
@@ -200,9 +197,7 @@ if (MSVC)
 	if (OVERRIDE_CXX_FLAGS)
 		set(CMAKE_CXX_FLAGS_DEBUG "/GS /Od /Ob0 /RTC1")
 		set(CMAKE_CXX_FLAGS_RELEASE "/GS- /Gy /O2 /Oi /Ot")
-		set(CMAKE_CXX_FLAGS_DISTRIBUTION "/GS- /Gy /O2 /Oi /Ot")
 	endif()
-
 	set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
 
 	# Set linker flags
@@ -290,8 +285,6 @@ endif()
 set(CMAKE_EXE_LINKER_FLAGS_DISTRIBUTION "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 set(CMAKE_SHARED_LINKER_FLAGS_DISTRIBUTION "${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
 
-SET_INTERPROCEDURAL_OPTIMIZATION()
-
 set(PHYSICS_REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/joltc)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable shared library when building Jolt" FORCE)
 
@@ -327,15 +320,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	${JoltPhysics_SOURCE_DIR}/..
 )
-target_link_libraries(${TARGET_NAME} PUBLIC Jolt)
-
-if(JPH_BUILD_SHARED)
-	set_property(TARGET Jolt PROPERTY POSITION_INDEPENDENT_CODE ON)
-    set_property(TARGET ${TARGET_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-    target_compile_definitions(${TARGET_NAME} PRIVATE JPH_SHARED_LIBRARY_BUILD=1)
-	set_property(TARGET ${TARGET_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
-endif()
+target_link_libraries(${TARGET_NAME} PRIVATE Jolt)
 
 install(TARGETS ${TARGET_NAME}
     EXPORT ${TARGET_NAME}
