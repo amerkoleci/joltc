@@ -57,7 +57,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Constraints/ConeConstraint.h"
 #include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
 #include "Jolt/Physics/Constraints/SixDOFConstraint.h"
-#include "Jolt/Physics/Character/CharacterBase.h"
+#include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 
 #include <iostream>
@@ -1739,6 +1739,34 @@ void JPH_BodyCreationSettings_Destroy(JPH_BodyCreationSettings* settings)
     }
 }
 
+void JPH_BodyCreationSettings_GetPosition(JPH_BodyCreationSettings* settings, JPH_RVec3* result)
+{
+    JPH_ASSERT(settings);
+
+    FromJolt(reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mPosition, result);
+}
+
+void JPH_BodyCreationSettings_SetPosition(JPH_BodyCreationSettings* settings, const JPH_RVec3* value)
+{
+    JPH_ASSERT(settings);
+
+    reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mPosition = ToJolt(value);
+}
+
+void JPH_BodyCreationSettings_GetRotation(JPH_BodyCreationSettings* settings, JPH_Quat* result)
+{
+    JPH_ASSERT(settings);
+
+    FromJolt(reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mRotation, result);
+}
+
+void JPH_BodyCreationSettings_SetRotation(JPH_BodyCreationSettings* settings, const JPH_Quat* value)
+{
+    JPH_ASSERT(settings);
+
+    reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mRotation = ToJolt(value);
+}
+
 void JPH_BodyCreationSettings_GetLinearVelocity(JPH_BodyCreationSettings* settings, JPH_Vec3* velocity)
 {
     JPH_ASSERT(settings);
@@ -3345,7 +3373,7 @@ JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, 
 	}
 }
 
-JPH_Body* JPH_BodyInterface_CreateBody(JPH_BodyInterface* interface, JPH_BodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateBody(JPH_BodyInterface* interface, const JPH_BodyCreationSettings* settings)
 {
     auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
 
@@ -3356,7 +3384,7 @@ JPH_Body* JPH_BodyInterface_CreateBody(JPH_BodyInterface* interface, JPH_BodyCre
     return reinterpret_cast<JPH_Body*>(body);
 }
 
-JPH_Body* JPH_BodyInterface_CreateBodyWithID(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_BodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateBodyWithID(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_BodyCreationSettings* settings)
 {
     auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
 
@@ -3368,7 +3396,7 @@ JPH_Body* JPH_BodyInterface_CreateBodyWithID(JPH_BodyInterface* interface, JPH_B
     return reinterpret_cast<JPH_Body*>(body);
 }
 
-JPH_Body* JPH_BodyInterface_CreateBodyWithoutID(JPH_BodyInterface* interface, JPH_BodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateBodyWithoutID(JPH_BodyInterface* interface, const JPH_BodyCreationSettings* settings)
 {
     auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
     auto body = joltBodyInterface->CreateBodyWithoutID(
@@ -3409,7 +3437,7 @@ JPH_Body* JPH_BodyInterface_UnassignBodyID(JPH_BodyInterface* interface, JPH_Bod
     return reinterpret_cast<JPH_Body*>(body);
 }
 
-JPH_BodyID JPH_BodyInterface_CreateAndAddBody(JPH_BodyInterface* interface, JPH_BodyCreationSettings* settings, JPH_Activation activationMode)
+JPH_BodyID JPH_BodyInterface_CreateAndAddBody(JPH_BodyInterface* interface, const JPH_BodyCreationSettings* settings, JPH_Activation activationMode)
 {
     auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
     JPH::BodyID bodyID = joltBodyInterface->CreateAndAddBody(
@@ -3732,7 +3760,6 @@ void JPH_BodyInterface_GetWorldTransform(JPH_BodyInterface* interface, JPH_BodyI
 
 void JPH_BodyInterface_GetCenterOfMassTransform(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RMatrix4x4* resutlt)
 {
-    JPH_ASSERT(interface);
     auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
 
     const JPH::RMat44& mat = joltBodyInterface->GetCenterOfMassTransform(JPH::BodyID(bodyId));
@@ -3741,10 +3768,25 @@ void JPH_BodyInterface_GetCenterOfMassTransform(JPH_BodyInterface* interface, JP
 
 void JPH_BodyInterface_MoveKinematic(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* targetPosition, JPH_Quat* targetRotation, float deltaTime)
 {
-    JPH_ASSERT(interface);
     auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
 
     joltBodyInterface->MoveKinematic(JPH::BodyID(bodyId), ToJolt(targetPosition), ToJolt(targetRotation), deltaTime);
+}
+
+JPH_Bool32 JPH_BodyInterface_ApplyBuoyancyImpulse(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime)
+{
+    auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
+    return ToJolt(joltBodyInterface->ApplyBuoyancyImpulse(
+        JPH::BodyID(bodyId),
+        ToJolt(surfacePosition),
+        ToJolt(surfaceNormal),
+        buoyancy,
+        linearDrag,
+        angularDrag,
+        ToJolt(fluidVelocity),
+        ToJolt(gravity),
+        deltaTime
+    ));
 }
 
 void JPH_BodyInterface_SetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
@@ -4529,6 +4571,25 @@ void JPH_Body_AddAngularImpulse(JPH_Body* body, const JPH_Vec3* angularImpulse)
     reinterpret_cast<JPH::Body*>(body)->AddAngularImpulse(ToJolt(angularImpulse));
 }
 
+void JPH_Body_MoveKinematic(JPH_Body* body, JPH_RVec3* targetPosition, JPH_Quat* targetRotation, float deltaTime)
+{
+    reinterpret_cast<JPH::Body*>(body)->MoveKinematic(ToJolt(targetPosition), ToJolt(targetRotation), deltaTime);
+}
+
+JPH_Bool32 JPH_Body_ApplyBuoyancyImpulse(JPH_Body* body, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime)
+{
+    return ToJolt(reinterpret_cast<JPH::Body*>(body)->ApplyBuoyancyImpulse(
+        ToJolt(surfacePosition),
+        ToJolt(surfaceNormal),
+        buoyancy,
+        linearDrag,
+        angularDrag,
+        ToJolt(fluidVelocity), 
+        ToJolt(gravity), 
+        deltaTime
+    ));
+}
+
 void JPH_Body_GetPosition(const JPH_Body* body, JPH_RVec3* result)
 {
     auto joltVector = reinterpret_cast<const JPH::Body*>(body)->GetPosition();
@@ -5019,6 +5080,98 @@ uint64_t JPH_CharacterBase_GetGroundUserData(JPH_CharacterBase* character)
 {
 	auto joltCharacter = reinterpret_cast<JPH::CharacterBase*>(character);
     return joltCharacter->GetGroundUserData();
+}
+
+/* CharacterSettings */
+JPH_CharacterSettings* JPH_CharacterSettings_Create(void)
+{
+    auto settings = new JPH::CharacterSettings();
+    settings->AddRef();
+
+    return reinterpret_cast<JPH_CharacterSettings*>(settings);
+}
+
+JPH_ObjectLayer JPH_CharacterSettings_GetLayer(JPH_CharacterSettings* settings)
+{
+    return static_cast<JPH_ObjectLayer>(reinterpret_cast<JPH::CharacterSettings*>(settings)->mLayer);
+}
+
+void JPH_CharacterSettings_SetLayer(JPH_CharacterSettings* settings, JPH_ObjectLayer value)
+{
+    reinterpret_cast<JPH::CharacterSettings*>(settings)->mLayer = static_cast<JPH::ObjectLayer>(value);
+}
+
+float JPH_CharacterSettings_GetMass(JPH_CharacterSettings* settings)
+{
+    return reinterpret_cast<JPH::CharacterSettings*>(settings)->mMass;
+}
+
+void JPH_CharacterSettings_SetMass(JPH_CharacterSettings* settings, float value)
+{
+    reinterpret_cast<JPH::CharacterSettings*>(settings)->mMass = value;
+}
+
+float JPH_CharacterSettings_GetFriction(JPH_CharacterSettings* settings)
+{
+    return reinterpret_cast<JPH::CharacterSettings*>(settings)->mFriction;
+}
+
+void JPH_CharacterSettings_SetFriction(JPH_CharacterSettings* settings, float value)
+{
+    reinterpret_cast<JPH::CharacterSettings*>(settings)->mFriction = value;
+}
+
+float JPH_CharacterSettings_GetGravityFactor(JPH_CharacterSettings* settings)
+{
+    return reinterpret_cast<JPH::CharacterSettings*>(settings)->mGravityFactor;
+}
+
+void JPH_CharacterSettings_SetGravityFactor(JPH_CharacterSettings* settings, float value)
+{
+    reinterpret_cast<JPH::CharacterSettings*>(settings)->mGravityFactor = value;
+}
+
+/* Character */
+JPH_Character* JPH_Character_Create(const JPH_CharacterSettings* settings,
+    const JPH_RVec3* position,
+    const JPH_Quat* rotation,
+    uint64_t userData,
+    JPH_PhysicsSystem* system)
+{
+    auto joltSettings = reinterpret_cast<const JPH::CharacterSettings*>(settings);
+
+    auto joltCharacter = new JPH::Character(joltSettings,
+        ToJolt(position),
+        rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
+        userData,
+        system->physicsSystem);
+    joltCharacter->AddRef();
+
+    return reinterpret_cast<JPH_Character*>(joltCharacter);
+}
+
+void JPH_Character_AddToPhysicsSystem(JPH_Character* character, JPH_Activation activationMode, JPH_Bool32 lockBodies)
+{
+    auto joltCharacter = reinterpret_cast<JPH::Character*>(character);
+    joltCharacter->AddToPhysicsSystem(static_cast<JPH::EActivation>(activationMode), ToJolt(lockBodies));
+}
+
+void JPH_Character_RemoveFromPhysicsSystem(JPH_Character* character, JPH_Bool32 lockBodies)
+{
+    auto joltCharacter = reinterpret_cast<JPH::Character*>(character);
+    joltCharacter->RemoveFromPhysicsSystem(ToJolt(lockBodies));
+}
+
+void JPH_Character_Activate(JPH_Character* character, JPH_Bool32 lockBodies)
+{
+    auto joltCharacter = reinterpret_cast<JPH::Character*>(character);
+    joltCharacter->Activate(ToJolt(lockBodies));
+}
+
+void JPH_Character_PostSimulation(JPH_Character* character, float maxSeparationDistance, JPH_Bool32 lockBodies)
+{
+    auto joltCharacter = reinterpret_cast<JPH::Character*>(character);
+    joltCharacter->PostSimulation(maxSeparationDistance, ToJolt(lockBodies));
 }
 
 /* CharacterVirtualSettings */
