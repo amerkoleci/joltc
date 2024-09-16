@@ -322,6 +322,33 @@ static inline JPH::MotorSettings ToJolt(const JPH_MotorSettings* settings)
 	return result;
 }
 
+static inline BodyManager::DrawSettings ToJolt(const JPH_DrawSettings* properties)
+{
+	BodyManager::DrawSettings result{};
+	result.mDrawGetSupportFunction = ToJolt(properties->drawGetSupportFunction);
+	result.mDrawSupportDirection = ToJolt(properties->drawSupportDirection);
+	result.mDrawGetSupportingFace = ToJolt(properties->drawGetSupportingFace);
+	result.mDrawShape = ToJolt(properties->drawShape);
+	result.mDrawShapeWireframe = ToJolt(properties->drawShapeWireframe);
+	result.mDrawShapeColor = static_cast<BodyManager::EShapeColor>(properties->drawShapeColor);
+	result.mDrawBoundingBox = ToJolt(properties->drawBoundingBox);
+	result.mDrawCenterOfMassTransform = ToJolt(properties->drawCenterOfMassTransform);
+	result.mDrawWorldTransform = ToJolt(properties->drawWorldTransform);
+	result.mDrawVelocity = ToJolt(properties->drawVelocity);
+	result.mDrawMassAndInertia = ToJolt(properties->drawMassAndInertia);
+	result.mDrawSleepStats = ToJolt(properties->drawSleepStats);
+	result.mDrawSoftBodyVertices = ToJolt(properties->drawSoftBodyVertices);
+	result.mDrawSoftBodyVertexVelocities = ToJolt(properties->drawSoftBodyVertexVelocities);
+	result.mDrawSoftBodyEdgeConstraints= ToJolt(properties->drawSoftBodyEdgeConstraints);
+	result.mDrawSoftBodyBendConstraints= ToJolt(properties->drawSoftBodyBendConstraints);
+	result.mDrawSoftBodyVolumeConstraints = ToJolt(properties->drawSoftBodyVolumeConstraints);
+	result.mDrawSoftBodySkinConstraints = ToJolt(properties->drawSoftBodySkinConstraints);
+	result.mDrawSoftBodyLRAConstraints = ToJolt(properties->drawSoftBodyLRAConstraints);
+	result.mDrawSoftBodyPredictedBounds = ToJolt(properties->drawSoftBodyPredictedBounds);
+	result.mDrawSoftBodyConstraintColor = static_cast<ESoftBodyConstraintColor>(properties->drawSoftBodyConstraintColor);
+	return result;
+}
+
 void JPH_MassProperties_DecomposePrincipalMomentsOfInertia(JPH_MassProperties* properties, JPH_Matrix4x4* rotation, JPH_Vec3* diagonal)
 {
 	JPH::Mat44 joltRotation;
@@ -508,6 +535,33 @@ JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterTable_Create
 
 	auto filter = new JPH::ObjectVsBroadPhaseLayerFilterTable(*joltBroadPhaseLayerInterface, numBroadPhaseLayers, *joltObjectLayerPairFilter, numObjectLayers);
 	return reinterpret_cast<JPH_ObjectVsBroadPhaseLayerFilter*>(filter);
+}
+
+void JPH_DrawSettings_InitDefault(JPH_DrawSettings* settings)
+{
+	JPH_ASSERT(settings);
+
+	settings->drawGetSupportFunction = false;
+	settings->drawSupportDirection = false;
+	settings->drawGetSupportingFace = false;
+	settings->drawShape = true;
+	settings->drawShapeWireframe = false;
+	settings->drawShapeColor = JPH_BodyManager_ShapeColor_MotionTypeColor;
+	settings->drawBoundingBox = false;
+	settings->drawCenterOfMassTransform = false;
+	settings->drawWorldTransform = false;
+	settings->drawVelocity = false;
+	settings->drawMassAndInertia = false;
+	settings->drawSleepStats = false;
+	settings->drawSoftBodyVertices = false;
+	settings->drawSoftBodyVertexVelocities = false;
+	settings->drawSoftBodyEdgeConstraints = false;
+	settings->drawSoftBodyBendConstraints = false;
+	settings->drawSoftBodyVolumeConstraints = false;
+	settings->drawSoftBodySkinConstraints = false;
+	settings->drawSoftBodyLRAConstraints = false;
+	settings->drawSoftBodyPredictedBounds = false;
+	settings->drawSoftBodyConstraintColor = JPH_SoftBodyConstraintColor_ConstraintType;
 }
 
 /* JPH_PhysicsSystem */
@@ -3458,21 +3512,15 @@ JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, 
 	}
 }
 
-void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer)
+void JPH_PhysicsSystem_DrawBodies(const JPH_DrawSettings* settings, JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer)
 {
+	JPH_ASSERT(settings);
 	JPH_ASSERT(system);
 	JPH_ASSERT(renderer);
 
-	// TODO: Expose this
-	BodyManager::DrawSettings settings;
-	settings.mDrawCenterOfMassTransform = false;
-	settings.mDrawShape = true;
-	settings.mDrawSoftBodyVertices = true;
-	settings.mDrawSoftBodyEdgeConstraints = true;
-	settings.mDrawShapeWireframe = true;
-	settings.mDrawShapeColor = BodyManager::EShapeColor::ShapeTypeColor;
+	BodyManager::DrawSettings joltSettings = ToJolt(settings);
 	BodyDrawFilter* bodyDrawFilter = nullptr;
-	system->physicsSystem->DrawBodies(settings, reinterpret_cast<DebugRenderer*>(renderer), bodyDrawFilter);
+	system->physicsSystem->DrawBodies(joltSettings, reinterpret_cast<DebugRenderer*>(renderer), bodyDrawFilter);
 }
 
 void JPH_PhysicsSystem_DrawConstraints(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer)

@@ -247,17 +247,41 @@ typedef enum JPH_SpringMode {
     _JPH_SpringMode_Force32 = 0x7FFFFFFF
 } JPH_SpringMode;
 
+/// Defines how to color soft body constraints
+typedef enum JPH_SoftBodyConstraintColor
+{
+    JPH_SoftBodyConstraintColor_ConstraintType,				/// Draw different types of constraints in different colors
+    JPH_SoftBodyConstraintColor_ConstraintGroup,			/// Draw constraints in the same group in the same color, non-parallel group will be red
+    JPH_SoftBodyConstraintColor_ConstraintOrder,			/// Draw constraints in the same group in the same color, non-parallel group will be red, and order within each group will be indicated with gradient
+
+    _JPH_SoftBodyConstraintColor_Count,
+    _JPH_SoftBodyConstraintColor_Force32 = 0x7FFFFFFF
+} JPH_SoftBodyConstraintColor;
+
+typedef enum JPH_BodyManager_ShapeColor
+{
+    JPH_BodyManager_ShapeColor_InstanceColor,				///< Random color per instance
+    JPH_BodyManager_ShapeColor_ShapeTypeColor,				///< Convex = green, scaled = yellow, compound = orange, mesh = red
+    JPH_BodyManager_ShapeColor_MotionTypeColor,			///< Static = grey, keyframed = green, dynamic = random color per instance
+    JPH_BodyManager_ShapeColor_SleepColor,					///< Static = grey, keyframed = green, dynamic = yellow, sleeping = red
+    JPH_BodyManager_ShapeColor_IslandColor,				///< Static = grey, active = random color per island, sleeping = light grey
+    JPH_BodyManager_ShapeColor_MaterialColor,				///< Color as defined by the PhysicsMaterial of the shape
+
+    _JPH_BodyManager_ShapeColor_Count,
+    _JPH_BodyManager_ShapeColor_Force32 = 0x7FFFFFFF
+} JPH_BodyManager_ShapeColor;
+
 typedef enum JPH_DebugRenderer_CastShadow {
-    JPH_DebugRenderer_CastShadow_On = 0,
-    JPH_DebugRenderer_CastShadow_Off = 1,
+    JPH_DebugRenderer_CastShadow_On = 0,    ///< This shape should cast a shadow
+    JPH_DebugRenderer_CastShadow_Off = 1,   ///< This shape should not cast a shadow
 
     _JPH_DebugRenderer_CastShadow_Count,
     _JPH_DebugRenderer_CastShadow_Force32 = 0x7FFFFFFF
 } JPH_DebugRenderer_CastShadow;
 
 typedef enum JPH_DebugRenderer_DrawMode {
-    JPH_DebugRenderer_DrawMode_Solid = 0,
-    JPH_DebugRenderer_DrawMode_Wireframe = 1,
+    JPH_DebugRenderer_DrawMode_Solid = 0,       ///< Draw as a solid shape
+    JPH_DebugRenderer_DrawMode_Wireframe = 1,   ///< Draw as wireframe
 
     _JPH_DebugRenderer_JPH_DebugRenderer_DrawMode_Count,
     _JPH_DebugRenderer_JPH_DebugRenderer_DrawMode_Force32 = 0x7FFFFFFF
@@ -406,6 +430,31 @@ typedef struct JPH_ShapeCastResult
     float              fraction;
     JPH_Bool32         isBackFaceHit;
 } JPH_ShapeCastResult;
+
+typedef struct JPH_DrawSettings
+{
+    JPH_Bool32					drawGetSupportFunction;				///< Draw the GetSupport() function, used for convex collision detection
+    JPH_Bool32					drawSupportDirection;				///< When drawing the support function, also draw which direction mapped to a specific support point
+    JPH_Bool32					drawGetSupportingFace;				///< Draw the faces that were found colliding during collision detection
+    JPH_Bool32					drawShape;							///< Draw the shapes of all bodies
+    JPH_Bool32					drawShapeWireframe;					///< When mDrawShape is true and this is true, the shapes will be drawn in wireframe instead of solid.
+    JPH_BodyManager_ShapeColor	drawShapeColor;                     ///< Coloring scheme to use for shapes
+    JPH_Bool32					drawBoundingBox;					///< Draw a bounding box per body
+    JPH_Bool32					drawCenterOfMassTransform;			///< Draw the center of mass for each body
+    JPH_Bool32					drawWorldTransform;					///< Draw the world transform (which can be different than the center of mass) for each body
+    JPH_Bool32					drawVelocity;						///< Draw the velocity vector for each body
+    JPH_Bool32					drawMassAndInertia;					///< Draw the mass and inertia (as the box equivalent) for each body
+    JPH_Bool32					drawSleepStats;						///< Draw stats regarding the sleeping algorithm of each body
+    JPH_Bool32					drawSoftBodyVertices;				///< Draw the vertices of soft bodies
+    JPH_Bool32					drawSoftBodyVertexVelocities;		///< Draw the velocities of the vertices of soft bodies
+    JPH_Bool32					drawSoftBodyEdgeConstraints;		///< Draw the edge constraints of soft bodies
+    JPH_Bool32					drawSoftBodyBendConstraints;		///< Draw the bend constraints of soft bodies
+    JPH_Bool32					drawSoftBodyVolumeConstraints;		///< Draw the volume constraints of soft bodies
+    JPH_Bool32					drawSoftBodySkinConstraints;		///< Draw the skin constraints of soft bodies
+    JPH_Bool32					drawSoftBodyLRAConstraints;	        ///< Draw the LRA constraints of soft bodies
+    JPH_Bool32					drawSoftBodyPredictedBounds;		///< Draw the predicted bounds of soft bodies
+    JPH_SoftBodyConstraintColor	drawSoftBodyConstraintColor;        ///< Coloring scheme to use for soft body constraints
+} JPH_DrawSettings;
 
 typedef float JPH_RayCastBodyCollector(void* context, JPH_BroadPhaseCastResult* result);
 typedef void JPH_CollideShapeBodyCollector(void* context, JPH_BodyID result);
@@ -589,6 +638,8 @@ JPH_CAPI JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterTab
 	JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface, uint32_t numBroadPhaseLayers,
 	JPH_ObjectLayerPairFilter* objectLayerPairFilter, uint32_t numObjectLayers);
 
+JPH_CAPI void JPH_DrawSettings_InitDefault(JPH_DrawSettings* settings);
+
 /* JPH_PhysicsSystem */
 typedef struct JPH_PhysicsSystemSettings {
 	uint32_t maxBodies; /* 10240 */
@@ -673,7 +724,7 @@ JPH_CAPI void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH
 JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
 
-JPH_CAPI void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
+JPH_CAPI void JPH_PhysicsSystem_DrawBodies(const JPH_DrawSettings* settings, JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraints(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraintLimits(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraintReferenceFrame(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);

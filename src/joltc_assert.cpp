@@ -180,6 +180,19 @@ static_assert(JPH_BackFaceMode_CollideWithBackFaces == (int)JPH::EBackFaceMode::
 static_assert(sizeof(JPH::SubShapeIDPair) == sizeof(JPH_SubShapeIDPair));
 static_assert(alignof(JPH::SubShapeIDPair) == alignof(JPH_SubShapeIDPair));
 
+// ESoftBodyConstraintColor
+static_assert(JPH_SoftBodyConstraintColor_ConstraintType == (int)JPH::ESoftBodyConstraintColor::ConstraintType);
+static_assert(JPH_SoftBodyConstraintColor_ConstraintGroup == (int)JPH::ESoftBodyConstraintColor::ConstraintGroup);
+static_assert(JPH_SoftBodyConstraintColor_ConstraintOrder == (int)JPH::ESoftBodyConstraintColor::ConstraintOrder);
+
+// BodyManager::EShapeColor
+static_assert(JPH_BodyManager_ShapeColor_InstanceColor == (int)JPH::BodyManager::EShapeColor::InstanceColor);
+static_assert(JPH_BodyManager_ShapeColor_ShapeTypeColor == (int)JPH::BodyManager::EShapeColor::ShapeTypeColor);
+static_assert(JPH_BodyManager_ShapeColor_MotionTypeColor == (int)JPH::BodyManager::EShapeColor::MotionTypeColor);
+static_assert(JPH_BodyManager_ShapeColor_SleepColor == (int)JPH::BodyManager::EShapeColor::SleepColor);
+static_assert(JPH_BodyManager_ShapeColor_IslandColor == (int)JPH::BodyManager::EShapeColor::IslandColor);
+static_assert(JPH_BodyManager_ShapeColor_MaterialColor == (int)JPH::BodyManager::EShapeColor::MaterialColor);
+
 // DebugRenderer::ECastShadow
 static_assert(JPH_DebugRenderer_CastShadow_On == (int)JPH::DebugRenderer::ECastShadow::On);
 static_assert(JPH_DebugRenderer_CastShadow_Off == (int)JPH::DebugRenderer::ECastShadow::Off);
