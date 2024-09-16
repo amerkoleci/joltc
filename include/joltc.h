@@ -37,8 +37,9 @@
 
 #define JPH_CAPI _JPH_EXTERN _JPH_EXPORT
 
-#include <stddef.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #define JPH_DEFAULT_COLLISION_TOLERANCE (1.0e-4f) // float cDefaultCollisionTolerance = 1.0e-4f
 #define JPH_DEFAULT_PENETRATION_TOLERANCE (1.0e-4f) // float cDefaultPenetrationTolerance = 1.0e-4f
@@ -47,7 +48,6 @@
 #define JPH_MAX_PHYSICS_JOBS (2048) // int cMaxPhysicsJobs = 2048
 #define JPH_MAX_PHYSICS_BARRIERS (2048) // int cMaxPhysicsBarriers = 8
 
-typedef uint32_t JPH_Bool32;
 typedef uint32_t JPH_BodyID;
 typedef uint32_t JPH_SubShapeID;
 typedef uint16_t JPH_ObjectLayer;
@@ -428,31 +428,31 @@ typedef struct JPH_ShapeCastResult
     JPH_SubShapeID     subShapeID2;
     JPH_BodyID         bodyID2;
     float              fraction;
-    JPH_Bool32         isBackFaceHit;
+    bool         isBackFaceHit;
 } JPH_ShapeCastResult;
 
 typedef struct JPH_DrawSettings
 {
-    JPH_Bool32					drawGetSupportFunction;				///< Draw the GetSupport() function, used for convex collision detection
-    JPH_Bool32					drawSupportDirection;				///< When drawing the support function, also draw which direction mapped to a specific support point
-    JPH_Bool32					drawGetSupportingFace;				///< Draw the faces that were found colliding during collision detection
-    JPH_Bool32					drawShape;							///< Draw the shapes of all bodies
-    JPH_Bool32					drawShapeWireframe;					///< When mDrawShape is true and this is true, the shapes will be drawn in wireframe instead of solid.
+    bool					drawGetSupportFunction;				///< Draw the GetSupport() function, used for convex collision detection
+    bool					drawSupportDirection;				///< When drawing the support function, also draw which direction mapped to a specific support point
+    bool					drawGetSupportingFace;				///< Draw the faces that were found colliding during collision detection
+    bool					drawShape;							///< Draw the shapes of all bodies
+    bool					drawShapeWireframe;					///< When mDrawShape is true and this is true, the shapes will be drawn in wireframe instead of solid.
     JPH_BodyManager_ShapeColor	drawShapeColor;                     ///< Coloring scheme to use for shapes
-    JPH_Bool32					drawBoundingBox;					///< Draw a bounding box per body
-    JPH_Bool32					drawCenterOfMassTransform;			///< Draw the center of mass for each body
-    JPH_Bool32					drawWorldTransform;					///< Draw the world transform (which can be different than the center of mass) for each body
-    JPH_Bool32					drawVelocity;						///< Draw the velocity vector for each body
-    JPH_Bool32					drawMassAndInertia;					///< Draw the mass and inertia (as the box equivalent) for each body
-    JPH_Bool32					drawSleepStats;						///< Draw stats regarding the sleeping algorithm of each body
-    JPH_Bool32					drawSoftBodyVertices;				///< Draw the vertices of soft bodies
-    JPH_Bool32					drawSoftBodyVertexVelocities;		///< Draw the velocities of the vertices of soft bodies
-    JPH_Bool32					drawSoftBodyEdgeConstraints;		///< Draw the edge constraints of soft bodies
-    JPH_Bool32					drawSoftBodyBendConstraints;		///< Draw the bend constraints of soft bodies
-    JPH_Bool32					drawSoftBodyVolumeConstraints;		///< Draw the volume constraints of soft bodies
-    JPH_Bool32					drawSoftBodySkinConstraints;		///< Draw the skin constraints of soft bodies
-    JPH_Bool32					drawSoftBodyLRAConstraints;	        ///< Draw the LRA constraints of soft bodies
-    JPH_Bool32					drawSoftBodyPredictedBounds;		///< Draw the predicted bounds of soft bodies
+    bool					drawBoundingBox;					///< Draw a bounding box per body
+    bool					drawCenterOfMassTransform;			///< Draw the center of mass for each body
+    bool					drawWorldTransform;					///< Draw the world transform (which can be different than the center of mass) for each body
+    bool					drawVelocity;						///< Draw the velocity vector for each body
+    bool					drawMassAndInertia;					///< Draw the mass and inertia (as the box equivalent) for each body
+    bool					drawSleepStats;						///< Draw stats regarding the sleeping algorithm of each body
+    bool					drawSoftBodyVertices;				///< Draw the vertices of soft bodies
+    bool					drawSoftBodyVertexVelocities;		///< Draw the velocities of the vertices of soft bodies
+    bool					drawSoftBodyEdgeConstraints;		///< Draw the edge constraints of soft bodies
+    bool					drawSoftBodyBendConstraints;		///< Draw the bend constraints of soft bodies
+    bool					drawSoftBodyVolumeConstraints;		///< Draw the volume constraints of soft bodies
+    bool					drawSoftBodySkinConstraints;		///< Draw the skin constraints of soft bodies
+    bool					drawSoftBodyLRAConstraints;	        ///< Draw the LRA constraints of soft bodies
+    bool					drawSoftBodyPredictedBounds;		///< Draw the predicted bounds of soft bodies
     JPH_SoftBodyConstraintColor	drawSoftBodyConstraintColor;        ///< Coloring scheme to use for soft body constraints
 } JPH_DrawSettings;
 
@@ -597,8 +597,8 @@ typedef struct JPH_Character                        JPH_Character;  /* Inherics 
 
 /* CharacterVirtual */
 typedef struct JPH_CharacterContactSettings {
-	JPH_Bool32 canPushCharacter;
-	JPH_Bool32 canReceiveImpulses;
+	bool canPushCharacter;
+	bool canReceiveImpulses;
 } JPH_CharacterContactSettings;
 
 typedef struct JPH_CharacterContactListener			JPH_CharacterContactListener;
@@ -606,9 +606,9 @@ typedef struct JPH_CharacterVirtualSettings         JPH_CharacterVirtualSettings
 typedef struct JPH_CharacterVirtual                 JPH_CharacterVirtual;  /* Inherics JPH_CharacterBase */
 
 typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* mssage);
-typedef JPH_Bool32(JPH_API_CALL* JPH_AssertFailureFunc)(const char* expression, const char* mssage, const char* file, uint32_t line);
+typedef bool(JPH_API_CALL* JPH_AssertFailureFunc)(const char* expression, const char* mssage, const char* file, uint32_t line);
 
-JPH_CAPI JPH_Bool32 JPH_Init(void);
+JPH_CAPI bool JPH_Init(void);
 JPH_CAPI void JPH_Shutdown(void);
 JPH_CAPI void JPH_SetTraceHandler(JPH_TraceFunc handler);
 JPH_CAPI void JPH_SetAssertFailureHandler(JPH_AssertFailureFunc handler);
@@ -629,7 +629,7 @@ JPH_CAPI uint32_t JPH_ObjectLayerPairFilterMask_GetMask(JPH_ObjectLayer layer);
 JPH_CAPI JPH_ObjectLayerPairFilter* JPH_ObjectLayerPairFilterTable_Create(uint32_t numObjectLayers);
 JPH_CAPI void JPH_ObjectLayerPairFilterTable_DisableCollision(JPH_ObjectLayerPairFilter* objectFilter, JPH_ObjectLayer layer1, JPH_ObjectLayer layer2);
 JPH_CAPI void JPH_ObjectLayerPairFilterTable_EnableCollision(JPH_ObjectLayerPairFilter* objectFilter, JPH_ObjectLayer layer1, JPH_ObjectLayer layer2);
-JPH_CAPI JPH_Bool32 JPH_ObjectLayerPairFilterTable_ShouldCollide(JPH_ObjectLayerPairFilter* objectFilter, JPH_ObjectLayer layer1, JPH_ObjectLayer layer2);
+JPH_CAPI bool JPH_ObjectLayerPairFilterTable_ShouldCollide(JPH_ObjectLayerPairFilter* objectFilter, JPH_ObjectLayer layer1, JPH_ObjectLayer layer2);
 
 /* JPH_ObjectVsBroadPhaseLayerFilter */
 JPH_CAPI JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterMask_Create(const JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface);
@@ -672,13 +672,13 @@ typedef struct JPH_PhysicsSettings {
 	float minVelocityForRestitution;
 	float timeBeforeSleep;
 	float pointVelocitySleepThreshold;
-	JPH_Bool32 deterministicSimulation;
-	JPH_Bool32 constraintWarmStart;
-	JPH_Bool32 useBodyPairContactCache;
-	JPH_Bool32 useManifoldReduction;
-	JPH_Bool32 useLargeIslandSplitter;
-	JPH_Bool32 allowSleeping;
-	JPH_Bool32 checkActiveEdges;
+	bool deterministicSimulation;
+	bool constraintWarmStart;
+	bool useBodyPairContactCache;
+	bool useManifoldReduction;
+	bool useLargeIslandSplitter;
+	bool allowSleeping;
+	bool checkActiveEdges;
 } JPH_PhysicsSettings;
 
 JPH_CAPI JPH_PhysicsSystem* JPH_PhysicsSystem_Create(const JPH_PhysicsSystemSettings* settings);
@@ -705,7 +705,7 @@ JPH_CAPI const JPH_NarrowPhaseQuery* JPH_PhysicsSystem_GetNarrowPhaseQueryNoLock
 JPH_CAPI void JPH_PhysicsSystem_SetContactListener(JPH_PhysicsSystem* system, JPH_ContactListener* listener);
 JPH_CAPI void JPH_PhysicsSystem_SetBodyActivationListener(JPH_PhysicsSystem* system, JPH_BodyActivationListener* listener);
 
-JPH_CAPI JPH_Bool32 JPH_PhysicsSystem_WereBodiesInContact(const JPH_PhysicsSystem* system, JPH_BodyID body1, JPH_BodyID body2);
+JPH_CAPI bool JPH_PhysicsSystem_WereBodiesInContact(const JPH_PhysicsSystem* system, JPH_BodyID body1, JPH_BodyID body2);
 
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumBodies(const JPH_PhysicsSystem* system);
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyType type);
@@ -747,7 +747,7 @@ JPH_CAPI JPH_ShapeType JPH_Shape_GetType(const JPH_Shape* shape);
 JPH_CAPI JPH_ShapeSubType JPH_Shape_GetSubType(const JPH_Shape* shape);
 JPH_CAPI uint64_t JPH_Shape_GetUserData(const JPH_Shape* shape);
 JPH_CAPI void JPH_Shape_SetUserData(JPH_Shape* shape, uint64_t userData);
-JPH_CAPI JPH_Bool32 JPH_Shape_MustBeStatic(const JPH_Shape* shape);
+JPH_CAPI bool JPH_Shape_MustBeStatic(const JPH_Shape* shape);
 JPH_CAPI void JPH_Shape_GetCenterOfMass(const JPH_Shape* shape, JPH_Vec3* result);
 JPH_CAPI void JPH_Shape_GetLocalBounds(const JPH_Shape* shape, JPH_AABox* result);
 JPH_CAPI uint32_t JPH_Shape_GetSubShapeIDBitsRecursive(const JPH_Shape* shape);
@@ -757,8 +757,8 @@ JPH_CAPI void JPH_Shape_GetMassProperties(const JPH_Shape* shape, JPH_MassProper
 JPH_CAPI const JPH_PhysicsMaterial* JPH_Shape_GetMaterial(const JPH_Shape* shape, JPH_SubShapeID subShapeID);
 JPH_CAPI void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_Vec3* localPosition, JPH_Vec3* normal);
 JPH_CAPI float JPH_Shape_GetVolume(const JPH_Shape* shape);
-JPH_CAPI JPH_Bool32 JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit);
-JPH_CAPI JPH_Bool32 JPH_Shape_CollidePoint(const JPH_Shape* shape, JPH_Vec3* point);
+JPH_CAPI bool JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit);
+JPH_CAPI bool JPH_Shape_CollidePoint(const JPH_Shape* shape, JPH_Vec3* point);
 
 
 /* JPH_ConvexShape */
@@ -849,8 +849,8 @@ JPH_CAPI uint32_t JPH_HeightFieldShape_GetSampleCount(const JPH_HeightFieldShape
 JPH_CAPI uint32_t JPH_HeightFieldShape_GetBlockSize(const JPH_HeightFieldShape* shape);
 JPH_CAPI const JPH_PhysicsMaterial* JPH_HeightFieldShape_GetMaterial(const JPH_HeightFieldShape* shape, uint32_t x, uint32_t y);
 JPH_CAPI void JPH_HeightFieldShape_GetPosition(const JPH_HeightFieldShape* shape, uint32_t x, uint32_t y, JPH_Vec3* result);
-JPH_CAPI JPH_Bool32 JPH_HeightFieldShape_IsNoCollision(const JPH_HeightFieldShape* shape, uint32_t x, uint32_t y);
-JPH_CAPI JPH_Bool32 JPH_HeightFieldShape_ProjectOntoSurface(const JPH_HeightFieldShape* shape, const JPH_Vec3* localPosition, JPH_Vec3* outSurfacePosition, JPH_SubShapeID* outSubShapeID);
+JPH_CAPI bool JPH_HeightFieldShape_IsNoCollision(const JPH_HeightFieldShape* shape, uint32_t x, uint32_t y);
+JPH_CAPI bool JPH_HeightFieldShape_ProjectOntoSurface(const JPH_HeightFieldShape* shape, const JPH_Vec3* localPosition, JPH_Vec3* outSurfacePosition, JPH_SubShapeID* outSubShapeID);
 JPH_CAPI float JPH_HeightFieldShape_GetMinHeightValue(const JPH_HeightFieldShape* shape);
 JPH_CAPI float JPH_HeightFieldShape_GetMaxHeightValue(const JPH_HeightFieldShape* shape);
 
@@ -940,8 +940,8 @@ JPH_CAPI void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings*
 
 /* JPH_ConstraintSettings */
 JPH_CAPI void JPH_ConstraintSettings_Destroy(JPH_ConstraintSettings* settings);
-JPH_CAPI JPH_Bool32 JPH_ConstraintSettings_GetEnabled(JPH_ConstraintSettings* settings);
-JPH_CAPI void JPH_FixedConstraintSettings_SetEnabled(JPH_ConstraintSettings* settings, JPH_Bool32 value);
+JPH_CAPI bool JPH_ConstraintSettings_GetEnabled(JPH_ConstraintSettings* settings);
+JPH_CAPI void JPH_FixedConstraintSettings_SetEnabled(JPH_ConstraintSettings* settings, bool value);
 JPH_CAPI uint32_t JPH_ConstraintSettings_GetConstraintPriority(JPH_ConstraintSettings* settings);
 JPH_CAPI void JPH_FixedConstraintSettings_SetConstraintPriority(JPH_ConstraintSettings* settings, uint32_t value);
 JPH_CAPI uint32_t JPH_ConstraintSettings_GetNumVelocityStepsOverride(JPH_ConstraintSettings* settings);
@@ -959,8 +959,8 @@ JPH_CAPI JPH_ConstraintType JPH_Constraint_GetType(const JPH_Constraint* constra
 JPH_CAPI JPH_ConstraintSubType JPH_Constraint_GetSubType(const JPH_Constraint* constraint);
 JPH_CAPI uint32_t JPH_Constraint_GetConstraintPriority(const JPH_Constraint* constraint);
 JPH_CAPI void JPH_Constraint_SetConstraintPriority(JPH_Constraint* constraint, uint32_t priority);
-JPH_CAPI JPH_Bool32 JPH_Constraint_GetEnabled(JPH_Constraint* constraint);
-JPH_CAPI void JPH_Constraint_SetEnabled(JPH_Constraint* constraint, JPH_Bool32 enabled);
+JPH_CAPI bool JPH_Constraint_GetEnabled(JPH_Constraint* constraint);
+JPH_CAPI void JPH_Constraint_SetEnabled(JPH_Constraint* constraint, bool enabled);
 JPH_CAPI uint64_t JPH_Constraint_GetUserData(const JPH_Constraint* constraint);
 JPH_CAPI void JPH_Constraint_SetUserData(JPH_Constraint* constraint, uint64_t userData);
 JPH_CAPI void JPH_Constraint_NotifyShapeChanged(JPH_Constraint* constraint, JPH_BodyID bodyID, JPH_Vec3* deltaCOM);
@@ -970,8 +970,8 @@ JPH_CAPI void JPH_Constraint_Destroy(JPH_Constraint* constraint);
 JPH_CAPI JPH_FixedConstraintSettings* JPH_FixedConstraintSettings_Create(void);
 JPH_CAPI JPH_ConstraintSpace JPH_FixedConstraintSettings_GetSpace(JPH_FixedConstraintSettings* settings);
 JPH_CAPI void JPH_FixedConstraintSettings_SetSpace(JPH_FixedConstraintSettings* settings, JPH_ConstraintSpace space);
-JPH_CAPI JPH_Bool32 JPH_FixedConstraintSettings_GetAutoDetectPoint(JPH_FixedConstraintSettings* settings);
-JPH_CAPI void JPH_FixedConstraintSettings_SetAutoDetectPoint(JPH_FixedConstraintSettings* settings, JPH_Bool32 value);
+JPH_CAPI bool JPH_FixedConstraintSettings_GetAutoDetectPoint(JPH_FixedConstraintSettings* settings);
+JPH_CAPI void JPH_FixedConstraintSettings_SetAutoDetectPoint(JPH_FixedConstraintSettings* settings, bool value);
 JPH_CAPI void JPH_FixedConstraintSettings_GetPoint1(JPH_FixedConstraintSettings* settings, JPH_RVec3* result);
 JPH_CAPI void JPH_FixedConstraintSettings_SetPoint1(JPH_FixedConstraintSettings* settings, const JPH_RVec3* value);
 JPH_CAPI void JPH_FixedConstraintSettings_GetAxisX1(JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
@@ -1055,7 +1055,7 @@ JPH_CAPI float JPH_HingeConstraint_GetTargetAngle(JPH_HingeConstraint* constrain
 JPH_CAPI void JPH_HingeConstraint_SetLimits(JPH_HingeConstraint* constraint, float inLimitsMin, float inLimitsMax);
 JPH_CAPI float JPH_HingeConstraint_GetLimitsMin(JPH_HingeConstraint* constraint);
 JPH_CAPI float JPH_HingeConstraint_GetLimitsMax(JPH_HingeConstraint* constraint);
-JPH_CAPI JPH_Bool32 JPH_HingeConstraint_HasLimits(JPH_HingeConstraint* constraint);
+JPH_CAPI bool JPH_HingeConstraint_HasLimits(JPH_HingeConstraint* constraint);
 JPH_CAPI void JPH_HingeConstraint_GetLimitsSpringSettings(JPH_HingeConstraint* constraint, JPH_SpringSettings* result);
 JPH_CAPI void JPH_HingeConstraint_SetLimitsSpringSettings(JPH_HingeConstraint* constraint, JPH_SpringSettings* settings);
 JPH_CAPI void JPH_HingeConstraint_GetTotalLambdaPosition(const JPH_HingeConstraint* constraint, JPH_Vec3* result);
@@ -1066,8 +1066,8 @@ JPH_CAPI float JPH_HingeConstraint_GetTotalLambdaMotor(const JPH_HingeConstraint
 /* JPH_SliderConstraintSettings */
 JPH_CAPI JPH_SliderConstraintSettings* JPH_SliderConstraintSettings_Create(void);
 JPH_CAPI void JPH_SliderConstraintSettings_SetSliderAxis(JPH_SliderConstraintSettings* settings, const JPH_Vec3* axis);
-JPH_CAPI JPH_Bool32 JPH_SliderConstraintSettings_GetAutoDetectPoint(JPH_SliderConstraintSettings* settings);
-JPH_CAPI void JPH_SliderConstraintSettings_SetAutoDetectPoint(JPH_SliderConstraintSettings* settings, JPH_Bool32 value);
+JPH_CAPI bool JPH_SliderConstraintSettings_GetAutoDetectPoint(JPH_SliderConstraintSettings* settings);
+JPH_CAPI void JPH_SliderConstraintSettings_SetAutoDetectPoint(JPH_SliderConstraintSettings* settings, bool value);
 JPH_CAPI void JPH_SliderConstraintSettings_GetPoint1(JPH_SliderConstraintSettings* settings, JPH_RVec3* result);
 JPH_CAPI void JPH_SliderConstraintSettings_SetPoint1(JPH_SliderConstraintSettings* settings, const JPH_RVec3* value);
 JPH_CAPI void JPH_SliderConstraintSettings_GetPoint2(JPH_SliderConstraintSettings* settings, JPH_RVec3* result);
@@ -1098,7 +1098,7 @@ JPH_CAPI float JPH_SliderConstraint_GetTargetPosition(JPH_SliderConstraint* cons
 JPH_CAPI void JPH_SliderConstraint_SetLimits(JPH_SliderConstraint* constraint, float inLimitsMin, float inLimitsMax);
 JPH_CAPI float JPH_SliderConstraint_GetLimitsMin(JPH_SliderConstraint* constraint);
 JPH_CAPI float JPH_SliderConstraint_GetLimitsMax(JPH_SliderConstraint* constraint);
-JPH_CAPI JPH_Bool32 JPH_SliderConstraint_HasLimits(JPH_SliderConstraint* constraint);
+JPH_CAPI bool JPH_SliderConstraint_HasLimits(JPH_SliderConstraint* constraint);
 JPH_CAPI void JPH_SliderConstraint_GetLimitsSpringSettings(JPH_SliderConstraint* constraint, JPH_SpringSettings* result);
 JPH_CAPI void JPH_SliderConstraint_SetLimitsSpringSettings(JPH_SliderConstraint* constraint, JPH_SpringSettings* settings);
 JPH_CAPI void JPH_SliderConstraint_GetTotalLambdaPosition(const JPH_SliderConstraint* constraint, float* x, float* y);
@@ -1163,8 +1163,8 @@ JPH_CAPI JPH_Body* JPH_BodyInterface_CreateBody(JPH_BodyInterface* interface, co
 JPH_CAPI JPH_Body* JPH_BodyInterface_CreateBodyWithID(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_BodyCreationSettings* settings);
 JPH_CAPI JPH_Body* JPH_BodyInterface_CreateBodyWithoutID(JPH_BodyInterface* interface, const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyInterface_DestroyBodyWithoutID(JPH_BodyInterface* interface, JPH_Body* body);
-JPH_CAPI JPH_Bool32 JPH_BodyInterface_AssignBodyID(JPH_BodyInterface* interface, JPH_Body* body);
-JPH_CAPI JPH_Bool32 JPH_BodyInterface_AssignBodyID2(JPH_BodyInterface* interface, JPH_Body* body, JPH_BodyID bodyID);
+JPH_CAPI bool JPH_BodyInterface_AssignBodyID(JPH_BodyInterface* interface, JPH_Body* body);
+JPH_CAPI bool JPH_BodyInterface_AssignBodyID2(JPH_BodyInterface* interface, JPH_Body* body, JPH_BodyID bodyID);
 JPH_CAPI JPH_Body* JPH_BodyInterface_UnassignBodyID(JPH_BodyInterface* interface, JPH_BodyID bodyID);
 
 JPH_CAPI JPH_Body* JPH_BodyInterface_CreateSoftBody(JPH_BodyInterface* interface, const JPH_SoftBodyCreationSettings* settings);
@@ -1175,8 +1175,8 @@ JPH_CAPI JPH_BodyID JPH_BodyInterface_CreateAndAddSoftBody(JPH_BodyInterface* in
 JPH_CAPI void JPH_BodyInterface_AddBody(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_Activation activationMode);
 JPH_CAPI void JPH_BodyInterface_RemoveBody(JPH_BodyInterface* interface, JPH_BodyID bodyID);
 JPH_CAPI void JPH_BodyInterface_RemoveAndDestroyBody(JPH_BodyInterface* interface, JPH_BodyID bodyID);
-JPH_CAPI JPH_Bool32 JPH_BodyInterface_IsActive(JPH_BodyInterface* interface, JPH_BodyID bodyID);
-JPH_CAPI JPH_Bool32 JPH_BodyInterface_IsAdded(JPH_BodyInterface* interface, JPH_BodyID bodyID);
+JPH_CAPI bool JPH_BodyInterface_IsActive(JPH_BodyInterface* interface, JPH_BodyID bodyID);
+JPH_CAPI bool JPH_BodyInterface_IsAdded(JPH_BodyInterface* interface, JPH_BodyID bodyID);
 JPH_CAPI JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* interface, JPH_BodyID bodyID);
 
 JPH_CAPI void JPH_BodyInterface_SetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_Vec3* velocity);
@@ -1204,8 +1204,8 @@ JPH_CAPI void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interf
 JPH_CAPI void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
 
 JPH_CAPI const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId);
-JPH_CAPI void JPH_BodyInterface_SetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_Shape* shape, JPH_Bool32 updateMassProperties, JPH_Activation activationMode);
-JPH_CAPI void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* previousCenterOfMass, JPH_Bool32 updateMassProperties, JPH_Activation activationMode);
+JPH_CAPI void JPH_BodyInterface_SetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_Shape* shape, bool updateMassProperties, JPH_Activation activationMode);
+JPH_CAPI void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* previousCenterOfMass, bool updateMassProperties, JPH_Activation activationMode);
 
 JPH_CAPI void JPH_BodyInterface_ActivateBody(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 JPH_CAPI void JPH_BodyInterface_DeactivateBody(JPH_BodyInterface* interface, JPH_BodyID bodyId);
@@ -1217,7 +1217,7 @@ JPH_CAPI void JPH_BodyInterface_GetWorldTransform(JPH_BodyInterface* interface, 
 JPH_CAPI void JPH_BodyInterface_GetCenterOfMassTransform(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RMatrix4x4* resutlt);
 
 JPH_CAPI void JPH_BodyInterface_MoveKinematic(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* targetPosition, JPH_Quat* targetRotation, float deltaTime);
-JPH_CAPI JPH_Bool32 JPH_BodyInterface_ApplyBuoyancyImpulse(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime);
+JPH_CAPI bool JPH_BodyInterface_ApplyBuoyancyImpulse(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime);
 
 JPH_CAPI void JPH_BodyInterface_SetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
 JPH_CAPI void JPH_BodyInterface_GetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
@@ -1285,23 +1285,23 @@ JPH_CAPI void JPH_MassProperties_GetEquivalentSolidBoxSize(float mass, const JPH
 //--------------------------------------------------------------------------------------------------
 // JPH_BroadPhaseQuery
 //--------------------------------------------------------------------------------------------------
-JPH_CAPI JPH_Bool32 JPH_BroadPhaseQuery_CastRay(const JPH_BroadPhaseQuery* query,
+JPH_CAPI bool JPH_BroadPhaseQuery_CastRay(const JPH_BroadPhaseQuery* query,
     const JPH_Vec3* origin, const JPH_Vec3* direction,
     JPH_RayCastBodyCollector* callback, void* userData,
     JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
     JPH_ObjectLayerFilter* objectLayerFilter);
 
-JPH_CAPI JPH_Bool32 JPH_BroadPhaseQuery_CollideAABox(const JPH_BroadPhaseQuery* query,
+JPH_CAPI bool JPH_BroadPhaseQuery_CollideAABox(const JPH_BroadPhaseQuery* query,
     const JPH_AABox* box, JPH_CollideShapeBodyCollector* callback, void* userData,
     JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
     JPH_ObjectLayerFilter* objectLayerFilter);
 
-JPH_CAPI JPH_Bool32 JPH_BroadPhaseQuery_CollideSphere(const JPH_BroadPhaseQuery* query,
+JPH_CAPI bool JPH_BroadPhaseQuery_CollideSphere(const JPH_BroadPhaseQuery* query,
     const JPH_Vec3* center, float radius, JPH_CollideShapeBodyCollector* callback, void* userData,
     JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
     JPH_ObjectLayerFilter* objectLayerFilter);
 
-JPH_CAPI JPH_Bool32 JPH_BroadPhaseQuery_CollidePoint(const JPH_BroadPhaseQuery* query,
+JPH_CAPI bool JPH_BroadPhaseQuery_CollidePoint(const JPH_BroadPhaseQuery* query,
     const JPH_Vec3* point, JPH_CollideShapeBodyCollector* callback, void* userData,
     JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
     JPH_ObjectLayerFilter* objectLayerFilter);
@@ -1309,28 +1309,28 @@ JPH_CAPI JPH_Bool32 JPH_BroadPhaseQuery_CollidePoint(const JPH_BroadPhaseQuery* 
 //--------------------------------------------------------------------------------------------------
 // JPH_NarrowPhaseQuery
 //--------------------------------------------------------------------------------------------------
-JPH_CAPI JPH_Bool32 JPH_NarrowPhaseQuery_CastRay(const JPH_NarrowPhaseQuery* query,
+JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay(const JPH_NarrowPhaseQuery* query,
     const JPH_RVec3* origin, const JPH_Vec3* direction,
     JPH_RayCastResult* hit,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter);
 
-JPH_CAPI JPH_Bool32 JPH_NarrowPhaseQuery_CastRay2(const JPH_NarrowPhaseQuery* query,
+JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
 	JPH_CastRayCollector* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter);
 
-JPH_CAPI JPH_Bool32 JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* query,
+JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
 	JPH_CollidePointCollector* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter);
 
-JPH_CAPI JPH_Bool32 JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* query,
+JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape, const JPH_Vec3* scale, const JPH_RMatrix4x4* centerOfMassTransform,
 	JPH_RVec3* baseOffset,
 	JPH_CollideShapeCollector* callback, void* userData,
@@ -1338,7 +1338,7 @@ JPH_CAPI JPH_Bool32 JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter);
 
-JPH_CAPI JPH_Bool32 JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
+JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
     const JPH_Shape* shape,
 	const JPH_RMatrix4x4* centerOfMassTransform, const JPH_Vec3* direction, JPH_RVec3* baseOffset,
 	JPH_CastShapeCollector* callback, void* userData,
@@ -1354,28 +1354,28 @@ JPH_CAPI JPH_BodyType JPH_Body_GetBodyType(const JPH_Body* body);
 JPH_CAPI void JPH_Body_GetWorldSpaceBounds(const JPH_Body* body, JPH_AABox* result);
 JPH_CAPI void JPH_Body_GetWorldSpaceSurfaceNormal(const JPH_Body* body, JPH_SubShapeID subShapeID, const JPH_RVec3* position, JPH_Vec3* normal);
 
-JPH_CAPI JPH_Bool32 JPH_Body_IsActive(const JPH_Body* body);
-JPH_CAPI JPH_Bool32 JPH_Body_IsStatic(const JPH_Body* body);
-JPH_CAPI JPH_Bool32 JPH_Body_IsKinematic(const JPH_Body* body);
-JPH_CAPI JPH_Bool32 JPH_Body_IsDynamic(const JPH_Body* body);
-JPH_CAPI JPH_Bool32 JPH_Body_IsSensor(const JPH_Body* body);
-JPH_CAPI void JPH_Body_SetIsSensor(JPH_Body* body, JPH_Bool32 value);
+JPH_CAPI bool JPH_Body_IsActive(const JPH_Body* body);
+JPH_CAPI bool JPH_Body_IsStatic(const JPH_Body* body);
+JPH_CAPI bool JPH_Body_IsKinematic(const JPH_Body* body);
+JPH_CAPI bool JPH_Body_IsDynamic(const JPH_Body* body);
+JPH_CAPI bool JPH_Body_IsSensor(const JPH_Body* body);
+JPH_CAPI void JPH_Body_SetIsSensor(JPH_Body* body, bool value);
 
-JPH_CAPI void JPH_Body_SetCollideKinematicVsNonDynamic(JPH_Body* body, JPH_Bool32 value);
-JPH_CAPI JPH_Bool32 JPH_Body_GetCollideKinematicVsNonDynamic(const JPH_Body* body);
+JPH_CAPI void JPH_Body_SetCollideKinematicVsNonDynamic(JPH_Body* body, bool value);
+JPH_CAPI bool JPH_Body_GetCollideKinematicVsNonDynamic(const JPH_Body* body);
 
-JPH_CAPI void JPH_Body_SetUseManifoldReduction(JPH_Body* body, JPH_Bool32 value);
-JPH_CAPI JPH_Bool32 JPH_Body_GetUseManifoldReduction(const JPH_Body* body);
-JPH_CAPI JPH_Bool32 JPH_Body_GetUseManifoldReductionWithBody(const JPH_Body* body, const JPH_Body* other);
+JPH_CAPI void JPH_Body_SetUseManifoldReduction(JPH_Body* body, bool value);
+JPH_CAPI bool JPH_Body_GetUseManifoldReduction(const JPH_Body* body);
+JPH_CAPI bool JPH_Body_GetUseManifoldReductionWithBody(const JPH_Body* body, const JPH_Body* other);
 
-JPH_CAPI void JPH_Body_SetApplyGyroscopicForce(JPH_Body* body, JPH_Bool32 value);
-JPH_CAPI JPH_Bool32 JPH_Body_GetApplyGyroscopicForce(const JPH_Body* body);
+JPH_CAPI void JPH_Body_SetApplyGyroscopicForce(JPH_Body* body, bool value);
+JPH_CAPI bool JPH_Body_GetApplyGyroscopicForce(const JPH_Body* body);
 
 JPH_CAPI JPH_MotionProperties* JPH_Body_GetMotionProperties(JPH_Body* body);
 JPH_CAPI JPH_MotionType JPH_Body_GetMotionType(const JPH_Body* body);
 JPH_CAPI void JPH_Body_SetMotionType(JPH_Body* body, JPH_MotionType motionType);
-JPH_CAPI JPH_Bool32 JPH_Body_GetAllowSleeping(JPH_Body* body);
-JPH_CAPI void JPH_Body_SetAllowSleeping(JPH_Body* body, JPH_Bool32 allowSleeping);
+JPH_CAPI bool JPH_Body_GetAllowSleeping(JPH_Body* body);
+JPH_CAPI void JPH_Body_SetAllowSleeping(JPH_Body* body, bool allowSleeping);
 JPH_CAPI void JPH_Body_ResetSleepTimer(JPH_Body* body);
 
 JPH_CAPI float JPH_Body_GetFriction(const JPH_Body* body);
@@ -1395,7 +1395,7 @@ JPH_CAPI void JPH_Body_AddImpulse(JPH_Body* body, const JPH_Vec3* impulse);
 JPH_CAPI void JPH_Body_AddImpulseAtPosition(JPH_Body* body, const JPH_Vec3* impulse, const JPH_RVec3* position);
 JPH_CAPI void JPH_Body_AddAngularImpulse(JPH_Body* body, const JPH_Vec3* angularImpulse);
 JPH_CAPI void JPH_Body_MoveKinematic(JPH_Body* body, JPH_RVec3* targetPosition, JPH_Quat* targetRotation, float deltaTime);
-JPH_CAPI JPH_Bool32 JPH_Body_ApplyBuoyancyImpulse(JPH_Body* body, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime);
+JPH_CAPI bool JPH_Body_ApplyBuoyancyImpulse(JPH_Body* body, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime);
 
 JPH_CAPI void JPH_Body_GetPosition(const JPH_Body* body, JPH_RVec3* result);
 JPH_CAPI void JPH_Body_GetRotation(const JPH_Body* body, JPH_Quat* result);
@@ -1410,7 +1410,7 @@ JPH_CAPI JPH_Body* JPH_Body_GetFixedToWorldBody(void);
 
 /* JPH_BroadPhaseLayerFilter_Procs */
 typedef struct JPH_BroadPhaseLayerFilter_Procs {
-    JPH_Bool32(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BroadPhaseLayer layer);
+    bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BroadPhaseLayer layer);
 } JPH_BroadPhaseLayerFilter_Procs;
 
 JPH_CAPI void JPH_BroadPhaseLayerFilter_SetProcs(JPH_BroadPhaseLayerFilter* filter, JPH_BroadPhaseLayerFilter_Procs procs, void* userData);
@@ -1419,7 +1419,7 @@ JPH_CAPI void JPH_BroadPhaseLayerFilter_Destroy(JPH_BroadPhaseLayerFilter* filte
 
 /* JPH_ObjectLayerFilter */
 typedef struct JPH_ObjectLayerFilter_Procs {
-    JPH_Bool32(JPH_API_CALL* ShouldCollide)(void* userData, JPH_ObjectLayer layer);
+    bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_ObjectLayer layer);
 } JPH_ObjectLayerFilter_Procs;
 
 JPH_CAPI void JPH_ObjectLayerFilter_SetProcs(JPH_ObjectLayerFilter* filter, JPH_ObjectLayerFilter_Procs procs, void* userData);
@@ -1428,8 +1428,8 @@ JPH_CAPI void JPH_ObjectLayerFilter_Destroy(JPH_ObjectLayerFilter* filter);
 
 /* JPH_BodyFilter */
 typedef struct JPH_BodyFilter_Procs {
-    JPH_Bool32(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BodyID bodyID);
-    JPH_Bool32(JPH_API_CALL* ShouldCollideLocked)(void* userData, const JPH_Body *bodyID);
+    bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BodyID bodyID);
+    bool(JPH_API_CALL* ShouldCollideLocked)(void* userData, const JPH_Body *bodyID);
 } JPH_BodyFilter_Procs;
 
 JPH_CAPI void JPH_BodyFilter_SetProcs(JPH_BodyFilter* filter, JPH_BodyFilter_Procs procs, void* userData);
@@ -1497,8 +1497,8 @@ JPH_CAPI float JPH_ContactSettings_GetInvMassScale2(JPH_ContactSettings* setting
 JPH_CAPI void JPH_ContactSettings_SetInvMassScale2(JPH_ContactSettings* settings, float scale);
 JPH_CAPI float JPH_ContactSettings_GetInvInertiaScale2(JPH_ContactSettings* settings);
 JPH_CAPI void JPH_ContactSettings_SetInvInertiaScale2(JPH_ContactSettings* settings, float scale);
-JPH_CAPI JPH_Bool32 JPH_ContactSettings_GetIsSensor(JPH_ContactSettings* settings);
-JPH_CAPI void JPH_ContactSettings_SetIsSensor(JPH_ContactSettings* settings, JPH_Bool32 sensor);
+JPH_CAPI bool JPH_ContactSettings_GetIsSensor(JPH_ContactSettings* settings);
+JPH_CAPI void JPH_ContactSettings_SetIsSensor(JPH_ContactSettings* settings, bool sensor);
 JPH_CAPI void JPH_ContactSettings_GetRelativeLinearSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_ContactSettings_SetRelativeLinearSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* velocity);
 JPH_CAPI void JPH_ContactSettings_GetRelativeAngularSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* result);
@@ -1512,8 +1512,8 @@ JPH_CAPI void JPH_CharacterBaseSettings_GetSupportingVolume(JPH_CharacterBaseSet
 JPH_CAPI void JPH_CharacterBaseSettings_SetSupportingVolume(JPH_CharacterBaseSettings* settings, const JPH_Plane* value);
 JPH_CAPI float JPH_CharacterBaseSettings_GetMaxSlopeAngle(JPH_CharacterBaseSettings* settings);
 JPH_CAPI void JPH_CharacterBaseSettings_SetMaxSlopeAngle(JPH_CharacterBaseSettings* settings, float maxSlopeAngle);
-JPH_CAPI JPH_Bool32 JPH_CharacterBaseSettings_GetEnhancedInternalEdgeRemoval(JPH_CharacterBaseSettings* settings);
-JPH_CAPI void JPH_CharacterBaseSettings_SetEnhancedInternalEdgeRemoval(JPH_CharacterBaseSettings* settings, JPH_Bool32 value);
+JPH_CAPI bool JPH_CharacterBaseSettings_GetEnhancedInternalEdgeRemoval(JPH_CharacterBaseSettings* settings);
+JPH_CAPI void JPH_CharacterBaseSettings_SetEnhancedInternalEdgeRemoval(JPH_CharacterBaseSettings* settings, bool value);
 JPH_CAPI const JPH_Shape* JPH_CharacterBaseSettings_GetShape(JPH_CharacterBaseSettings* settings);
 JPH_CAPI void JPH_CharacterBaseSettings_SetShape(JPH_CharacterBaseSettings* settings, const JPH_Shape* shape);
 
@@ -1523,11 +1523,11 @@ JPH_CAPI float JPH_CharacterBase_GetCosMaxSlopeAngle(JPH_CharacterBase* characte
 JPH_CAPI void JPH_CharacterBase_SetMaxSlopeAngle(JPH_CharacterBase* character, float maxSlopeAngle);
 JPH_CAPI void JPH_CharacterBase_GetUp(JPH_CharacterBase* character, JPH_Vec3* result);
 JPH_CAPI void JPH_CharacterBase_SetUp(JPH_CharacterBase* character, const JPH_Vec3* value);
-JPH_CAPI JPH_Bool32 JPH_CharacterBase_IsSlopeTooSteep(JPH_CharacterBase* character, const JPH_Vec3* value);
+JPH_CAPI bool JPH_CharacterBase_IsSlopeTooSteep(JPH_CharacterBase* character, const JPH_Vec3* value);
 JPH_CAPI const JPH_Shape* JPH_CharacterBase_GetShape(JPH_CharacterBase* character);
 
 JPH_CAPI JPH_GroundState JPH_CharacterBase_GetGroundState(JPH_CharacterBase* character);
-JPH_CAPI JPH_Bool32 JPH_CharacterBase_IsSupported(JPH_CharacterBase* character);
+JPH_CAPI bool JPH_CharacterBase_IsSupported(JPH_CharacterBase* character);
 JPH_CAPI void JPH_CharacterBase_GetGroundPosition(JPH_CharacterBase* character, JPH_RVec3* position);
 JPH_CAPI void JPH_CharacterBase_GetGroundNormal(JPH_CharacterBase* character, JPH_Vec3* normal);
 JPH_CAPI void JPH_CharacterBase_GetGroundVelocity(JPH_CharacterBase* character, JPH_Vec3* velocity);
@@ -1554,10 +1554,10 @@ JPH_CAPI JPH_Character* JPH_Character_Create(const JPH_CharacterSettings* settin
     uint64_t userData,
     JPH_PhysicsSystem* system);
 
-JPH_CAPI void JPH_Character_AddToPhysicsSystem(JPH_Character* character, JPH_Activation activationMode /*= JPH_ActivationActivate */, JPH_Bool32 lockBodies /* = true */);
-JPH_CAPI void JPH_Character_RemoveFromPhysicsSystem(JPH_Character* character, JPH_Bool32 lockBodies /* = true */);
-JPH_CAPI void JPH_Character_Activate(JPH_Character* character, JPH_Bool32 lockBodies /* = true */);
-JPH_CAPI void JPH_Character_PostSimulation(JPH_Character* character, float maxSeparationDistance, JPH_Bool32 lockBodies /* = true */);
+JPH_CAPI void JPH_Character_AddToPhysicsSystem(JPH_Character* character, JPH_Activation activationMode /*= JPH_ActivationActivate */, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Character_RemoveFromPhysicsSystem(JPH_Character* character, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Character_Activate(JPH_Character* character, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Character_PostSimulation(JPH_Character* character, float maxSeparationDistance, bool lockBodies /* = true */);
 
 /* CharacterVirtualSettings */
 JPH_CAPI JPH_CharacterVirtualSettings* JPH_CharacterVirtualSettings_Create(void);
@@ -1612,14 +1612,14 @@ JPH_CAPI void JPH_CharacterVirtual_SetMaxStrength(JPH_CharacterVirtual* characte
 
 JPH_CAPI float JPH_CharacterVirtual_GetPenetrationRecoverySpeed(JPH_CharacterVirtual* character);
 JPH_CAPI void JPH_CharacterVirtual_SetPenetrationRecoverySpeed(JPH_CharacterVirtual* character, float value);
-JPH_CAPI JPH_Bool32	JPH_CharacterVirtual_GetEnhancedInternalEdgeRemoval(JPH_CharacterVirtual* character);
-JPH_CAPI void JPH_CharacterVirtual_SetEnhancedInternalEdgeRemoval(JPH_CharacterVirtual* character, JPH_Bool32 value);
+JPH_CAPI bool	JPH_CharacterVirtual_GetEnhancedInternalEdgeRemoval(JPH_CharacterVirtual* character);
+JPH_CAPI void JPH_CharacterVirtual_SetEnhancedInternalEdgeRemoval(JPH_CharacterVirtual* character, bool value);
 JPH_CAPI float JPH_CharacterVirtual_GetCharacterPadding(JPH_CharacterVirtual* character);
 JPH_CAPI uint32_t JPH_CharacterVirtual_GetMaxNumHits(JPH_CharacterVirtual* character);
 JPH_CAPI void JPH_CharacterVirtual_SetMaxNumHits(JPH_CharacterVirtual* character, uint32_t value);
 JPH_CAPI float JPH_CharacterVirtual_GetHitReductionCosMaxAngle(JPH_CharacterVirtual* character);
 JPH_CAPI void JPH_CharacterVirtual_SetHitReductionCosMaxAngle(JPH_CharacterVirtual* character, float value);
-JPH_CAPI JPH_Bool32 JPH_CharacterVirtual_GetMaxHitsExceeded(JPH_CharacterVirtual* character);
+JPH_CAPI bool JPH_CharacterVirtual_GetMaxHitsExceeded(JPH_CharacterVirtual* character);
 JPH_CAPI uint64_t JPH_CharacterVirtual_GetUserData(JPH_CharacterVirtual* character);
 JPH_CAPI void JPH_CharacterVirtual_SetUserData(JPH_CharacterVirtual* character, uint64_t value);
 
@@ -1637,7 +1637,7 @@ typedef struct JPH_CharacterContactListener_Procs {
         const JPH_Vec3* linearVelocity,
 		const JPH_Vec3* angularVelocity);
 
-    JPH_Bool32(JPH_API_CALL* OnContactValidate)(void* userData,
+    bool(JPH_API_CALL* OnContactValidate)(void* userData,
 		const JPH_CharacterVirtual* character,
         const JPH_BodyID bodyID2,
         const JPH_SubShapeID subShapeID2);
