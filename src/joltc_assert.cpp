@@ -28,6 +28,9 @@ __pragma(warning(push, 0))
 #include <Jolt/Physics/Body/AllowedDOFs.h>
 #include <Jolt/Physics/Constraints/SixDOFConstraint.h>
 #include <Jolt/Physics/Character/CharacterBase.h>
+#ifdef JPH_DEBUG_RENDERER
+#include <Jolt/Renderer/DebugRendererSimple.h>
+#endif // JPH_DEBUG_RENDERER
 
 #ifdef _MSC_VER
 __pragma(warning(pop))
@@ -177,4 +180,11 @@ static_assert(JPH_BackFaceMode_CollideWithBackFaces == (int)JPH::EBackFaceMode::
 static_assert(sizeof(JPH::SubShapeIDPair) == sizeof(JPH_SubShapeIDPair));
 static_assert(alignof(JPH::SubShapeIDPair) == alignof(JPH_SubShapeIDPair));
 
-//static_assert(offsetof(JPH::MassProperties, mMass) == offsetof(JPH_MassProperties, mass));
+// DebugRenderer::ECastShadow
+static_assert(JPH_DebugRenderer_CastShadow_On == (int)JPH::DebugRenderer::ECastShadow::On);
+static_assert(JPH_DebugRenderer_CastShadow_Off == (int)JPH::DebugRenderer::ECastShadow::Off);
+
+// DebugRenderer::EDrawMode
+static_assert(JPH_DebugRenderer_DrawMode_Solid == (int)JPH::DebugRenderer::EDrawMode::Solid);
+static_assert(JPH_DebugRenderer_DrawMode_Wireframe == (int)JPH::DebugRenderer::EDrawMode::Wireframe);
+

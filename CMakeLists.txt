@@ -104,7 +104,7 @@ option(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE "Enable debug renderer in Debug and R
 
 # Setting to enable the debug renderer in all builds.
 # Note that enabling this reduces the performance of the library even if you're not drawing anything.
-option(DEBUG_RENDERER_IN_DISTRIBUTION "Enable debug renderer in all builds" OFF)
+option(DEBUG_RENDERER_IN_DISTRIBUTION "Enable debug renderer in all builds" ON)
 
 # Enable the profiler in Debug and Release builds. Note that PROFILER_IN_DISTRIBUTION will override this setting.
 option(PROFILER_IN_DEBUG_AND_RELEASE "Enable the profiler in Debug and Release builds" ON)
@@ -138,7 +138,7 @@ endif ()
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "2292c415a9a94cd7b4706de6ac8f24c9b5af74a5"
+        GIT_TAG "c7d9114f44d98cb76ecf3806dc3621cd73371226"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
