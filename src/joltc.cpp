@@ -42,6 +42,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/Shape/DecoratedShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
+#include "Jolt/Physics/Collision/Shape/EmptyShape.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Body/BodyActivationListener.h"
 #include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
@@ -1803,9 +1804,9 @@ JPH_OffsetCenterOfMassShape* JPH_OffsetCenterOfMassShapeSettings_CreateShape(con
 	return reinterpret_cast<JPH_OffsetCenterOfMassShape*>(shape);
 }
 
-JPH_OffsetCenterOfMassShape* JPH_OffsetCenterOfMassShape_Create(JPH_Vec3* offset, JPH_Shape* shape)
+JPH_OffsetCenterOfMassShape* JPH_OffsetCenterOfMassShape_Create(const JPH_Vec3* offset, const JPH_Shape* shape)
 {
-	auto joltShape = reinterpret_cast<JPH::Shape*>(shape);
+	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
 
 	auto offsetCenterOfMassShape = new JPH::OffsetCenterOfMassShape(joltShape, ToJolt(offset));
 	offsetCenterOfMassShape->AddRef();
@@ -1816,6 +1817,26 @@ JPH_OffsetCenterOfMassShape* JPH_OffsetCenterOfMassShape_Create(JPH_Vec3* offset
 void JPH_OffsetCenterOfMassShape_GetOffset(const JPH_OffsetCenterOfMassShape* shape, JPH_Vec3* result)
 {
 	FromJolt(reinterpret_cast<const JPH::OffsetCenterOfMassShape*>(shape)->GetOffset(), result);
+}
+
+/* EmptyShape */
+JPH_EmptyShapeSettings* JPH_EmptyShapeSettings_Create(const JPH_Vec3* centerOfMass)
+{
+	auto settings = new EmptyShapeSettings(ToJolt(centerOfMass));
+	settings->AddRef();
+
+	return reinterpret_cast<JPH_EmptyShapeSettings*>(settings);
+}
+
+JPH_EmptyShape* JPH_EmptyShapeSettings_CreateShape(const JPH_EmptyShapeSettings* settings)
+{
+	const EmptyShapeSettings* joltSettings = reinterpret_cast<const EmptyShapeSettings*>(settings);
+	auto shape_res = joltSettings->Create();
+
+	auto shape = shape_res.Get().GetPtr();
+	shape->AddRef();
+
+	return reinterpret_cast<JPH_EmptyShape*>(shape);
 }
 
 /* JPH_BodyCreationSettings */
