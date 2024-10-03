@@ -589,22 +589,53 @@ typedef struct JPH_ExtendedUpdateSettings  {
 	JPH_Vec3	walkStairsStepDownExtra;
 } JPH_ExtendedUpdateSettings;
 
+typedef struct JPH_CharacterBaseSettings {
+    JPH_Vec3 up;
+    JPH_Plane supportingVolume;
+    float maxSlopeAngle;
+    bool enhancedInternalEdgeRemoval;
+    const JPH_Shape* shape;
+} JPH_CharacterBaseSettings;
+
 /* CharacterBase */
-typedef struct JPH_CharacterBaseSettings            JPH_CharacterBaseSettings;
 typedef struct JPH_CharacterBase                    JPH_CharacterBase;
 
 /* Character */
-typedef struct JPH_CharacterSettings                JPH_CharacterSettings; /* Inherics JPH_CharacterBaseSettings */
+typedef struct JPH_CharacterSettings {
+    JPH_CharacterBaseSettings           base;    /* Inherics JPH_CharacterBaseSettings */
+    JPH_ObjectLayer						layer ;
+    float								mass;
+    float								friction;
+    float								gravityFactor;
+} JPH_CharacterSettings;
 typedef struct JPH_Character                        JPH_Character;  /* Inherics JPH_CharacterBase */
 
 /* CharacterVirtual */
+typedef struct JPH_CharacterVirtualSettings {
+    JPH_CharacterBaseSettings           base;    /* Inherics JPH_CharacterBaseSettings */
+    float								mass;
+    float								maxStrength;
+    JPH_Vec3							shapeOffset;
+    JPH_BackFaceMode					backFaceMode;
+    float								predictiveContactDistance;
+    uint32_t							maxCollisionIterations;
+    uint32_t							maxConstraintIterations;
+    float								minTimeRemaining;
+    float								collisionTolerance;
+    float								characterPadding;
+    uint32_t							maxNumHits;
+    float								hitReductionCosMaxAngle;
+    float								penetrationRecoverySpeed;
+    const JPH_Shape*                    innerBodyShape;
+    JPH_ObjectLayer						innerBodyLayer;
+} JPH_CharacterVirtualSettings;
+
 typedef struct JPH_CharacterContactSettings {
 	bool canPushCharacter;
 	bool canReceiveImpulses;
 } JPH_CharacterContactSettings;
 
 typedef struct JPH_CharacterContactListener			JPH_CharacterContactListener;
-typedef struct JPH_CharacterVirtualSettings         JPH_CharacterVirtualSettings; /* Inherics JPH_CharacterBaseSettings */
 typedef struct JPH_CharacterVirtual                 JPH_CharacterVirtual;  /* Inherics JPH_CharacterBase */
 
 typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* mssage);
@@ -1510,19 +1541,6 @@ JPH_CAPI void JPH_ContactSettings_SetRelativeLinearSurfaceVelocity(JPH_ContactSe
 JPH_CAPI void JPH_ContactSettings_GetRelativeAngularSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_ContactSettings_SetRelativeAngularSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* velocity);
 
-/* CharacterBaseSettings */
-JPH_CAPI void JPH_CharacterBaseSettings_Destroy(JPH_CharacterBaseSettings* settings);
-JPH_CAPI void JPH_CharacterBaseSettings_GetUp(JPH_CharacterBaseSettings* settings, JPH_Vec3* result);
-JPH_CAPI void JPH_CharacterBaseSettings_SetUp(JPH_CharacterBaseSettings* settings, const JPH_Vec3* value);
-JPH_CAPI void JPH_CharacterBaseSettings_GetSupportingVolume(JPH_CharacterBaseSettings* settings, JPH_Plane* result);
-JPH_CAPI void JPH_CharacterBaseSettings_SetSupportingVolume(JPH_CharacterBaseSettings* settings, const JPH_Plane* value);
-JPH_CAPI float JPH_CharacterBaseSettings_GetMaxSlopeAngle(JPH_CharacterBaseSettings* settings);
-JPH_CAPI void JPH_CharacterBaseSettings_SetMaxSlopeAngle(JPH_CharacterBaseSettings* settings, float maxSlopeAngle);
-JPH_CAPI bool JPH_CharacterBaseSettings_GetEnhancedInternalEdgeRemoval(JPH_CharacterBaseSettings* settings);
-JPH_CAPI void JPH_CharacterBaseSettings_SetEnhancedInternalEdgeRemoval(JPH_CharacterBaseSettings* settings, bool value);
-JPH_CAPI const JPH_Shape* JPH_CharacterBaseSettings_GetShape(JPH_CharacterBaseSettings* settings);
-JPH_CAPI void JPH_CharacterBaseSettings_SetShape(JPH_CharacterBaseSettings* settings, const JPH_Shape* shape);
-
 /* CharacterBase */
 JPH_CAPI void JPH_CharacterBase_Destroy(JPH_CharacterBase* character);
 JPH_CAPI float JPH_CharacterBase_GetCosMaxSlopeAngle(JPH_CharacterBase* character);
@@ -1543,15 +1561,7 @@ JPH_CAPI JPH_SubShapeID JPH_CharacterBase_GetGroundSubShapeId(JPH_CharacterBase*
 JPH_CAPI uint64_t JPH_CharacterBase_GetGroundUserData(JPH_CharacterBase* character);
 
 /* CharacterSettings */
-JPH_CAPI JPH_CharacterSettings* JPH_CharacterSettings_Create(void);
-JPH_CAPI JPH_ObjectLayer JPH_CharacterSettings_GetLayer(JPH_CharacterSettings* settings);
-JPH_CAPI void JPH_CharacterSettings_SetLayer(JPH_CharacterSettings* settings, JPH_ObjectLayer value);
-JPH_CAPI float JPH_CharacterSettings_GetMass(JPH_CharacterSettings* settings);
-JPH_CAPI void JPH_CharacterSettings_SetMass(JPH_CharacterSettings* settings, float value);
-JPH_CAPI float JPH_CharacterSettings_GetFriction(JPH_CharacterSettings* settings);
-JPH_CAPI void JPH_CharacterSettings_SetFriction(JPH_CharacterSettings* settings, float value);
-JPH_CAPI float JPH_CharacterSettings_GetGravityFactor(JPH_CharacterSettings* settings);
-JPH_CAPI void JPH_CharacterSettings_SetGravityFactor(JPH_CharacterSettings* settings, float value);
+JPH_CAPI void JPH_CharacterSettings_Init(JPH_CharacterSettings* settings);
 
 /* Character */
 JPH_CAPI JPH_Character* JPH_Character_Create(const JPH_CharacterSettings* settings,
@@ -1566,33 +1576,7 @@ JPH_CAPI void JPH_Character_Activate(JPH_Character* character, bool lockBodies /
 JPH_CAPI void JPH_Character_PostSimulation(JPH_Character* character, float maxSeparationDistance, bool lockBodies /* = true */);
 
 /* CharacterVirtualSettings */
-JPH_CAPI JPH_CharacterVirtualSettings* JPH_CharacterVirtualSettings_Create(void);
-JPH_CAPI float JPH_CharacterVirtualSettings_GetMass(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetMass(JPH_CharacterVirtualSettings* settings, float value);
-JPH_CAPI float JPH_CharacterVirtualSettings_GetMaxStrength(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetMaxStrength(JPH_CharacterVirtualSettings* settings, float value);
-JPH_CAPI void JPH_CharacterVirtualSettings_GetShapeOffset(JPH_CharacterVirtualSettings* settings, JPH_Vec3* result);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetShapeOffset(JPH_CharacterVirtualSettings* settings, const JPH_Vec3* value);
-JPH_CAPI JPH_BackFaceMode JPH_CharacterVirtualSettings_GetBackFaceMode(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetBackFaceMode(JPH_CharacterVirtualSettings* settings, JPH_BackFaceMode value);
-JPH_CAPI float JPH_CharacterVirtualSettings_GetPredictiveContactDistance(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetPredictiveContactDistance(JPH_CharacterVirtualSettings* settings, float value);
-JPH_CAPI uint32_t JPH_CharacterVirtualSettings_GetMaxCollisionIterations(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetMaxCollisionIterations(JPH_CharacterVirtualSettings* settings, uint32_t value);
-JPH_CAPI uint32_t JPH_CharacterVirtualSettings_GetMaxConstraintIterations(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetMaxConstraintIterations(JPH_CharacterVirtualSettings* settings, uint32_t value);
-JPH_CAPI float JPH_CharacterVirtualSettings_GetMinTimeRemaining(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetMinTimeRemaining(JPH_CharacterVirtualSettings* settings, float value);
-JPH_CAPI float JPH_CharacterVirtualSettings_GetCollisionTolerance(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetCollisionTolerance(JPH_CharacterVirtualSettings* settings, float value);
-JPH_CAPI float JPH_CharacterVirtualSettings_GetCharacterPadding(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetCharacterPadding(JPH_CharacterVirtualSettings* settings, float value);
-JPH_CAPI uint32_t JPH_CharacterVirtualSettings_GetMaxNumHits(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetMaxNumHits(JPH_CharacterVirtualSettings* settings, uint32_t value);
-JPH_CAPI float JPH_CharacterVirtualSettings_GetHitReductionCosMaxAngle(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetHitReductionCosMaxAngle(JPH_CharacterVirtualSettings* settings, float value);
-JPH_CAPI float JPH_CharacterVirtualSettings_GetPenetrationRecoverySpeed(JPH_CharacterVirtualSettings* settings);
-JPH_CAPI void JPH_CharacterVirtualSettings_SetPenetrationRecoverySpeed(JPH_CharacterVirtualSettings* settings, float value);
+JPH_CAPI void JPH_CharacterVirtualSettings_Init(JPH_CharacterVirtualSettings* settings);
 
 /* CharacterVirtual */
 JPH_CAPI JPH_CharacterVirtual* JPH_CharacterVirtual_Create(const JPH_CharacterVirtualSettings* settings,

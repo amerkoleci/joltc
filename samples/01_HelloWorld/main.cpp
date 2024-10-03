@@ -101,6 +101,27 @@ int main(void)
 	JPH_Vec3 sphereLinearVelocity = { 0.0f, -5.0f, 0.0f };
 	JPH_BodyInterface_SetLinearVelocity(bodyInterface, sphereId, &sphereLinearVelocity);
 
+	{
+		static constexpr float	cCharacterHeightStanding = 1.35f;
+		static constexpr float	cCharacterRadiusStanding = 0.3f;
+		static constexpr float	cCharacterHeightCrouching = 0.8f;
+		static constexpr float	cCharacterRadiusCrouching = 0.3f;
+		static constexpr float	cInnerShapeFraction = 0.9f;
+
+		JPH_CapsuleShape* capsuleShape = JPH_CapsuleShape_Create(0.5f * cCharacterHeightStanding, cCharacterRadiusStanding);
+		JPH_Vec3 position = { 0, 0.5f * cCharacterHeightStanding + cCharacterRadiusStanding, 0 };
+		auto mStandingShape = JPH_RotatedTranslatedShape_Create(&position, nullptr, (JPH_Shape*) capsuleShape);
+
+		JPH_CharacterVirtualSettings characterSettings{};
+		JPH_CharacterVirtualSettings_Init(&characterSettings);
+		characterSettings.base.shape = (const JPH_Shape*)mStandingShape;
+		characterSettings.base.supportingVolume = { {0, 1, 0}, -cCharacterRadiusStanding}; // Accept contacts that touch the lower sphere of the capsule
+		static const JPH_RVec3 characterVirtualPosition = {-5.0f, 0, 3.0f};
+
+		auto mAnimatedCharacterVirtual = JPH_CharacterVirtual_Create(&characterSettings, &characterVirtualPosition, nullptr, 0, system);
+	}
+
+
 	// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
 	const float cDeltaTime = 1.0f / 60.0f;
 
