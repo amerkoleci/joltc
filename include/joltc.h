@@ -560,6 +560,7 @@ typedef struct JPH_ContactManifold                  JPH_ContactManifold;
 typedef struct JPH_ContactSettings                  JPH_ContactSettings;
 
 typedef struct JPH_BodyActivationListener           JPH_BodyActivationListener;
+typedef struct JPH_BodyDrawFilter                   JPH_BodyDrawFilter;
 
 typedef struct JPH_SharedMutex                      JPH_SharedMutex;
 
@@ -757,7 +758,7 @@ JPH_CAPI void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH
 JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
 
-JPH_CAPI void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer);
+JPH_CAPI void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, const JPH_BodyDrawFilter* bodyFilter /* = nullptr */);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraints(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraintLimits(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraintReferenceFrame(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
@@ -1450,8 +1451,7 @@ typedef struct JPH_BroadPhaseLayerFilter_Procs {
     bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BroadPhaseLayer layer);
 } JPH_BroadPhaseLayerFilter_Procs;
 
-JPH_CAPI void JPH_BroadPhaseLayerFilter_SetProcs(JPH_BroadPhaseLayerFilter* filter, JPH_BroadPhaseLayerFilter_Procs procs, void* userData);
-JPH_CAPI JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(void);
+JPH_CAPI JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(JPH_BroadPhaseLayerFilter_Procs procs, void* userData);
 JPH_CAPI void JPH_BroadPhaseLayerFilter_Destroy(JPH_BroadPhaseLayerFilter* filter);
 
 /* JPH_ObjectLayerFilter */
@@ -1459,8 +1459,7 @@ typedef struct JPH_ObjectLayerFilter_Procs {
     bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_ObjectLayer layer);
 } JPH_ObjectLayerFilter_Procs;
 
-JPH_CAPI void JPH_ObjectLayerFilter_SetProcs(JPH_ObjectLayerFilter* filter, JPH_ObjectLayerFilter_Procs procs, void* userData);
-JPH_CAPI JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(void);
+JPH_CAPI JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(JPH_ObjectLayerFilter_Procs procs, void* userData);
 JPH_CAPI void JPH_ObjectLayerFilter_Destroy(JPH_ObjectLayerFilter* filter);
 
 /* JPH_BodyFilter */
@@ -1469,8 +1468,7 @@ typedef struct JPH_BodyFilter_Procs {
     bool(JPH_API_CALL* ShouldCollideLocked)(void* userData, const JPH_Body *bodyID);
 } JPH_BodyFilter_Procs;
 
-JPH_CAPI void JPH_BodyFilter_SetProcs(JPH_BodyFilter* filter, JPH_BodyFilter_Procs procs, void* userData);
-JPH_CAPI JPH_BodyFilter* JPH_BodyFilter_Create(void);
+JPH_CAPI JPH_BodyFilter* JPH_BodyFilter_Create(JPH_BodyFilter_Procs procs, void* userData);
 JPH_CAPI void JPH_BodyFilter_Destroy(JPH_BodyFilter* filter);
 
 /* Contact listener */
@@ -1498,8 +1496,7 @@ typedef struct JPH_ContactListener_Procs {
         );
 } JPH_ContactListener_Procs;
 
-JPH_CAPI void JPH_ContactListener_SetProcs(JPH_ContactListener* listener, JPH_ContactListener_Procs procs, void* userData);
-JPH_CAPI JPH_ContactListener* JPH_ContactListener_Create(void);
+JPH_CAPI JPH_ContactListener* JPH_ContactListener_Create(JPH_ContactListener_Procs procs, void* userData);
 JPH_CAPI void JPH_ContactListener_Destroy(JPH_ContactListener* listener);
 
 /* BodyActivationListener */
@@ -1508,9 +1505,16 @@ typedef struct JPH_BodyActivationListener_Procs {
     void(JPH_API_CALL* OnBodyDeactivated)(void* userData, JPH_BodyID bodyID, uint64_t bodyUserData);
 } JPH_BodyActivationListener_Procs;
 
-JPH_CAPI void JPH_BodyActivationListener_SetProcs(JPH_BodyActivationListener* listener, JPH_BodyActivationListener_Procs procs, void* userData);
-JPH_CAPI JPH_BodyActivationListener* JPH_BodyActivationListener_Create(void);
+JPH_CAPI JPH_BodyActivationListener* JPH_BodyActivationListener_Create(JPH_BodyActivationListener_Procs procs, void* userData);
 JPH_CAPI void JPH_BodyActivationListener_Destroy(JPH_BodyActivationListener* listener);
+
+/* JPH_BodyDrawFilter */
+typedef struct JPH_BodyDrawFilter_Procs {
+    bool(JPH_API_CALL* ShouldDraw)(void* userData, const JPH_Body* body);
+} JPH_BodyDrawFilter_Procs;
+
+JPH_CAPI JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(JPH_BodyDrawFilter_Procs procs, void* userData);
+JPH_CAPI void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter);
 
 /* ContactManifold */
 JPH_CAPI void JPH_ContactManifold_GetWorldSpaceNormal(const JPH_ContactManifold* manifold, JPH_Vec3* result);

@@ -100,8 +100,9 @@ static JPH_AssertFailureFunc s_AssertFailureFunc = nullptr;
 // Callback for asserts, connect this to your own assert handler if you have one
 static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine)
 {
-	if (s_AssertFailureFunc) {
-		return !!s_AssertFailureFunc(inExpression, inMessage, inFile, inLine);
+	if (s_AssertFailureFunc)
+	{
+		return s_AssertFailureFunc(inExpression, inMessage, inFile, inLine);
 	}
 
 	// Print to the TTY
@@ -345,8 +346,8 @@ static inline BodyManager::DrawSettings ToJolt(const JPH_DrawSettings* propertie
 	result.mDrawSleepStats = properties->drawSleepStats;
 	result.mDrawSoftBodyVertices = properties->drawSoftBodyVertices;
 	result.mDrawSoftBodyVertexVelocities = properties->drawSoftBodyVertexVelocities;
-	result.mDrawSoftBodyEdgeConstraints= properties->drawSoftBodyEdgeConstraints;
-	result.mDrawSoftBodyBendConstraints= properties->drawSoftBodyBendConstraints;
+	result.mDrawSoftBodyEdgeConstraints = properties->drawSoftBodyEdgeConstraints;
+	result.mDrawSoftBodyBendConstraints = properties->drawSoftBodyBendConstraints;
 	result.mDrawSoftBodyVolumeConstraints = properties->drawSoftBodyVolumeConstraints;
 	result.mDrawSoftBodySkinConstraints = properties->drawSoftBodySkinConstraints;
 	result.mDrawSoftBodyLRAConstraints = properties->drawSoftBodyLRAConstraints;
@@ -746,16 +747,11 @@ public:
 	void* userData = nullptr;
 };
 
-void JPH_BroadPhaseLayerFilter_SetProcs(JPH_BroadPhaseLayerFilter* filter, JPH_BroadPhaseLayerFilter_Procs procs, void* userData)
-{
-	auto managedFilter = reinterpret_cast<ManagedBroadPhaseLayerFilter*>(filter);
-	managedFilter->procs = procs;
-	managedFilter->userData = userData;
-}
-
-JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(void)
+JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(JPH_BroadPhaseLayerFilter_Procs procs, void* userData)
 {
 	auto filter = new ManagedBroadPhaseLayerFilter();
+	filter->procs = procs;
+	filter->userData = userData;
 	return reinterpret_cast<JPH_BroadPhaseLayerFilter*>(filter);
 }
 
@@ -798,16 +794,11 @@ public:
 	void* userData = nullptr;
 };
 
-void JPH_ObjectLayerFilter_SetProcs(JPH_ObjectLayerFilter* filter, JPH_ObjectLayerFilter_Procs procs, void* userData)
-{
-	auto managedFilter = reinterpret_cast<ManagedObjectLayerFilter*>(filter);
-	managedFilter->procs = procs;
-	managedFilter->userData = userData;
-}
-
-JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(void)
+JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(JPH_ObjectLayerFilter_Procs procs, void* userData)
 {
 	auto filter = new ManagedObjectLayerFilter();
+	filter->procs = procs;
+	filter->userData = userData;
 	return reinterpret_cast<JPH_ObjectLayerFilter*>(filter);
 }
 
@@ -840,7 +831,7 @@ public:
 	{
 		if (procs.ShouldCollide)
 		{
-			return !!procs.ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
+			return procs.ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
 		}
 
 		return true;
@@ -850,7 +841,7 @@ public:
 	{
 		if (procs.ShouldCollideLocked)
 		{
-			return !!procs.ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
+			return procs.ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
 		}
 
 		return true;
@@ -860,16 +851,11 @@ public:
 	void* userData = nullptr;
 };
 
-void JPH_BodyFilter_SetProcs(JPH_BodyFilter* filter, JPH_BodyFilter_Procs procs, void* userData)
-{
-	auto managedFilter = reinterpret_cast<ManagedBodyFilter*>(filter);
-	managedFilter->procs = procs;
-	managedFilter->userData = userData;
-}
-
-JPH_BodyFilter* JPH_BodyFilter_Create(void)
+JPH_BodyFilter* JPH_BodyFilter_Create(JPH_BodyFilter_Procs procs, void* userData)
 {
 	auto filter = new ManagedBodyFilter();
+	filter->procs = procs;
+	filter->userData = userData;
 	return reinterpret_cast<JPH_BodyFilter*>(filter);
 }
 
@@ -1748,7 +1734,7 @@ JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create2(c
 	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
 
 	auto settings = new JPH::RotatedTranslatedShapeSettings(
-		ToJolt(position), 
+		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
 		joltShape);
 	settings->AddRef();
@@ -1772,7 +1758,7 @@ JPH_RotatedTranslatedShape* JPH_RotatedTranslatedShape_Create(const JPH_Vec3* po
 	auto jolt_shape = reinterpret_cast<const JPH::Shape*>(shape);
 
 	auto rotatedTranslatedShape = new JPH::RotatedTranslatedShape(
-		ToJolt(position), 
+		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
 		jolt_shape);
 	rotatedTranslatedShape->AddRef();
@@ -2156,7 +2142,7 @@ bool JPH_Constraint_GetEnabled(JPH_Constraint* constraint)
 void JPH_Constraint_SetEnabled(JPH_Constraint* constraint, bool enabled)
 {
 	auto joltConstraint = reinterpret_cast<JPH::HingeConstraint*>(constraint);
-	joltConstraint->SetEnabled(!!enabled);
+	joltConstraint->SetEnabled(enabled);
 }
 
 uint64_t JPH_Constraint_GetUserData(const JPH_Constraint* constraint)
@@ -3547,14 +3533,14 @@ JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, 
 	}
 }
 
-void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer)
+void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, const JPH_BodyDrawFilter* bodyFilter)
 {
 	JPH_ASSERT(settings);
 	JPH_ASSERT(system);
 	JPH_ASSERT(renderer);
 
 	BodyManager::DrawSettings joltSettings = ToJolt(settings);
-	BodyDrawFilter* bodyDrawFilter = nullptr;
+	const BodyDrawFilter* bodyDrawFilter = (bodyFilter != nullptr) ? (reinterpret_cast<const BodyDrawFilter*>(bodyFilter)) : nullptr;
 	system->physicsSystem->DrawBodies(joltSettings, reinterpret_cast<DebugRenderer*>(renderer), bodyDrawFilter);
 }
 
@@ -3913,9 +3899,7 @@ void JPH_BodyInterface_SetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId,
 	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
 
 	auto jphShape = reinterpret_cast<const JPH::Shape*>(shape);
-
-	// !! is to make ms compiler happy.
-	joltBodyInterface->SetShape(JPH::BodyID(bodyId), jphShape, !!updateMassProperties, static_cast<JPH::EActivation>(activationMode));
+	joltBodyInterface->SetShape(JPH::BodyID(bodyId), jphShape, updateMassProperties, static_cast<JPH::EActivation>(activationMode));
 }
 
 void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* previousCenterOfMass, bool updateMassProperties, JPH_Activation activationMode)
@@ -3923,7 +3907,7 @@ void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* interface, JPH_Body
 	JPH_ASSERT(interface);
 	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
 
-	joltBodyInterface->NotifyShapeChanged(JPH::BodyID(bodyId), ToJolt(previousCenterOfMass), !!updateMassProperties, static_cast<JPH::EActivation>(activationMode));
+	joltBodyInterface->NotifyShapeChanged(JPH::BodyID(bodyId), ToJolt(previousCenterOfMass), updateMassProperties, static_cast<JPH::EActivation>(activationMode));
 }
 
 void JPH_BodyInterface_ActivateBody(JPH_BodyInterface* interface, JPH_BodyID bodyId)
@@ -4628,12 +4612,12 @@ bool JPH_Body_IsSensor(const JPH_Body* body)
 
 void JPH_Body_SetIsSensor(JPH_Body* body, bool value)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetIsSensor(!!value);
+	reinterpret_cast<JPH::Body*>(body)->SetIsSensor(value);
 }
 
 void JPH_Body_SetCollideKinematicVsNonDynamic(JPH_Body* body, bool value)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetCollideKinematicVsNonDynamic(!!value);
+	reinterpret_cast<JPH::Body*>(body)->SetCollideKinematicVsNonDynamic(value);
 }
 
 bool JPH_Body_GetCollideKinematicVsNonDynamic(const JPH_Body* body)
@@ -4643,7 +4627,7 @@ bool JPH_Body_GetCollideKinematicVsNonDynamic(const JPH_Body* body)
 
 void JPH_Body_SetUseManifoldReduction(JPH_Body* body, bool value)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetUseManifoldReduction(!!value);
+	reinterpret_cast<JPH::Body*>(body)->SetUseManifoldReduction(value);
 }
 
 bool JPH_Body_GetUseManifoldReduction(const JPH_Body* body)
@@ -4658,7 +4642,7 @@ bool JPH_Body_GetUseManifoldReductionWithBody(const JPH_Body* body, const JPH_Bo
 
 void JPH_Body_SetApplyGyroscopicForce(JPH_Body* body, bool value)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetApplyGyroscopicForce(!!value);
+	reinterpret_cast<JPH::Body*>(body)->SetApplyGyroscopicForce(value);
 }
 
 bool JPH_Body_GetApplyGyroscopicForce(const JPH_Body* body)
@@ -4688,7 +4672,7 @@ bool JPH_Body_GetAllowSleeping(JPH_Body* body)
 
 void JPH_Body_SetAllowSleeping(JPH_Body* body, bool allowSleeping)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetAllowSleeping(!!allowSleeping);
+	reinterpret_cast<JPH::Body*>(body)->SetAllowSleeping(allowSleeping);
 }
 
 void JPH_Body_ResetSleepTimer(JPH_Body* body)
@@ -4919,17 +4903,12 @@ public:
 	void* userData = nullptr;
 };
 
-void JPH_ContactListener_SetProcs(JPH_ContactListener* listener, JPH_ContactListener_Procs procs, void* userData)
+JPH_ContactListener* JPH_ContactListener_Create(JPH_ContactListener_Procs procs, void* userData)
 {
-	auto managedListener = reinterpret_cast<ManagedContactListener*>(listener);
-	managedListener->procs = procs;
-	managedListener->userData = userData;
-}
-
-JPH_ContactListener* JPH_ContactListener_Create(void)
-{
-	auto impl = new ManagedContactListener();
-	return reinterpret_cast<JPH_ContactListener*>(impl);
+	auto listener = new ManagedContactListener();
+	listener->procs = procs;
+	listener->userData = userData;
+	return reinterpret_cast<JPH_ContactListener*>(listener);
 }
 
 void JPH_ContactListener_Destroy(JPH_ContactListener* listener)
@@ -4972,17 +4951,12 @@ public:
 	void* userData = nullptr;
 };
 
-void JPH_BodyActivationListener_SetProcs(JPH_BodyActivationListener* listener, JPH_BodyActivationListener_Procs procs, void* userData)
+JPH_BodyActivationListener* JPH_BodyActivationListener_Create(JPH_BodyActivationListener_Procs procs, void* userData)
 {
-	auto managedListener = reinterpret_cast<ManagedBodyActivationListener*>(listener);
-	managedListener->procs = procs;
-	managedListener->userData = userData;
-}
-
-JPH_BodyActivationListener* JPH_BodyActivationListener_Create(void)
-{
-	auto impl = new ManagedBodyActivationListener();
-	return reinterpret_cast<JPH_BodyActivationListener*>(impl);
+	auto listener = new ManagedBodyActivationListener();
+	listener->procs = procs;
+	listener->userData = userData;
+	return reinterpret_cast<JPH_BodyActivationListener*>(listener);
 }
 
 void JPH_BodyActivationListener_Destroy(JPH_BodyActivationListener* listener)
@@ -4990,6 +4964,47 @@ void JPH_BodyActivationListener_Destroy(JPH_BodyActivationListener* listener)
 	if (listener)
 	{
 		delete reinterpret_cast<ManagedBodyActivationListener*>(listener);
+	}
+}
+
+/* JPH_BodyDrawFilter */
+class ManagedBodyDrawFilter final : public JPH::BodyDrawFilter
+{
+public:
+	ManagedBodyDrawFilter() = default;
+
+	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&) = delete;
+	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&&) = delete;
+	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&) = delete;
+	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&&) = delete;
+
+	bool ShouldDraw([[maybe_unused]] const Body& inBody) const override
+	{
+		if (procs.ShouldDraw)
+		{
+			return procs.ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
+		}
+
+		return true;
+	}
+
+	JPH_BodyDrawFilter_Procs procs = {};
+	void* userData = nullptr;
+};
+
+JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(JPH_BodyDrawFilter_Procs procs, void* userData)
+{
+	auto filter = new ManagedBodyDrawFilter();
+	filter->procs = procs;
+	filter->userData = userData;
+	return reinterpret_cast<JPH_BodyDrawFilter*>(filter);
+}
+
+void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter)
+{
+	if (filter)
+	{
+		delete reinterpret_cast<ManagedBodyDrawFilter*>(filter);
 	}
 }
 
