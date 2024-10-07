@@ -71,6 +71,37 @@ JPH_SUPPRESS_WARNINGS
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
 
+#define DEF_MAP_DECL(JoltType, c_type)        \
+    static inline const JPH::JoltType& As##JoltType(const c_type& t) {    \
+        return reinterpret_cast<const JPH::JoltType&>(t);              \
+    }                                                               \
+    static inline const JPH::JoltType* As##JoltType(const c_type* t) {    \
+        return reinterpret_cast<const JPH::JoltType*>(t);              \
+    }                                                               \
+    static inline JPH::JoltType& As##JoltType(c_type& t) {                \
+        return reinterpret_cast<JPH::JoltType&>(t);                    \
+    }                                                               \
+    static inline JPH::JoltType* As##JoltType(c_type* t) {                \
+        return reinterpret_cast<JPH::JoltType*>(t);                    \
+    }                                                               \
+    static inline const c_type& To##JoltType(const JPH::JoltType& t) {    \
+        return reinterpret_cast<const c_type&>(t);                 \
+    }                                                               \
+    static inline const c_type* To##JoltType(const JPH::JoltType* t) {    \
+        return reinterpret_cast<const c_type*>(t);                 \
+    }                                                               \
+    static inline c_type& To##JoltType(JPH::JoltType& t) {                \
+        return reinterpret_cast<c_type&>(t);                       \
+    }                                                               \
+    static inline c_type* To##JoltType(JPH::JoltType* t) {                \
+        return reinterpret_cast<c_type*>(t);                       \
+    }
+
+//DEF_MAP_DECL(Quat, JPH_Quat)
+DEF_MAP_DECL(Body, JPH_Body)
+DEF_MAP_DECL(Shape, JPH_Shape)
+DEF_MAP_DECL(MotionProperties, JPH_MotionProperties)
+
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
 
@@ -139,6 +170,12 @@ static inline void FromJolt(const Plane& value, JPH_Plane* result)
 {
 	FromJolt(value.GetNormal(), &result->normal);
 	result->distance = value.GetConstant();
+}
+
+static inline void FromJolt(const AABox& value, JPH_AABox* result)
+{
+	FromJolt(value.mMin, &result->min);
+	FromJolt(value.mMax, &result->max);
 }
 
 static inline void FromJolt(const Mat44& matrix, JPH_Matrix4x4* result)
@@ -3926,20 +3963,20 @@ void JPH_BodyInterface_DeactivateBody(JPH_BodyInterface* interface, JPH_BodyID b
 	joltBodyInterface->DeactivateBody(JPH::BodyID(bodyId));
 }
 
-void JPH_BodyInterface_SetObjectLayer(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_ObjectLayer layer)
-{
-	JPH_ASSERT(interface);
-	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
-
-	joltBodyInterface->SetObjectLayer(JPH::BodyID(bodyId), layer);
-}
-
 JPH_ObjectLayer JPH_BodyInterface_GetObjectLayer(JPH_BodyInterface* interface, JPH_BodyID bodyId)
 {
 	JPH_ASSERT(interface);
 	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
 
 	return joltBodyInterface->GetObjectLayer(JPH::BodyID(bodyId));
+}
+
+void JPH_BodyInterface_SetObjectLayer(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_ObjectLayer layer)
+{
+	JPH_ASSERT(interface);
+	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
+
+	joltBodyInterface->SetObjectLayer(JPH::BodyID(bodyId), layer);
 }
 
 void JPH_BodyInterface_GetWorldTransform(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RMatrix4x4* result)
@@ -4555,139 +4592,152 @@ bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 /* Body */
 JPH_BodyID JPH_Body_GetID(const JPH_Body* body)
 {
-	auto joltBody = reinterpret_cast<const JPH::Body*>(body);
-	return joltBody->GetID().GetIndexAndSequenceNumber();
+	return AsBody(body)->GetID().GetIndexAndSequenceNumber();
 }
 
 JPH_BodyType JPH_Body_GetBodyType(const JPH_Body* body)
 {
-	auto joltBody = reinterpret_cast<const JPH::Body*>(body);
-	return static_cast<JPH_BodyType>(joltBody->GetBodyType());
+	return static_cast<JPH_BodyType>(AsBody(body)->GetBodyType());
 }
 
-void JPH_Body_GetWorldSpaceBounds(const JPH_Body* body, JPH_AABox* result)
+bool JPH_Body_IsRigidBody(const JPH_Body* body)
 {
-	JPH_ASSERT(body);
-	JPH_ASSERT(result);
-
-	auto joltBody = reinterpret_cast<const JPH::Body*>(body);
-	auto bounds = joltBody->GetWorldSpaceBounds();
-	FromJolt(bounds.mMin, &result->min);
-	FromJolt(bounds.mMax, &result->max);
+	return AsBody(body)->IsRigidBody();
 }
 
-void JPH_Body_GetWorldSpaceSurfaceNormal(const JPH_Body* body, JPH_SubShapeID subShapeID, const JPH_RVec3* position, JPH_Vec3* normal)
+bool JPH_Body_IsSoftBody(const JPH_Body* body)
 {
-	auto joltBody = reinterpret_cast<const JPH::Body*>(body);
-	auto joltSubShapeID = JPH::SubShapeID();
-	joltSubShapeID.SetValue(subShapeID);
-	Vec3 joltNormal = joltBody->GetWorldSpaceSurfaceNormal(joltSubShapeID, ToJolt(position));
-	FromJolt(joltNormal, normal);
+	return AsBody(body)->IsSoftBody();
 }
 
 bool JPH_Body_IsActive(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->IsActive();
+	return AsBody(body)->IsActive();
 }
 
 bool JPH_Body_IsStatic(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->IsStatic();
+	return AsBody(body)->IsStatic();
 }
 
 bool JPH_Body_IsKinematic(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->IsKinematic();
+	return AsBody(body)->IsKinematic();
 }
 
 bool JPH_Body_IsDynamic(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->IsDynamic();
+	return AsBody(body)->IsDynamic();
 }
 
-bool JPH_Body_IsSensor(const JPH_Body* body)
+bool JPH_Body_CanBeKinematicOrDynamic(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->IsSensor();
+	return AsBody(body)->CanBeKinematicOrDynamic();
 }
 
 void JPH_Body_SetIsSensor(JPH_Body* body, bool value)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetIsSensor(value);
+	AsBody(body)->SetIsSensor(value);
+}
+
+bool JPH_Body_IsSensor(const JPH_Body* body)
+{
+	return AsBody(body)->IsSensor();
 }
 
 void JPH_Body_SetCollideKinematicVsNonDynamic(JPH_Body* body, bool value)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetCollideKinematicVsNonDynamic(value);
+	AsBody(body)->SetCollideKinematicVsNonDynamic(value);
 }
 
 bool JPH_Body_GetCollideKinematicVsNonDynamic(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->GetCollideKinematicVsNonDynamic();
+	return AsBody(body)->GetCollideKinematicVsNonDynamic();
 }
 
 void JPH_Body_SetUseManifoldReduction(JPH_Body* body, bool value)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetUseManifoldReduction(value);
+	AsBody(body)->SetUseManifoldReduction(value);
 }
 
 bool JPH_Body_GetUseManifoldReduction(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->GetUseManifoldReduction();
+	return AsBody(body)->GetUseManifoldReduction();
 }
 
 bool JPH_Body_GetUseManifoldReductionWithBody(const JPH_Body* body, const JPH_Body* other)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->GetUseManifoldReductionWithBody(*reinterpret_cast<const JPH::Body*>(other));
+	return AsBody(body)->GetUseManifoldReductionWithBody(*AsBody(other));
 }
 
 void JPH_Body_SetApplyGyroscopicForce(JPH_Body* body, bool value)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetApplyGyroscopicForce(value);
+	AsBody(body)->SetApplyGyroscopicForce(value);
 }
 
 bool JPH_Body_GetApplyGyroscopicForce(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->GetApplyGyroscopicForce();
+	return AsBody(body)->GetApplyGyroscopicForce();
 }
 
-JPH_MotionProperties* JPH_Body_GetMotionProperties(JPH_Body* body)
+void JPH_Body_SetEnhancedInternalEdgeRemoval(JPH_Body* body, bool value)
 {
-	return reinterpret_cast<JPH_MotionProperties*>(reinterpret_cast<JPH::Body*>(body)->GetMotionProperties());
+	AsBody(body)->SetEnhancedInternalEdgeRemoval(value);
+}
+
+bool JPH_Body_GetEnhancedInternalEdgeRemoval(const JPH_Body* body)
+{
+	return AsBody(body)->GetEnhancedInternalEdgeRemoval();
+}
+
+bool JPH_Body_GetEnhancedInternalEdgeRemovalWithBody(const JPH_Body* body, const JPH_Body* other)
+{
+	return AsBody(body)->GetEnhancedInternalEdgeRemovalWithBody(*AsBody(other));
 }
 
 JPH_MotionType JPH_Body_GetMotionType(const JPH_Body* body)
 {
-	return static_cast<JPH_MotionType>(reinterpret_cast<const JPH::Body*>(body)->GetMotionType());
+	return static_cast<JPH_MotionType>(AsBody(body)->GetMotionType());
 }
 
 void JPH_Body_SetMotionType(JPH_Body* body, JPH_MotionType motionType)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetMotionType(static_cast<JPH::EMotionType>(motionType));
+	AsBody(body)->SetMotionType(static_cast<JPH::EMotionType>(motionType));
+}
+
+JPH_BroadPhaseLayer JPH_Body_GetBroadPhaseLayer(const JPH_Body* body)
+{
+	return static_cast<JPH_BroadPhaseLayer>(AsBody(body)->GetBroadPhaseLayer());
+}
+
+JPH_ObjectLayer JPH_Body_GetObjectLayer(const JPH_Body* body)
+{
+	return static_cast<JPH_ObjectLayer>(AsBody(body)->GetObjectLayer());
 }
 
 bool JPH_Body_GetAllowSleeping(JPH_Body* body)
 {
-	return reinterpret_cast<JPH::Body*>(body)->GetAllowSleeping();
+	return AsBody(body)->GetAllowSleeping();
 }
 
 void JPH_Body_SetAllowSleeping(JPH_Body* body, bool allowSleeping)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetAllowSleeping(allowSleeping);
+	AsBody(body)->SetAllowSleeping(allowSleeping);
 }
 
 void JPH_Body_ResetSleepTimer(JPH_Body* body)
 {
-	reinterpret_cast<JPH::Body*>(body)->ResetSleepTimer();
+	AsBody(body)->ResetSleepTimer();
 }
 
 float JPH_Body_GetFriction(const JPH_Body* body)
 {
-	return reinterpret_cast<const JPH::Body*>(body)->GetFriction();
+	return AsBody(body)->GetFriction();
 }
 
 void JPH_Body_SetFriction(JPH_Body* body, float friction)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetFriction(friction);
+	AsBody(body)->SetFriction(friction);
 }
 
 float JPH_Body_GetRestitution(const JPH_Body* body)
@@ -4711,6 +4761,11 @@ void JPH_Body_SetLinearVelocity(JPH_Body* body, const JPH_Vec3* velocity)
 	reinterpret_cast<JPH::Body*>(body)->SetLinearVelocity(ToJolt(velocity));
 }
 
+void JPH_Body_SetLinearVelocityClamped(JPH_Body* body, const JPH_Vec3* velocity)
+{
+	reinterpret_cast<JPH::Body*>(body)->SetLinearVelocityClamped(ToJolt(velocity));
+}
+
 void JPH_Body_GetAngularVelocity(JPH_Body* body, JPH_Vec3* velocity)
 {
 	auto joltVector = reinterpret_cast<JPH::Body*>(body)->GetAngularVelocity();
@@ -4719,59 +4774,94 @@ void JPH_Body_GetAngularVelocity(JPH_Body* body, JPH_Vec3* velocity)
 
 void JPH_Body_SetAngularVelocity(JPH_Body* body, const JPH_Vec3* velocity)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetAngularVelocity(ToJolt(velocity));
+	AsBody(body)->SetAngularVelocity(ToJolt(velocity));
+}
+
+void JPH_Body_SetAngularVelocityClamped(JPH_Body* body, const JPH_Vec3* velocity)
+{
+	AsBody(body)->SetAngularVelocityClamped(ToJolt(velocity));
+}
+
+void JPH_Body_GetPointVelocityCOM(JPH_Body* body, const JPH_Vec3* pointRelativeToCOM, JPH_Vec3* velocity)
+{
+	FromJolt(AsBody(body)->GetPointVelocityCOM(ToJolt(pointRelativeToCOM)), velocity);
+}
+
+void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_Vec3* point, JPH_Vec3* velocity)
+{
+	FromJolt(AsBody(body)->GetPointVelocity(ToJolt(point)), velocity);
 }
 
 void JPH_Body_AddForce(JPH_Body* body, const JPH_Vec3* force)
 {
-	reinterpret_cast<JPH::Body*>(body)->AddForce(ToJolt(force));
+	AsBody(body)->AddForce(ToJolt(force));
 }
 
 void JPH_Body_AddForceAtPosition(JPH_Body* body, const JPH_Vec3* force, const JPH_RVec3* position)
 {
-	reinterpret_cast<JPH::Body*>(body)->AddForce(ToJolt(force), ToJolt(position));
+	AsBody(body)->AddForce(ToJolt(force), ToJolt(position));
 }
 
 void JPH_Body_AddTorque(JPH_Body* body, const JPH_Vec3* force)
 {
-	reinterpret_cast<JPH::Body*>(body)->AddTorque(ToJolt(force));
+	AsBody(body)->AddTorque(ToJolt(force));
 }
 
 void JPH_Body_GetAccumulatedForce(JPH_Body* body, JPH_Vec3* force)
 {
-	auto joltVector = reinterpret_cast<JPH::Body*>(body)->GetAccumulatedForce();
+	auto joltVector = AsBody(body)->GetAccumulatedForce();
 	FromJolt(joltVector, force);
 }
 
 void JPH_Body_GetAccumulatedTorque(JPH_Body* body, JPH_Vec3* force)
 {
-	auto joltVector = reinterpret_cast<JPH::Body*>(body)->GetAccumulatedTorque();
+	auto joltVector = AsBody(body)->GetAccumulatedTorque();
 	FromJolt(joltVector, force);
+}
+
+void JPH_Body_ResetForce(JPH_Body* body)
+{
+	AsBody(body)->ResetForce();
+}
+
+void JPH_Body_ResetTorque(JPH_Body* body)
+{
+	AsBody(body)->ResetTorque();
+}
+
+void JPH_Body_ResetMotion(JPH_Body* body)
+{
+	AsBody(body)->ResetMotion();
+}
+
+void JPH_Body_GetInverseInertia(JPH_Body* body, JPH_Matrix4x4* result)
+{
+	FromJolt(AsBody(body)->GetInverseInertia(), result);
 }
 
 void JPH_Body_AddImpulse(JPH_Body* body, const JPH_Vec3* impulse)
 {
-	reinterpret_cast<JPH::Body*>(body)->AddImpulse(ToJolt(impulse));
+	AsBody(body)->AddImpulse(ToJolt(impulse));
 }
 
 void JPH_Body_AddImpulseAtPosition(JPH_Body* body, const JPH_Vec3* impulse, const JPH_RVec3* position)
 {
-	reinterpret_cast<JPH::Body*>(body)->AddImpulse(ToJolt(impulse), ToJolt(position));
+	AsBody(body)->AddImpulse(ToJolt(impulse), ToJolt(position));
 }
 
 void JPH_Body_AddAngularImpulse(JPH_Body* body, const JPH_Vec3* angularImpulse)
 {
-	reinterpret_cast<JPH::Body*>(body)->AddAngularImpulse(ToJolt(angularImpulse));
+	AsBody(body)->AddAngularImpulse(ToJolt(angularImpulse));
 }
 
 void JPH_Body_MoveKinematic(JPH_Body* body, JPH_RVec3* targetPosition, JPH_Quat* targetRotation, float deltaTime)
 {
-	reinterpret_cast<JPH::Body*>(body)->MoveKinematic(ToJolt(targetPosition), ToJolt(targetRotation), deltaTime);
+	AsBody(body)->MoveKinematic(ToJolt(targetPosition), ToJolt(targetRotation), deltaTime);
 }
 
 bool JPH_Body_ApplyBuoyancyImpulse(JPH_Body* body, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime)
 {
-	return reinterpret_cast<JPH::Body*>(body)->ApplyBuoyancyImpulse(
+	return AsBody(body)->ApplyBuoyancyImpulse(
 		ToJolt(surfacePosition),
 		ToJolt(surfaceNormal),
 		buoyancy,
@@ -4783,49 +4873,87 @@ bool JPH_Body_ApplyBuoyancyImpulse(JPH_Body* body, const JPH_RVec3* surfacePosit
 	);
 }
 
+bool JPH_Body_IsInBroadPhase(JPH_Body* body)
+{
+	return AsBody(body)->IsInBroadPhase();
+}
+
+bool JPH_Body_IsCollisionCacheInvalid(JPH_Body* body)
+{
+	return AsBody(body)->IsCollisionCacheInvalid();
+}
+
+const JPH_Shape* JPH_Body_GetShape(JPH_Body* body)
+{
+	return ToShape(AsBody(body)->GetShape());
+}
+
 void JPH_Body_GetPosition(const JPH_Body* body, JPH_RVec3* result)
 {
-	auto joltVector = reinterpret_cast<const JPH::Body*>(body)->GetPosition();
-	FromJolt(joltVector, result);
+	FromJolt(AsBody(body)->GetPosition(), result);
 }
 
 void JPH_Body_GetRotation(const JPH_Body* body, JPH_Quat* result)
 {
-	auto joltQuat = reinterpret_cast<const JPH::Body*>(body)->GetRotation();
-	FromJolt(joltQuat, result);
-}
-
-void JPH_Body_GetCenterOfMassPosition(const JPH_Body* body, JPH_RVec3* result)
-{
-	auto joltVector = reinterpret_cast<const JPH::Body*>(body)->GetCenterOfMassPosition();
-	FromJolt(joltVector, result);
+	FromJolt(AsBody(body)->GetRotation(), result);
 }
 
 void JPH_Body_GetWorldTransform(const JPH_Body* body, JPH_RMatrix4x4* result)
 {
-	auto joltMatrix = reinterpret_cast<const JPH::Body*>(body)->GetWorldTransform();
-	FromJolt(joltMatrix, result);
+	FromJolt(AsBody(body)->GetWorldTransform(), result);
+}
+
+void JPH_Body_GetCenterOfMassPosition(const JPH_Body* body, JPH_RVec3* result)
+{
+	FromJolt(AsBody(body)->GetCenterOfMassPosition(), result);
 }
 
 void JPH_Body_GetCenterOfMassTransform(const JPH_Body* body, JPH_RMatrix4x4* result)
 {
-	auto joltMatrix = reinterpret_cast<const JPH::Body*>(body)->GetCenterOfMassTransform();
-	FromJolt(joltMatrix, result);
+	FromJolt(AsBody(body)->GetCenterOfMassTransform(), result);
+}
+
+void JPH_Body_GetInverseCenterOfMassTransform(const JPH_Body* body, JPH_RMatrix4x4* result)
+{
+	FromJolt(AsBody(body)->GetInverseCenterOfMassTransform(), result);
+}
+
+void JPH_Body_GetWorldSpaceBounds(const JPH_Body* body, JPH_AABox* result)
+{
+	FromJolt(AsBody(body)->GetWorldSpaceBounds(), result);
+}
+
+void JPH_Body_GetWorldSpaceSurfaceNormal(const JPH_Body* body, JPH_SubShapeID subShapeID, const JPH_RVec3* position, JPH_Vec3* normal)
+{
+	auto joltSubShapeID = JPH::SubShapeID();
+	joltSubShapeID.SetValue(subShapeID);
+	Vec3 joltNormal = AsBody(body)->GetWorldSpaceSurfaceNormal(joltSubShapeID, ToJolt(position));
+	FromJolt(joltNormal, normal);
+}
+
+JPH_MotionProperties* JPH_Body_GetMotionProperties(JPH_Body* body)
+{
+	return ToMotionProperties(AsBody(body)->GetMotionProperties());
+}
+
+JPH_MotionProperties* JPH_Body_GetMotionPropertiesUnchecked(JPH_Body* body)
+{
+	return ToMotionProperties(AsBody(body)->GetMotionPropertiesUnchecked());
 }
 
 void JPH_Body_SetUserData(JPH_Body* body, uint64_t userData)
 {
-	reinterpret_cast<JPH::Body*>(body)->SetUserData(userData);
+	AsBody(body)->SetUserData(userData);
 }
 
 uint64_t JPH_Body_GetUserData(JPH_Body* body)
 {
-	return reinterpret_cast<JPH::Body*>(body)->GetUserData();
+	return AsBody(body)->GetUserData();
 }
 
 JPH_Body* JPH_Body_GetFixedToWorldBody(void)
 {
-	return reinterpret_cast<JPH_Body*>(&JPH::Body::sFixedToWorld);
+	return ToBody(&JPH::Body::sFixedToWorld);
 }
 
 /* Contact Listener */
