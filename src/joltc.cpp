@@ -4787,7 +4787,7 @@ void JPH_Body_GetPointVelocityCOM(JPH_Body* body, const JPH_Vec3* pointRelativeT
 	FromJolt(AsBody(body)->GetPointVelocityCOM(ToJolt(pointRelativeToCOM)), velocity);
 }
 
-void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_Vec3* point, JPH_Vec3* velocity)
+void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_RVec3* point, JPH_Vec3* velocity)
 {
 	FromJolt(AsBody(body)->GetPointVelocity(ToJolt(point)), velocity);
 }

@@ -1436,7 +1436,7 @@ JPH_CAPI void JPH_Body_SetAngularVelocity(JPH_Body* body, const JPH_Vec3* veloci
 JPH_CAPI void JPH_Body_SetAngularVelocityClamped(JPH_Body* body, const JPH_Vec3* velocity);
 
 JPH_CAPI void JPH_Body_GetPointVelocityCOM(JPH_Body* body, const JPH_Vec3* pointRelativeToCOM, JPH_Vec3* velocity);
-JPH_CAPI void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_Vec3* point, JPH_Vec3* velocity);
+JPH_CAPI void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_RVec3* point, JPH_Vec3* velocity);
 
 JPH_CAPI void JPH_Body_AddForce(JPH_Body* body, const JPH_Vec3* force);
 JPH_CAPI void JPH_Body_AddForceAtPosition(JPH_Body* body, const JPH_Vec3* force, const JPH_RVec3* position);
