@@ -1026,6 +1026,17 @@ void JPH_Shape_GetMassProperties(const JPH_Shape* shape, JPH_MassProperties* res
 	FromJolt(joltShape->GetMassProperties(), result);
 }
 
+const JPH_Shape* JPH_Shape_GetLeafShape(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_SubShapeID* remainder)
+{
+	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
+	auto joltSubShapeID = JPH::SubShapeID();
+	joltSubShapeID.SetValue(subShapeID);
+	JPH::SubShapeID joltRemainder = JPH::SubShapeID();
+	const JPH::Shape* leaf = joltShape->GetLeafShape(joltSubShapeID, joltRemainder);
+	*remainder = joltRemainder.GetValue();
+	return reinterpret_cast<const JPH_Shape*>(leaf);
+}
+
 const JPH_PhysicsMaterial* JPH_Shape_GetMaterial(const JPH_Shape* shape, JPH_SubShapeID subShapeID)
 {
 	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
@@ -1494,6 +1505,16 @@ JPH_MeshShapeSettings* JPH_MeshShapeSettings_Create2(const JPH_Vec3* vertices, u
 	return reinterpret_cast<JPH_MeshShapeSettings*>(settings);
 }
 
+bool JPH_MeshShapeSettings_GetPerTriangleUserData(const JPH_MeshShapeSettings* settings)
+{
+	return reinterpret_cast<const JPH::MeshShapeSettings*>(settings)->mPerTriangleUserData;
+}
+
+void JPH_MeshShapeSettings_SetPerTriangleUserData(JPH_MeshShapeSettings* settings, bool perTriangleUserData)
+{
+	reinterpret_cast<JPH::MeshShapeSettings*>(settings)->mPerTriangleUserData = perTriangleUserData;
+}
+
 void JPH_MeshShapeSettings_Sanitize(JPH_MeshShapeSettings* settings)
 {
 	JPH_ASSERT(settings != nullptr);
@@ -1510,6 +1531,13 @@ JPH_MeshShape* JPH_MeshShapeSettings_CreateShape(const JPH_MeshShapeSettings* se
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_MeshShape*>(shape);
+}
+
+uint32_t JPH_MeshShape_GetTriangleUserData(const JPH_MeshShape* shape, JPH_SubShapeID id)
+{
+	JPH::SubShapeID joltSubShapeID = JPH::SubShapeID();
+	joltSubShapeID.SetValue(id);
+	return reinterpret_cast<const JPH::MeshShape*>(shape)->GetTriangleUserData(joltSubShapeID);
 }
 
 /* HeightFieldShapeSettings */
