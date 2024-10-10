@@ -1026,6 +1026,17 @@ void JPH_Shape_GetMassProperties(const JPH_Shape* shape, JPH_MassProperties* res
 	FromJolt(joltShape->GetMassProperties(), result);
 }
 
+const JPH_Shape* JPH_Shape_GetLeafShape(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_SubShapeID* remainder)
+{
+	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
+	auto joltSubShapeID = JPH::SubShapeID();
+	joltSubShapeID.SetValue(subShapeID);
+	JPH::SubShapeID joltRemainder = JPH::SubShapeID();
+	const JPH::Shape* leaf = joltShape->GetLeafShape(joltSubShapeID, joltRemainder);
+	*remainder = joltRemainder.GetValue();
+	return reinterpret_cast<const JPH_Shape*>(leaf);
+}
+
 const JPH_PhysicsMaterial* JPH_Shape_GetMaterial(const JPH_Shape* shape, JPH_SubShapeID subShapeID)
 {
 	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
