@@ -1152,7 +1152,7 @@ bool JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH
 	return hadHit;
 }
 
-bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback)
+bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData)
 {
 	JPH::RayCast ray(ToJolt(origin), ToJolt(direction));
 	JPH::RayCastSettings settings = ToJolt(rayCastSettings);
@@ -1178,7 +1178,7 @@ bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JP
 					hitResult.fraction = hit.mFraction;
 					hitResult.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
 					hitResult.subShapeID2 = hit.mSubShapeID2.GetValue();
-					callback(&hitResult);
+					callback(userData, &hitResult);
 				}
 			}
 
@@ -1194,7 +1194,7 @@ bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JP
 				hitResult.fraction = collector.mHit.mFraction;
 				hitResult.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 				hitResult.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-				callback(&hitResult);
+				callback(userData, &hitResult);
 			}
 
 			return collector.HadHit();
@@ -1210,7 +1210,7 @@ bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JP
 				hitResult.fraction = collector.mHit.mFraction;
 				hitResult.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 				hitResult.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-				callback(&hitResult);
+				callback(userData, &hitResult);
 			}
 
 			return collector.HadHit();
@@ -1230,7 +1230,7 @@ bool JPH_Shape_CollidePoint(const JPH_Shape* shape, const JPH_Vec3* point)
 	return collector.HadHit();
 }
 
-bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_CollisionCollectorType collectorType, JPH_CollidePointResultCallback* callback)
+bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_CollisionCollectorType collectorType, JPH_CollidePointResultCallback* callback, void* userData)
 {
 	JPH::Vec3 joltPoint = ToJolt(point);
 	SubShapeIDCreator creator;
@@ -1253,7 +1253,7 @@ bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_
 				{
 					result.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
 					result.subShapeID2 = hit.mSubShapeID2.GetValue();
-					callback(&result);
+					callback(userData, &result);
 				}
 			}
 
@@ -1268,7 +1268,7 @@ bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_
 			{
 				result.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 				result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-				callback(&result);
+				callback(userData, &result);
 			}
 
 			return collector.HadHit();
@@ -1283,7 +1283,7 @@ bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_
 			{
 				result.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 				result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-				callback(&result);
+				callback(userData, &result);
 			}
 
 			return collector.HadHit();
@@ -4584,7 +4584,7 @@ class CollideShapeBodyCollectorCallback : public CollideShapeBodyCollector
 public:
 	CollideShapeBodyCollectorCallback(JPH_CollideShapeBodyCollector* proc, void* userData) : proc(proc), userData(userData) {}
 
-	virtual void AddHit(const BodyID& result)
+	void AddHit(const BodyID& result) override
 	{
 		proc(userData, result.GetIndexAndSequenceNumber());
 		hadHit = true;
@@ -4616,10 +4616,10 @@ bool JPH_BroadPhaseQuery_CollideAABox(const JPH_BroadPhaseQuery* query,
 	JPH_ObjectLayerFilter* objectLayerFilter)
 {
 	JPH_ASSERT(query && box && callback);
-	auto joltQuery = reinterpret_cast<const JPH::BroadPhaseQuery*>(query);
+
 	JPH::AABox joltBox(ToJolt(&box->min), ToJolt(&box->max));
 	CollideShapeBodyCollectorCallback collector(callback, userData);
-	joltQuery->CollideAABox(joltBox, collector, ToJolt(broadPhaseLayerFilter), ToJolt(objectLayerFilter));
+	AsBroadPhaseQuery(query)->CollideAABox(joltBox, collector, ToJolt(broadPhaseLayerFilter), ToJolt(objectLayerFilter));
 	return collector.hadHit;
 }
 
@@ -4817,7 +4817,7 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
 	const JPH_RayCastSettings* rayCastSettings,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastRayResultCallback* callback,
+	JPH_CastRayResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter,
@@ -4853,7 +4853,7 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 					hitResult.fraction = hit.mFraction;
 					hitResult.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
 					hitResult.subShapeID2 = hit.mSubShapeID2.GetValue();
-					callback(&hitResult);
+					callback(userData, &hitResult);
 				}
 			}
 
@@ -4877,7 +4877,7 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 				hitResult.fraction = collector.mHit.mFraction;
 				hitResult.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 				hitResult.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-				callback(&hitResult);
+				callback(userData, &hitResult);
 			}
 
 			return collector.HadHit();
@@ -4901,7 +4901,7 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 				hitResult.fraction = collector.mHit.mFraction;
 				hitResult.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 				hitResult.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-				callback(&hitResult);
+				callback(userData, &hitResult);
 			}
 
 			return collector.HadHit();
@@ -4938,7 +4938,7 @@ bool JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* query,
 bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CollidePointResultCallback* callback,
+	JPH_CollidePointResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter,
@@ -4971,7 +4971,7 @@ bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 				{
 					result.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
 					result.subShapeID2 = hit.mSubShapeID2.GetValue();
-					callback(&result);
+					callback(userData, &result);
 				}
 			}
 
@@ -4993,7 +4993,7 @@ bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 			{
 				result.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 				result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-				callback(&result);
+				callback(userData, &result);
 			}
 
 			return collector.HadHit();
@@ -5015,7 +5015,7 @@ bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 			{
 				result.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 				result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-				callback(&result);
+				callback(userData, &result);
 			}
 
 			return collector.HadHit();
@@ -5067,7 +5067,7 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 	const JPH_CollideShapeSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CollideShapeResultCallback* callback,
+	JPH_CollideShapeResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter,
@@ -5117,7 +5117,7 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 					result.subShapeID1 = hit.mSubShapeID1.GetValue();
 					result.subShapeID2 = hit.mSubShapeID2.GetValue();
 					result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
-					callback(&result);
+					callback(userData, &result);
 				}
 			}
 
@@ -5148,7 +5148,7 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 				result.subShapeID1 = collector.mHit.mSubShapeID1.GetValue();
 				result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
 				result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
-				callback(&result);
+				callback(userData, &result);
 			}
 
 			return collector.HadHit();
@@ -5179,7 +5179,7 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 				result.subShapeID1 = collector.mHit.mSubShapeID1.GetValue();
 				result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
 				result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
-				callback(&result);
+				callback(userData, &result);
 			}
 
 			return collector.HadHit();
@@ -5234,7 +5234,7 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 	const JPH_ShapeCastSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastShapeResultCallback* callback,
+	JPH_CastShapeResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter,
@@ -5287,7 +5287,7 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 					result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 					result.fraction = hit.mFraction;
 					result.isBackFaceHit = hit.mIsBackFaceHit;
-					callback(&result);
+					callback(userData, &result);
 				}
 			}
 
@@ -5318,7 +5318,7 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 				result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = collector.mHit.mFraction;
 				result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-				callback(&result);
+				callback(userData, &result);
 			}
 
 			return collector.HadHit();
@@ -5349,7 +5349,7 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 				result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = collector.mHit.mFraction;
 				result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-				callback(&result);
+				callback(userData, &result);
 			}
 
 			return collector.HadHit();

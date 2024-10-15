@@ -538,15 +538,15 @@ typedef struct JPH_DrawSettings
 	JPH_SoftBodyConstraintColor	drawSoftBodyConstraintColor;        ///< Coloring scheme to use for soft body constraints
 } JPH_DrawSettings;
 
-typedef void JPH_CastRayResultCallback(const JPH_RayCastResult* result);
-typedef void JPH_CollidePointResultCallback(const JPH_CollidePointResult* result);
-typedef void JPH_CollideShapeResultCallback(const JPH_CollideShapeResult* result);
-typedef void JPH_CastShapeResultCallback(const JPH_ShapeCastResult* result);
+typedef void JPH_CastRayResultCallback(void* context, const JPH_RayCastResult* result);
+typedef void JPH_CollidePointResultCallback(void* context, const JPH_CollidePointResult* result);
+typedef void JPH_CollideShapeResultCallback(void* context, const JPH_CollideShapeResult* result);
+typedef void JPH_CastShapeResultCallback(void* context, const JPH_ShapeCastResult* result);
 
+typedef float JPH_CastRayCollector(void* context, const JPH_RayCastResult* result);
 typedef float JPH_RayCastBodyCollector(void* context, const JPH_BroadPhaseCastResult* result);
 typedef void JPH_CollideShapeBodyCollector(void* context, const JPH_BodyID result);
 
-typedef float JPH_CastRayCollector(void* context, const JPH_RayCastResult* result);
 typedef float JPH_CollidePointCollector(void* context, const JPH_CollidePointResult* result);
 typedef float JPH_CollideShapeCollector(void* context, const JPH_CollideShapeResult* result);
 typedef float JPH_CastShapeCollector(void* context, const JPH_ShapeCastResult* result);
@@ -881,9 +881,9 @@ JPH_CAPI const JPH_PhysicsMaterial* JPH_Shape_GetMaterial(const JPH_Shape* shape
 JPH_CAPI void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_Vec3* localPosition, JPH_Vec3* normal);
 JPH_CAPI float JPH_Shape_GetVolume(const JPH_Shape* shape);
 JPH_CAPI bool JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit);
-JPH_CAPI bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback);
+JPH_CAPI bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData);
 JPH_CAPI bool JPH_Shape_CollidePoint(const JPH_Shape* shape, const JPH_Vec3* point);
-JPH_CAPI bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_CollisionCollectorType collectorType, JPH_CollidePointResultCallback* callback);
+JPH_CAPI bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_CollisionCollectorType collectorType, JPH_CollidePointResultCallback* callback, void* userData);
 
 /* JPH_ConvexShape */
 JPH_CAPI float JPH_ConvexShapeSettings_GetDensity(const JPH_ConvexShapeSettings* shape);
@@ -1470,7 +1470,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
 	const JPH_RayCastSettings* rayCastSettings,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastRayResultCallback* callback,
+	JPH_CastRayResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter,
@@ -1487,7 +1487,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* quer
 JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CollidePointResultCallback* callback,
+	JPH_CollidePointResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter,
@@ -1508,7 +1508,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* que
 	const JPH_CollideShapeSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CollideShapeResultCallback* callback,
+	JPH_CollideShapeResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter,
@@ -1531,7 +1531,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 	const JPH_ShapeCastSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastShapeResultCallback* callback,
+	JPH_CastShapeResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	JPH_BodyFilter* bodyFilter,
