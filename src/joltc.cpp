@@ -385,6 +385,7 @@ static inline JPH::MotorSettings ToJolt(const JPH_MotorSettings* settings)
 	return result;
 }
 
+#ifdef JPH_DEBUG_RENDERER
 static inline BodyManager::DrawSettings ToJolt(const JPH_DrawSettings* settings)
 {
 	BodyManager::DrawSettings result{};
@@ -413,6 +414,7 @@ static inline BodyManager::DrawSettings ToJolt(const JPH_DrawSettings* settings)
 	result.mDrawSoftBodyConstraintColor = static_cast<ESoftBodyConstraintColor>(settings->drawSoftBodyConstraintColor);
 	return result;
 }
+#endif
 
 void JPH_MassProperties_DecomposePrincipalMomentsOfInertia(JPH_MassProperties* properties, JPH_Matrix4x4* rotation, JPH_Vec3* diagonal)
 {
@@ -3799,6 +3801,7 @@ JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, 
 	}
 }
 
+#ifdef JPH_DEBUG_RENDERER
 void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, const JPH_BodyDrawFilter* bodyFilter)
 {
 	JPH_ASSERT(settings);
@@ -3833,6 +3836,7 @@ void JPH_PhysicsSystem_DrawConstraintReferenceFrame(JPH_PhysicsSystem* system, J
 
 	system->physicsSystem->DrawConstraintReferenceFrame(reinterpret_cast<DebugRenderer*>(renderer));
 }
+#endif
 
 JPH_Body* JPH_BodyInterface_CreateBody(JPH_BodyInterface* interface, const JPH_BodyCreationSettings* settings)
 {
@@ -5866,6 +5870,7 @@ void JPH_BodyActivationListener_Destroy(JPH_BodyActivationListener* listener)
 	}
 }
 
+#ifdef JPH_DEBUG_RENDERER
 /* JPH_BodyDrawFilter */
 class ManagedBodyDrawFilter final : public JPH::BodyDrawFilter
 {
@@ -5906,6 +5911,7 @@ void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter)
 		delete reinterpret_cast<ManagedBodyDrawFilter*>(filter);
 	}
 }
+#endif
 
 /* ContactManifold */
 void JPH_ContactManifold_GetWorldSpaceNormal(const JPH_ContactManifold* manifold, JPH_Vec3* result)
@@ -6648,6 +6654,7 @@ void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener
 }
 
 
+#ifdef JPH_DEBUG_RENDERER
 /* DebugRenderer */
 class ManagedDebugRendererSimple final : public DebugRendererSimple
 {
@@ -6718,5 +6725,6 @@ void JPH_DebugRenderer_NextFrame(JPH_DebugRenderer* renderer)
 {
 	reinterpret_cast<DebugRenderer*>(renderer)->NextFrame();
 }
+#endif
 
 JPH_SUPPRESS_WARNING_POP

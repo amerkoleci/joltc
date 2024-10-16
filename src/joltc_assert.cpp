@@ -188,6 +188,8 @@ static_assert(JPH_CollectFacesMode_NoFaces == (int)JPH::ECollectFacesMode::NoFac
 static_assert(sizeof(JPH::SubShapeIDPair) == sizeof(JPH_SubShapeIDPair));
 static_assert(alignof(JPH::SubShapeIDPair) == alignof(JPH_SubShapeIDPair));
 
+#ifdef JPH_DEBUG_RENDERER
+
 // ESoftBodyConstraintColor
 static_assert(JPH_SoftBodyConstraintColor_ConstraintType == (int)JPH::ESoftBodyConstraintColor::ConstraintType);
 static_assert(JPH_SoftBodyConstraintColor_ConstraintGroup == (int)JPH::ESoftBodyConstraintColor::ConstraintGroup);
@@ -209,3 +211,4 @@ static_assert(JPH_DebugRenderer_CastShadow_Off == (int)JPH::DebugRenderer::ECast
 static_assert(JPH_DebugRenderer_DrawMode_Solid == (int)JPH::DebugRenderer::EDrawMode::Solid);
 static_assert(JPH_DebugRenderer_DrawMode_Wireframe == (int)JPH::DebugRenderer::EDrawMode::Wireframe);
 
+#endif
