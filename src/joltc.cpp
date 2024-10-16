@@ -60,9 +60,6 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Constraints/SixDOFConstraint.h"
 #include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
-#ifdef JPH_DEBUG_RENDERER
-#include <Jolt/Renderer/DebugRendererSimple.h>
-#endif // JPH_DEBUG_RENDERER
 
 #include <iostream>
 #include <cstdarg>
@@ -384,38 +381,6 @@ static inline JPH::MotorSettings ToJolt(const JPH_MotorSettings* settings)
 	result.mMaxTorqueLimit = settings->maxTorqueLimit;
 	return result;
 }
-
-#ifdef JPH_DEBUG_RENDERER
-static inline BodyManager::DrawSettings ToJolt(const JPH_DrawSettings* settings)
-{
-	BodyManager::DrawSettings result{};
-	if (!settings)
-		return result;
-	result.mDrawGetSupportFunction = settings->drawGetSupportFunction;
-	result.mDrawSupportDirection = settings->drawSupportDirection;
-	result.mDrawGetSupportingFace = settings->drawGetSupportingFace;
-	result.mDrawShape = settings->drawShape;
-	result.mDrawShapeWireframe = settings->drawShapeWireframe;
-	result.mDrawShapeColor = static_cast<BodyManager::EShapeColor>(settings->drawShapeColor);
-	result.mDrawBoundingBox = settings->drawBoundingBox;
-	result.mDrawCenterOfMassTransform = settings->drawCenterOfMassTransform;
-	result.mDrawWorldTransform = settings->drawWorldTransform;
-	result.mDrawVelocity = settings->drawVelocity;
-	result.mDrawMassAndInertia = settings->drawMassAndInertia;
-	result.mDrawSleepStats = settings->drawSleepStats;
-	result.mDrawSoftBodyVertices = settings->drawSoftBodyVertices;
-	result.mDrawSoftBodyVertexVelocities = settings->drawSoftBodyVertexVelocities;
-	result.mDrawSoftBodyEdgeConstraints = settings->drawSoftBodyEdgeConstraints;
-	result.mDrawSoftBodyBendConstraints = settings->drawSoftBodyBendConstraints;
-	result.mDrawSoftBodyVolumeConstraints = settings->drawSoftBodyVolumeConstraints;
-	result.mDrawSoftBodySkinConstraints = settings->drawSoftBodySkinConstraints;
-	result.mDrawSoftBodyLRAConstraints = settings->drawSoftBodyLRAConstraints;
-	result.mDrawSoftBodyPredictedBounds = settings->drawSoftBodyPredictedBounds;
-	result.mDrawSoftBodyConstraintColor = static_cast<ESoftBodyConstraintColor>(settings->drawSoftBodyConstraintColor);
-	return result;
-}
-#endif
-
 void JPH_MassProperties_DecomposePrincipalMomentsOfInertia(JPH_MassProperties* properties, JPH_Matrix4x4* rotation, JPH_Vec3* diagonal)
 {
 	JPH::Mat44 joltRotation;
@@ -3802,6 +3767,35 @@ JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, 
 }
 
 #ifdef JPH_DEBUG_RENDERER
+static inline BodyManager::DrawSettings ToJolt(const JPH_DrawSettings* settings)
+{
+	BodyManager::DrawSettings result{};
+	if (!settings)
+		return result;
+	result.mDrawGetSupportFunction = settings->drawGetSupportFunction;
+	result.mDrawSupportDirection = settings->drawSupportDirection;
+	result.mDrawGetSupportingFace = settings->drawGetSupportingFace;
+	result.mDrawShape = settings->drawShape;
+	result.mDrawShapeWireframe = settings->drawShapeWireframe;
+	result.mDrawShapeColor = static_cast<BodyManager::EShapeColor>(settings->drawShapeColor);
+	result.mDrawBoundingBox = settings->drawBoundingBox;
+	result.mDrawCenterOfMassTransform = settings->drawCenterOfMassTransform;
+	result.mDrawWorldTransform = settings->drawWorldTransform;
+	result.mDrawVelocity = settings->drawVelocity;
+	result.mDrawMassAndInertia = settings->drawMassAndInertia;
+	result.mDrawSleepStats = settings->drawSleepStats;
+	result.mDrawSoftBodyVertices = settings->drawSoftBodyVertices;
+	result.mDrawSoftBodyVertexVelocities = settings->drawSoftBodyVertexVelocities;
+	result.mDrawSoftBodyEdgeConstraints = settings->drawSoftBodyEdgeConstraints;
+	result.mDrawSoftBodyBendConstraints = settings->drawSoftBodyBendConstraints;
+	result.mDrawSoftBodyVolumeConstraints = settings->drawSoftBodyVolumeConstraints;
+	result.mDrawSoftBodySkinConstraints = settings->drawSoftBodySkinConstraints;
+	result.mDrawSoftBodyLRAConstraints = settings->drawSoftBodyLRAConstraints;
+	result.mDrawSoftBodyPredictedBounds = settings->drawSoftBodyPredictedBounds;
+	result.mDrawSoftBodyConstraintColor = static_cast<ESoftBodyConstraintColor>(settings->drawSoftBodyConstraintColor);
+	return result;
+}
+
 void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, const JPH_BodyDrawFilter* bodyFilter)
 {
 	JPH_ASSERT(settings);
@@ -5870,49 +5864,6 @@ void JPH_BodyActivationListener_Destroy(JPH_BodyActivationListener* listener)
 	}
 }
 
-#ifdef JPH_DEBUG_RENDERER
-/* JPH_BodyDrawFilter */
-class ManagedBodyDrawFilter final : public JPH::BodyDrawFilter
-{
-public:
-	ManagedBodyDrawFilter() = default;
-
-	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&) = delete;
-	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&&) = delete;
-	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&) = delete;
-	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&&) = delete;
-
-	bool ShouldDraw([[maybe_unused]] const Body& inBody) const override
-	{
-		if (procs.ShouldDraw)
-		{
-			return procs.ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
-		}
-
-		return true;
-	}
-
-	JPH_BodyDrawFilter_Procs procs = {};
-	void* userData = nullptr;
-};
-
-JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(JPH_BodyDrawFilter_Procs procs, void* userData)
-{
-	auto filter = new ManagedBodyDrawFilter();
-	filter->procs = procs;
-	filter->userData = userData;
-	return reinterpret_cast<JPH_BodyDrawFilter*>(filter);
-}
-
-void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter)
-{
-	if (filter)
-	{
-		delete reinterpret_cast<ManagedBodyDrawFilter*>(filter);
-	}
-}
-#endif
-
 /* ContactManifold */
 void JPH_ContactManifold_GetWorldSpaceNormal(const JPH_ContactManifold* manifold, JPH_Vec3* result)
 {
@@ -6653,8 +6604,50 @@ void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener
 		delete reinterpret_cast<ManagedCharacterContactListener*>(listener);
 }
 
-
 #ifdef JPH_DEBUG_RENDERER
+#include <Jolt/Renderer/DebugRendererSimple.h>
+
+/* JPH_BodyDrawFilter */
+class ManagedBodyDrawFilter final : public JPH::BodyDrawFilter
+{
+public:
+	ManagedBodyDrawFilter() = default;
+
+	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&) = delete;
+	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&&) = delete;
+	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&) = delete;
+	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&&) = delete;
+
+	bool ShouldDraw([[maybe_unused]] const Body& inBody) const override
+	{
+		if (procs.ShouldDraw)
+		{
+			return procs.ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
+		}
+
+		return true;
+	}
+
+	JPH_BodyDrawFilter_Procs procs = {};
+	void* userData = nullptr;
+};
+
+JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(JPH_BodyDrawFilter_Procs procs, void* userData)
+{
+	auto filter = new ManagedBodyDrawFilter();
+	filter->procs = procs;
+	filter->userData = userData;
+	return reinterpret_cast<JPH_BodyDrawFilter*>(filter);
+}
+
+void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter)
+{
+	if (filter)
+	{
+		delete reinterpret_cast<ManagedBodyDrawFilter*>(filter);
+	}
+}
+
 /* DebugRenderer */
 class ManagedDebugRendererSimple final : public DebugRendererSimple
 {
@@ -6705,7 +6698,6 @@ public:
 		}
 	}
 };
-
 
 JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(JPH_DebugRenderer_Procs procs, void* userData)
 {
