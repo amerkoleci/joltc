@@ -41,6 +41,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/Shape/MutableCompoundShape.h"
 #include "Jolt/Physics/Collision/Shape/DecoratedShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
+#include "Jolt/Physics/Collision/Shape/ScaledShape.h"
 #include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
 #include "Jolt/Physics/Collision/Shape/EmptyShape.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
@@ -2013,6 +2014,55 @@ void JPH_RotatedTranslatedShape_GetRotation(const JPH_RotatedTranslatedShape* sh
 	auto joltShape = reinterpret_cast<const JPH::RotatedTranslatedShape*>(shape);
 	JPH::Quat joltQuat = joltShape->GetRotation();
 	FromJolt(joltQuat, rotation);
+}
+
+JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create(const JPH_ShapeSettings* shapeSettings, const JPH_Vec3* scale)
+{
+	auto joltSettings = reinterpret_cast<const JPH::ShapeSettings*>(shapeSettings);
+
+	auto settings = new JPH::ScaledShapeSettings(joltSettings, ToJolt(scale));
+	settings->AddRef();
+
+	return reinterpret_cast<JPH_ScaledShapeSettings*>(settings);
+}
+
+JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create2(const JPH_Shape* shape, const JPH_Vec3* scale)
+{
+	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
+
+	auto settings = new JPH::ScaledShapeSettings(joltShape, ToJolt(scale));
+	settings->AddRef();
+
+	return reinterpret_cast<JPH_ScaledShapeSettings*>(settings);
+}
+
+JPH_ScaledShape* JPH_ScaledShapeSettings_CreateShape(const JPH_ScaledShapeSettings* settings)
+{
+	const JPH::ScaledShapeSettings* jolt_settings = reinterpret_cast<const JPH::ScaledShapeSettings*>(settings);
+	auto shape_res = jolt_settings->Create();
+
+	auto shape = shape_res.Get().GetPtr();
+	shape->AddRef();
+
+	return reinterpret_cast<JPH_ScaledShape*>(shape);
+}
+
+JPH_ScaledShape* JPH_ScaledShape_Create(const JPH_Shape* shape, const JPH_Vec3* scale)
+{
+	auto jolt_shape = reinterpret_cast<const JPH::Shape*>(shape);
+
+	auto scaledShape = new JPH::ScaledShape(jolt_shape, ToJolt(scale));
+	scaledShape->AddRef();
+
+	return reinterpret_cast<JPH_ScaledShape*>(scaledShape);
+}
+
+void JPH_ScaledShape_GetScale(const JPH_ScaledShape* shape, JPH_Vec3* result)
+{
+	JPH_ASSERT(shape);
+	auto joltShape = reinterpret_cast<const JPH::ScaledShape*>(shape);
+	JPH::Vec3 joltScale = joltShape->GetScale();
+	FromJolt(joltScale, result);
 }
 
 /* JPH_OffsetCenterOfMassShape */

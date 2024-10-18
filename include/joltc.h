@@ -581,6 +581,7 @@ typedef struct JPH_MutableCompoundShapeSettings     JPH_MutableCompoundShapeSett
 typedef struct JPH_MeshShapeSettings                JPH_MeshShapeSettings;
 typedef struct JPH_HeightFieldShapeSettings         JPH_HeightFieldShapeSettings;
 typedef struct JPH_RotatedTranslatedShapeSettings   JPH_RotatedTranslatedShapeSettings;
+typedef struct JPH_ScaledShapeSettings              JPH_ScaledShapeSettings;
 typedef struct JPH_OffsetCenterOfMassShapeSettings  JPH_OffsetCenterOfMassShapeSettings;
 typedef struct JPH_EmptyShapeSettings               JPH_EmptyShapeSettings;
 
@@ -602,6 +603,7 @@ typedef struct JPH_MeshShape                        JPH_MeshShape;
 typedef struct JPH_HeightFieldShape                 JPH_HeightFieldShape;
 typedef struct JPH_DecoratedShape                   JPH_DecoratedShape;
 typedef struct JPH_RotatedTranslatedShape           JPH_RotatedTranslatedShape;
+typedef struct JPH_ScaledShape                      JPH_ScaledShape;
 typedef struct JPH_OffsetCenterOfMassShape          JPH_OffsetCenterOfMassShape;
 typedef struct JPH_EmptyShape                       JPH_EmptyShape;
 
@@ -1020,6 +1022,13 @@ JPH_CAPI JPH_RotatedTranslatedShape* JPH_RotatedTranslatedShapeSettings_CreateSh
 JPH_CAPI JPH_RotatedTranslatedShape* JPH_RotatedTranslatedShape_Create(const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* shape);
 JPH_CAPI void JPH_RotatedTranslatedShape_GetPosition(const JPH_RotatedTranslatedShape* shape, JPH_Vec3* position);
 JPH_CAPI void JPH_RotatedTranslatedShape_GetRotation(const JPH_RotatedTranslatedShape* shape, JPH_Quat* rotation);
+
+/* ScaledShape */
+JPH_CAPI JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create(const JPH_ShapeSettings* shapeSettings, const JPH_Vec3* scale);
+JPH_CAPI JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create2(const JPH_Shape* shape, const JPH_Vec3* scale);
+JPH_CAPI JPH_ScaledShape* JPH_ScaledShapeSettings_CreateShape(const JPH_ScaledShapeSettings* settings);
+JPH_CAPI JPH_ScaledShape* JPH_ScaledShape_Create(const JPH_Shape* shape, const JPH_Vec3* scale);
+JPH_CAPI void JPH_ScaledShape_GetScale(const JPH_ScaledShape* shape, JPH_Vec3* result);
 
 /* OffsetCenterOfMassShape */
 JPH_CAPI JPH_OffsetCenterOfMassShapeSettings* JPH_OffsetCenterOfMassShapeSettings_Create(const JPH_Vec3* offset, const JPH_ShapeSettings* shapeSettings);
