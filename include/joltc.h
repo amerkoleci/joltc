@@ -539,14 +539,15 @@ typedef struct JPH_DrawSettings
 } JPH_DrawSettings;
 
 typedef void JPH_CastRayResultCallback(void* context, const JPH_RayCastResult* result);
+typedef void JPH_RayCastBodyResultCallback(void* context, const JPH_BroadPhaseCastResult* result);
+typedef void JPH_CollideShapeBodyResultCallback(void* context, const JPH_BodyID result);
 typedef void JPH_CollidePointResultCallback(void* context, const JPH_CollidePointResult* result);
 typedef void JPH_CollideShapeResultCallback(void* context, const JPH_CollideShapeResult* result);
 typedef void JPH_CastShapeResultCallback(void* context, const JPH_ShapeCastResult* result);
 
 typedef float JPH_CastRayCollector(void* context, const JPH_RayCastResult* result);
 typedef float JPH_RayCastBodyCollector(void* context, const JPH_BroadPhaseCastResult* result);
-typedef void JPH_CollideShapeBodyCollector(void* context, const JPH_BodyID result);
-
+typedef float JPH_CollideShapeBodyCollector(void* context, const JPH_BodyID result);
 typedef float JPH_CollidePointCollector(void* context, const JPH_CollidePointResult* result);
 typedef float JPH_CollideShapeCollector(void* context, const JPH_CollideShapeResult* result);
 typedef float JPH_CastShapeCollector(void* context, const JPH_ShapeCastResult* result);
@@ -637,10 +638,6 @@ typedef struct JPH_SliderConstraint                 JPH_SliderConstraint;
 typedef struct JPH_ConeConstraint                   JPH_ConeConstraint;
 typedef struct JPH_SwingTwistConstraint             JPH_SwingTwistConstraint;
 typedef struct JPH_SixDOFConstraint				    JPH_SixDOFConstraint;
-
-typedef struct JPH_AllHit_CastRayCollector          JPH_AllHit_CastRayCollector;
-typedef struct JPH_AllHit_CastShapeCollector        JPH_AllHit_CastShapeCollector;
-typedef struct JPH_ShapeCastSettings                JPH_ShapeCastSettings;
 
 typedef struct JPH_CollideShapeResult               JPH_CollideShapeResult;
 typedef struct JPH_ContactListener                  JPH_ContactListener;
@@ -1429,6 +1426,13 @@ JPH_CAPI void JPH_ShapeCastSettings_Init(JPH_ShapeCastSettings* settings);
 JPH_CAPI bool JPH_BroadPhaseQuery_CastRay(const JPH_BroadPhaseQuery* query,
 	const JPH_Vec3* origin, const JPH_Vec3* direction,
 	JPH_RayCastBodyCollector* callback, void* userData,
+	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	JPH_ObjectLayerFilter* objectLayerFilter);
+
+JPH_CAPI bool JPH_BroadPhaseQuery_CastRay2(const JPH_BroadPhaseQuery* query,
+	const JPH_Vec3* origin, const JPH_Vec3* direction,
+	JPH_CollisionCollectorType collectorType,
+	JPH_RayCastBodyResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter);
 

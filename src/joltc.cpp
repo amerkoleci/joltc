@@ -4560,7 +4560,7 @@ class RayCastBodyCollectorCallback : public RayCastBodyCollector
 public:
 	RayCastBodyCollectorCallback(JPH_RayCastBodyCollector* proc, void* userData) : proc(proc), userData(userData) {}
 
-	virtual void AddHit(const BroadPhaseCastResult& result)
+	void AddHit(const BroadPhaseCastResult& result) override
 	{
 		JPH_BroadPhaseCastResult hit;
 		hit.bodyID = result.mBodyID.GetIndexAndSequenceNumber();
@@ -4580,11 +4580,17 @@ public:
 class CollideShapeBodyCollectorCallback : public CollideShapeBodyCollector
 {
 public:
-	CollideShapeBodyCollectorCallback(JPH_CollideShapeBodyCollector* proc, void* userData) : proc(proc), userData(userData) {}
+	CollideShapeBodyCollectorCallback(JPH_CollideShapeBodyCollector* proc, void* userData) 
+		: proc(proc)
+		, userData(userData)
+	{
+	}
 
 	void AddHit(const BodyID& result) override
 	{
-		proc(userData, result.GetIndexAndSequenceNumber());
+		float fraction = proc(userData, result.GetIndexAndSequenceNumber());
+
+		UpdateEarlyOutFraction(fraction);
 		hadHit = true;
 	}
 
@@ -4601,11 +4607,79 @@ bool JPH_BroadPhaseQuery_CastRay(const JPH_BroadPhaseQuery* query,
 	JPH_ObjectLayerFilter* objectLayerFilter)
 {
 	JPH_ASSERT(query && origin && direction && callback);
-	auto joltQuery = reinterpret_cast<const JPH::BroadPhaseQuery*>(query);
+
 	JPH::RayCast ray(ToJolt(origin), ToJolt(direction));
 	RayCastBodyCollectorCallback collector(callback, userData);
-	joltQuery->CastRay(ray, collector, ToJolt(broadPhaseLayerFilter), ToJolt(objectLayerFilter));
+	AsBroadPhaseQuery(query)->CastRay(ray, collector, ToJolt(broadPhaseLayerFilter), ToJolt(objectLayerFilter));
 	return collector.hadHit;
+}
+
+bool JPH_BroadPhaseQuery_CastRay2(const JPH_BroadPhaseQuery* query,
+	const JPH_Vec3* origin, const JPH_Vec3* direction,
+	JPH_CollisionCollectorType collectorType,
+	JPH_RayCastBodyResultCallback* callback, void* userData,
+	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	JPH_ObjectLayerFilter* objectLayerFilter)
+{
+	JPH::RayCast ray(ToJolt(origin), ToJolt(direction));
+	JPH_BroadPhaseCastResult hitResult{};
+
+	switch (collectorType)
+	{
+		case JPH_CollisionCollectorType_AllHit:
+		case JPH_CollisionCollectorType_AllHitSorted:
+		{
+			AllHitCollisionCollector<RayCastBodyCollector> collector;
+			AsBroadPhaseQuery(query)->CastRay(ray, collector, ToJolt(broadPhaseLayerFilter), ToJolt(objectLayerFilter));
+
+			if (collector.HadHit())
+			{
+				if (collectorType == JPH_CollisionCollectorType_AllHitSorted)
+					collector.Sort();
+
+				for (auto& hit : collector.mHits)
+				{
+					hitResult.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
+					hitResult.fraction = hit.mFraction;
+					callback(userData, &hitResult);
+				}
+			}
+
+			return collector.HadHit();
+		}
+		case JPH_CollisionCollectorType_ClosestHit:
+		{
+			ClosestHitCollisionCollector<RayCastBodyCollector> collector;
+			AsBroadPhaseQuery(query)->CastRay(ray, collector, ToJolt(broadPhaseLayerFilter), ToJolt(objectLayerFilter));
+
+			if (collector.HadHit())
+			{
+				hitResult.fraction = collector.mHit.mFraction;
+				hitResult.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
+				callback(userData, &hitResult);
+			}
+
+			return collector.HadHit();
+		}
+
+		case JPH_CollisionCollectorType_AnyHit:
+		{
+			AnyHitCollisionCollector<RayCastBodyCollector> collector;
+			AsBroadPhaseQuery(query)->CastRay(ray, collector, ToJolt(broadPhaseLayerFilter), ToJolt(objectLayerFilter));
+
+			if (collector.HadHit())
+			{
+				hitResult.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
+				hitResult.fraction = collector.mHit.mFraction;
+				callback(userData, &hitResult);
+			}
+
+			return collector.HadHit();
+		}
+
+		default:
+			return false;
+	}
 }
 
 bool JPH_BroadPhaseQuery_CollideAABox(const JPH_BroadPhaseQuery* query,
