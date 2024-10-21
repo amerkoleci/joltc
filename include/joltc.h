@@ -607,6 +607,7 @@ typedef struct JPH_RotatedTranslatedShape           JPH_RotatedTranslatedShape;
 typedef struct JPH_ScaledShape                      JPH_ScaledShape;
 typedef struct JPH_OffsetCenterOfMassShape          JPH_OffsetCenterOfMassShape;
 typedef struct JPH_EmptyShape                       JPH_EmptyShape;
+typedef struct JPH_TransformedShape                 JPH_TransformedShape;
 
 typedef struct JPH_BodyCreationSettings             JPH_BodyCreationSettings;
 typedef struct JPH_SoftBodyCreationSettings         JPH_SoftBodyCreationSettings;
@@ -1077,6 +1078,22 @@ JPH_CAPI void JPH_BodyCreationSettings_SetAllowedDOFs(JPH_BodyCreationSettings* 
 JPH_CAPI JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void);
 JPH_CAPI void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings* settings);
 
+/* JPH_TransformedShape */
+JPH_CAPI JPH_BodyID JPH_TransformedShape_GetBodyID(const JPH_TransformedShape* shape);
+JPH_CAPI bool JPH_TransformedShape_CastRay(const JPH_TransformedShape* shape, const JPH_RVec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit);
+JPH_CAPI bool JPH_TransformedShape_CastRay2(const JPH_TransformedShape* shape, const JPH_RVec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData, const JPH_ShapeFilter* shapeFilter);
+
+JPH_CAPI void JPH_TransformedShape_GetShapeScale(const JPH_TransformedShape* shape, JPH_Vec3* result);
+JPH_CAPI void JPH_TransformedShape_SetShapeScale(JPH_TransformedShape* shape, const JPH_Vec3* value);
+JPH_CAPI void JPH_TransformedShape_GetCenterOfMassTransform(const JPH_TransformedShape* shape, JPH_RMatrix4x4* result);
+JPH_CAPI void JPH_TransformedShape_GetInverseCenterOfMassTransform(const JPH_TransformedShape* shape, JPH_RMatrix4x4* result);
+JPH_CAPI void JPH_TransformedShape_SetWorldTransform(JPH_TransformedShape* shape, const JPH_RMatrix4x4* value);
+JPH_CAPI void JPH_TransformedShape_SetWorldTransform2(JPH_TransformedShape* shape, const JPH_RVec3* position, JPH_Quat* rotation, const JPH_Vec3* scale);
+JPH_CAPI void JPH_TransformedShape_GetWorldTransform(const JPH_TransformedShape* shape, JPH_RMatrix4x4* result);
+JPH_CAPI void JPH_TransformedShape_GetWorldSpaceBounds(const JPH_TransformedShape* shape, JPH_AABox* result);
+
+JPH_CAPI void JPH_TransformedShape_GetWorldSpaceSurfaceNormal(const JPH_TransformedShape* shape, JPH_SubShapeID subShapeID, const JPH_RVec3* position, JPH_Vec3* normal);
+
 /* JPH_ConstraintSettings */
 JPH_CAPI void JPH_ConstraintSettings_Destroy(JPH_ConstraintSettings* settings);
 JPH_CAPI bool JPH_ConstraintSettings_GetEnabled(JPH_ConstraintSettings* settings);
@@ -1383,12 +1400,20 @@ JPH_CAPI JPH_MotionQuality JPH_BodyInterface_GetMotionQuality(JPH_BodyInterface*
 
 JPH_CAPI void JPH_BodyInterface_GetInverseInertia(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Matrix4x4* result);
 
-JPH_CAPI void JPH_BodyInterface_SetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId, float gravityFactor);
+JPH_CAPI void JPH_BodyInterface_SetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId, float value);
 JPH_CAPI float JPH_BodyInterface_GetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 
-JPH_CAPI void JPH_BodyInterface_InvalidateContactCache(JPH_BodyInterface* interface, JPH_BodyID bodyId);
+JPH_CAPI void JPH_BodyInterface_SetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId, bool value);
+JPH_CAPI bool JPH_BodyInterface_GetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId);
+
+JPH_CAPI const JPH_TransformedShape* JPH_BodyInterface_GetTransformedShape(JPH_BodyInterface* interface, JPH_BodyID bodyId);
+
 JPH_CAPI void JPH_BodyInterface_SetUserData(JPH_BodyInterface* interface, JPH_BodyID bodyId, uint64_t inUserData);
 JPH_CAPI uint64_t JPH_BodyInterface_GetUserData(JPH_BodyInterface* interface, JPH_BodyID bodyId);
+
+JPH_CAPI const JPH_PhysicsMaterial* JPH_BodyInterface_GetMaterial(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_SubShapeID subShapeID);
+
+JPH_CAPI void JPH_BodyInterface_InvalidateContactCache(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 
 //--------------------------------------------------------------------------------------------------
 // JPH_BodyLockInterface
@@ -1470,7 +1495,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay(const JPH_NarrowPhaseQuery* query,
 	JPH_RayCastResult* hit,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter);
+	const JPH_BodyFilter* bodyFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
@@ -1478,8 +1503,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay2(const JPH_NarrowPhaseQuery* query,
 	JPH_CastRayCollector* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
@@ -1488,16 +1513,16 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 	JPH_CastRayResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
 	JPH_CollidePointCollector* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
@@ -1505,8 +1530,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* que
 	JPH_CollidePointResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape, const JPH_Vec3* scale, const JPH_RMatrix4x4* centerOfMassTransform,
@@ -1515,8 +1540,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* quer
 	JPH_CollideShapeCollector* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape, const JPH_Vec3* scale, const JPH_RMatrix4x4* centerOfMassTransform,
@@ -1526,8 +1551,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* que
 	JPH_CollideShapeResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape,
@@ -1537,8 +1562,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	JPH_CastShapeCollector* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape,
@@ -1549,8 +1574,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 	JPH_CastShapeResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
 
 //--------------------------------------------------------------------------------------------------
 // JPH_Body
@@ -1637,6 +1662,7 @@ JPH_CAPI void JPH_Body_GetInverseCenterOfMassTransform(const JPH_Body* body, JPH
 
 JPH_CAPI void JPH_Body_GetWorldSpaceBounds(const JPH_Body* body, JPH_AABox* result);
 JPH_CAPI void JPH_Body_GetWorldSpaceSurfaceNormal(const JPH_Body* body, JPH_SubShapeID subShapeID, const JPH_RVec3* position, JPH_Vec3* normal);
+JPH_CAPI const JPH_TransformedShape* JPH_Body_GetTransformedShape(const JPH_Body* body);
 
 JPH_CAPI JPH_MotionProperties* JPH_Body_GetMotionProperties(JPH_Body* body);
 JPH_CAPI JPH_MotionProperties* JPH_Body_GetMotionPropertiesUnchecked(JPH_Body* body);
@@ -1882,7 +1908,7 @@ JPH_CAPI void JPH_DebugRenderer_Destroy(JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_DebugRenderer_NextFrame(JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_DebugRenderer_DrawLine(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color);
 JPH_CAPI void JPH_DebugRenderer_DrawWireBox(JPH_DebugRenderer* renderer, const JPH_AABox* box, JPH_Color color);
-JPH_CAPI void JPH_DebugRenderer_DrawWireBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, const JPH_RVec3* v3, JPH_Color color);
+JPH_CAPI void JPH_DebugRenderer_DrawWireBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, JPH_Color color);
 JPH_CAPI void JPH_DebugRenderer_DrawMarker(JPH_DebugRenderer* renderer, const JPH_RVec3* position, JPH_Color color, float size);
 JPH_CAPI void JPH_DebugRenderer_DrawArrow(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color, float size);
 JPH_CAPI void JPH_DebugRenderer_DrawCoordinateSystem(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float size);
