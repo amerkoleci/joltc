@@ -61,6 +61,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Constraints/SixDOFConstraint.h"
 #include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
+#include <Jolt/Physics/Collision/PhysicsMaterialSimple.h>
 
 #include <iostream>
 #include <cstdarg>
@@ -97,6 +98,8 @@ using namespace JPH;
 
 //DEF_MAP_DECL(Quat, JPH_Quat)
 DEF_MAP_DECL(Body, JPH_Body)
+DEF_MAP_DECL(BodyInterface, JPH_BodyInterface)
+DEF_MAP_DECL(BodyLockInterface, JPH_BodyLockInterface)
 DEF_MAP_DECL(Shape, JPH_Shape)
 DEF_MAP_DECL(MotionProperties, JPH_MotionProperties)
 DEF_MAP_DECL(BroadPhaseQuery, JPH_BroadPhaseQuery)
@@ -306,13 +309,13 @@ static inline JPH::Plane ToJolt(const JPH_Plane* value)
 	return JPH::Plane(ToJolt(value->normal), value->distance);
 }
 
-static inline JPH::Mat44 ToJolt(const JPH_Matrix4x4& matrix)
+static inline JPH::Mat44 ToJolt(const JPH_Matrix4x4* matrix)
 {
 	JPH::Mat44 result{};
-	result.SetColumn4(0, JPH::Vec4(matrix.m11, matrix.m12, matrix.m13, matrix.m14));
-	result.SetColumn4(1, JPH::Vec4(matrix.m21, matrix.m22, matrix.m23, matrix.m24));
-	result.SetColumn4(2, JPH::Vec4(matrix.m31, matrix.m32, matrix.m33, matrix.m34));
-	result.SetColumn4(3, JPH::Vec4(matrix.m41, matrix.m42, matrix.m43, matrix.m44));
+	result.SetColumn4(0, JPH::Vec4(matrix->m11, matrix->m12, matrix->m13, matrix->m14));
+	result.SetColumn4(1, JPH::Vec4(matrix->m21, matrix->m22, matrix->m23, matrix->m24));
+	result.SetColumn4(2, JPH::Vec4(matrix->m31, matrix->m32, matrix->m33, matrix->m34));
+	result.SetColumn4(3, JPH::Vec4(matrix->m41, matrix->m42, matrix->m43, matrix->m44));
 	return result;
 }
 
@@ -321,19 +324,24 @@ static inline JPH::Float3 ToJoltFloat3(const JPH_Vec3& vec)
 	return JPH::Float3(vec.x, vec.y, vec.z);
 }
 
+static inline JPH::AABox ToJolt(const JPH_AABox* value)
+{
+	return JPH::AABox(ToJolt(value->min), ToJolt(value->max));
+}
+
 #if defined(JPH_DOUBLE_PRECISION)
 static inline JPH::RVec3 ToJolt(const JPH_RVec3* vec)
 {
 	return JPH::RVec3(vec->x, vec->y, vec->z);
 }
 
-static inline JPH::RMat44 ToJolt(const JPH_RMatrix4x4& matrix)
+static inline JPH::RMat44 ToJolt(const JPH_RMatrix4x4* matrix)
 {
 	JPH::RMat44 result{};
-	result.SetColumn4(0, JPH::Vec4(matrix.m11, matrix.m12, matrix.m13, matrix.m14));
-	result.SetColumn4(1, JPH::Vec4(matrix.m21, matrix.m22, matrix.m23, matrix.m24));
-	result.SetColumn4(2, JPH::Vec4(matrix.m31, matrix.m32, matrix.m33, matrix.m34));
-	result.SetTranslation(JPH::RVec3(matrix.m41, matrix.m42, matrix.m43));
+	result.SetColumn4(0, JPH::Vec4(matrix->m11, matrix->m12, matrix->m13, matrix->m14));
+	result.SetColumn4(1, JPH::Vec4(matrix->m21, matrix->m22, matrix->m23, matrix->m24));
+	result.SetColumn4(2, JPH::Vec4(matrix->m31, matrix->m32, matrix->m33, matrix->m34));
+	result.SetTranslation(JPH::RVec3(matrix->m41, matrix->m42, matrix->m43));
 	return result;
 }
 #endif /* defined(JPH_DOUBLE_PRECISION) */
@@ -344,7 +352,7 @@ static inline JPH::MassProperties ToJolt(const JPH_MassProperties* properties)
 	if (!properties)
 		return result;
 	result.mMass = properties->mass;
-	result.mInertia = ToJolt(properties->inertia);
+	result.mInertia = ToJolt(&properties->inertia);
 	return result;
 }
 
@@ -967,9 +975,9 @@ void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* q
 }
 
 /* Material */
-JPH_PhysicsMaterial* JPH_PhysicsMaterial_Create(void)
+JPH_PhysicsMaterial* JPH_PhysicsMaterial_Create(const char* name, uint32_t color)
 {
-	auto material = new JPH::PhysicsMaterial();
+	auto material = new JPH::PhysicsMaterialSimple(name, JPH::Color(color));
 	material->AddRef();
 
 	return reinterpret_cast<JPH_PhysicsMaterial*>(material);
@@ -979,9 +987,21 @@ void JPH_PhysicsMaterial_Destroy(JPH_PhysicsMaterial* material)
 {
 	if (material)
 	{
-		auto joltMaterial = reinterpret_cast<JPH::PhysicsMaterial*>(material);
+		auto joltMaterial = reinterpret_cast<JPH::PhysicsMaterialSimple*>(material);
 		joltMaterial->Release();
 	}
+}
+
+const char* JPH_PhysicsMaterial_GetDebugName(const JPH_PhysicsMaterial* material)
+{
+	auto joltMaterial = reinterpret_cast<const JPH::PhysicsMaterialSimple*>(material);
+	return joltMaterial->GetDebugName();
+}
+
+uint32_t JPH_PhysicsMaterial_GetDebugColor(const JPH_PhysicsMaterial* material)
+{
+	auto joltMaterial = reinterpret_cast<const JPH::PhysicsMaterialSimple*>(material);
+	return joltMaterial->GetDebugColor().GetUInt32();
 }
 
 /* ShapeSettings */
@@ -1057,7 +1077,7 @@ uint32_t JPH_Shape_GetSubShapeIDBitsRecursive(const JPH_Shape* shape)
 
 void JPH_Shape_GetWorldSpaceBounds(const JPH_Shape* shape, JPH_RMatrix4x4* centerOfMassTransform, JPH_Vec3* scale, JPH_AABox* result)
 {
-	auto bounds = AsShape(shape)->GetWorldSpaceBounds(ToJolt(*centerOfMassTransform), ToJolt(scale));
+	auto bounds = AsShape(shape)->GetWorldSpaceBounds(ToJolt(centerOfMassTransform), ToJolt(scale));
 	FromJolt(bounds, result);
 }
 
@@ -4481,7 +4501,7 @@ uint64_t JPH_BodyInterface_GetUserData(JPH_BodyInterface* interface, JPH_BodyID 
 void JPH_BodyLockInterface_LockRead(const JPH_BodyLockInterface* lockInterface, JPH_BodyID bodyID, JPH_BodyLockRead* outLock)
 {
 	JPH_ASSERT(outLock != nullptr);
-	auto joltBodyLockInterface = reinterpret_cast<const JPH::BodyLockInterface*>(lockInterface);
+	auto joltBodyLockInterface = AsBodyLockInterface(lockInterface);
 
 	::new (outLock) JPH::BodyLockRead(*joltBodyLockInterface, JPH::BodyID(bodyID));
 }
@@ -5161,7 +5181,7 @@ bool JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* query,
 	JPH_ASSERT(query && shape && scale && centerOfMassTransform && callback);
 
 	auto joltScale = ToJolt(scale);
-	auto joltTransform = ToJolt(*centerOfMassTransform);
+	auto joltTransform = ToJolt(centerOfMassTransform);
 
 	JPH::CollideShapeSettings joltSettings = ToJolt(settings);
 	auto joltBaseOffset = ToJolt(baseOffset);
@@ -5199,7 +5219,7 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 	JPH_ASSERT(query && shape && scale && centerOfMassTransform && callback);
 
 	auto joltScale = ToJolt(scale);
-	auto joltTransform = ToJolt(*centerOfMassTransform);
+	auto joltTransform = ToJolt(centerOfMassTransform);
 
 	JPH::CollideShapeSettings joltSettings = ToJolt(settings);
 	auto joltBaseOffset = ToJolt(baseOffset);
@@ -5328,7 +5348,7 @@ bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	RShapeCast shapeCast = RShapeCast::sFromWorldTransform(
 		AsShape(shape),
 		JPH::Vec3(1.f, 1.f, 1.f), // scale can be embedded in worldTransform
-		ToJolt(*worldTransform),
+		ToJolt(worldTransform),
 		ToJolt(direction));
 
 	ShapeCastSettings joltSettings = ToJolt(settings);
@@ -5367,7 +5387,7 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 	RShapeCast shapeCast = RShapeCast::sFromWorldTransform(
 		AsShape(shape),
 		JPH::Vec3(1.f, 1.f, 1.f), // scale can be embedded in worldTransform
-		ToJolt(*worldTransform),
+		ToJolt(worldTransform),
 		ToJolt(direction));
 
 	ShapeCastSettings joltSettings = ToJolt(settings);
@@ -6840,6 +6860,56 @@ void JPH_DebugRenderer_Destroy(JPH_DebugRenderer* renderer)
 void JPH_DebugRenderer_NextFrame(JPH_DebugRenderer* renderer)
 {
 	reinterpret_cast<DebugRenderer*>(renderer)->NextFrame();
+}
+
+void JPH_DebugRenderer_DrawLine(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawLine(ToJolt(from), ToJolt(to), JPH::Color(color));
+}
+
+void JPH_DebugRenderer_DrawWireBox(JPH_DebugRenderer* renderer, const JPH_AABox* box, JPH_Color color)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireBox(ToJolt(box), JPH::Color(color));
+}
+
+void JPH_DebugRenderer_DrawWireBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, const JPH_RVec3* v3, JPH_Color color)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireBox(ToJolt(matrix), ToJolt(box), JPH::Color(color));
+}
+
+void JPH_DebugRenderer_DrawMarker(JPH_DebugRenderer* renderer, const JPH_RVec3* position, JPH_Color color, float size)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawMarker(ToJolt(position), JPH::Color(color), size);
+}
+
+void JPH_DebugRenderer_DrawArrow(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color, float size)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawArrow(ToJolt(from), ToJolt(to), JPH::Color(color), size);
+}
+
+void JPH_DebugRenderer_DrawCoordinateSystem(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float size)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawCoordinateSystem(ToJolt(matrix), size);
+}
+
+void JPH_DebugRenderer_DrawPlane(JPH_DebugRenderer* renderer, const JPH_RVec3* point, const JPH_Vec3* normal, JPH_Color color, float size)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawPlane(ToJolt(point), ToJolt(normal), JPH::Color(color), size);
+}
+
+void JPH_DebugRenderer_DrawWireTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireTriangle(ToJolt(v2), ToJolt(v2), ToJolt(v3), JPH::Color(color));
+}
+
+void JPH_DebugRenderer_DrawWireSphere(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, JPH_Color color, int level)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireSphere(ToJolt(center), radius, JPH::Color(color), level);
+}
+
+void JPH_DebugRenderer_DrawWireUnitSphere(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, JPH_Color color, int level)
+{
+	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireUnitSphere(ToJolt(matrix), JPH::Color(color), level);
 }
 #endif
 
