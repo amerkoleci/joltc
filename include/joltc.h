@@ -905,7 +905,7 @@ JPH_CAPI const JPH_PhysicsMaterial* JPH_Shape_GetMaterial(const JPH_Shape* shape
 JPH_CAPI void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_Vec3* localPosition, JPH_Vec3* normal);
 JPH_CAPI float JPH_Shape_GetVolume(const JPH_Shape* shape);
 JPH_CAPI bool JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit);
-JPH_CAPI bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData);
+JPH_CAPI bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData, const JPH_ShapeFilter* shapeFilter);
 JPH_CAPI bool JPH_Shape_CollidePoint(const JPH_Shape* shape, const JPH_Vec3* point, const JPH_ShapeFilter* shapeFilter);
 JPH_CAPI bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_CollisionCollectorType collectorType, JPH_CollidePointResultCallback* callback, void* userData, const JPH_ShapeFilter* shapeFilter);
 
@@ -1709,6 +1709,7 @@ typedef struct JPH_ShapeFilter_Procs {
 JPH_CAPI JPH_ShapeFilter* JPH_ShapeFilter_Create(JPH_ShapeFilter_Procs procs, void* userData);
 JPH_CAPI void JPH_ShapeFilter_Destroy(JPH_ShapeFilter* filter);
 JPH_CAPI JPH_BodyID JPH_ShapeFilter_GetBodyID2(JPH_ShapeFilter* filter);
+JPH_CAPI void JPH_ShapeFilter_SetBodyID2(JPH_ShapeFilter* filter, JPH_BodyID id);
 
 /* Contact listener */
 typedef struct JPH_ContactListener_Procs {

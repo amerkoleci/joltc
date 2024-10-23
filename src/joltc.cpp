@@ -1052,6 +1052,11 @@ JPH_BodyID JPH_ShapeFilter_GetBodyID2(JPH_ShapeFilter* filter)
 	return reinterpret_cast<ManagedShapeFilter*>(filter)->mBodyID2.GetIndexAndSequenceNumber();
 }
 
+void JPH_ShapeFilter_SetBodyID2(JPH_ShapeFilter* filter, JPH_BodyID id)
+{
+	reinterpret_cast<ManagedShapeFilter*>(filter)->mBodyID2 = JPH::BodyID(id);
+}
+
 /* Math */
 void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* quat)
 {
@@ -1224,7 +1229,7 @@ bool JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH
 	return hadHit;
 }
 
-bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData)
+bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData, const JPH_ShapeFilter* shapeFilter)
 {
 	JPH::RayCast ray(ToJolt(origin), ToJolt(direction));
 	JPH::RayCastSettings settings = ToJolt(rayCastSettings);
@@ -1238,7 +1243,7 @@ bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JP
 		case JPH_CollisionCollectorType_AllHitSorted:
 		{
 			AllHitCollisionCollector<CastRayCollector> collector;
-			AsShape(shape)->CastRay(ray, settings, creator, collector);
+			AsShape(shape)->CastRay(ray, settings, creator, collector, ToJolt(shapeFilter));
 
 			if (collector.HadHit())
 			{
@@ -1259,7 +1264,7 @@ bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JP
 		case JPH_CollisionCollectorType_ClosestHit:
 		{
 			ClosestHitCollisionCollector<CastRayCollector> collector;
-			AsShape(shape)->CastRay(ray, settings, creator, collector);
+			AsShape(shape)->CastRay(ray, settings, creator, collector, ToJolt(shapeFilter));
 
 			if (collector.HadHit())
 			{
@@ -1275,7 +1280,7 @@ bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JP
 		case JPH_CollisionCollectorType_AnyHit:
 		{
 			AnyHitCollisionCollector<CastRayCollector> collector;
-			AsShape(shape)->CastRay(ray, settings, creator, collector);
+			AsShape(shape)->CastRay(ray, settings, creator, collector, ToJolt(shapeFilter));
 
 			if (collector.HadHit())
 			{
