@@ -607,7 +607,6 @@ typedef struct JPH_RotatedTranslatedShape           JPH_RotatedTranslatedShape;
 typedef struct JPH_ScaledShape                      JPH_ScaledShape;
 typedef struct JPH_OffsetCenterOfMassShape          JPH_OffsetCenterOfMassShape;
 typedef struct JPH_EmptyShape                       JPH_EmptyShape;
-typedef struct JPH_TransformedShape                 JPH_TransformedShape;
 
 typedef struct JPH_BodyCreationSettings             JPH_BodyCreationSettings;
 typedef struct JPH_SoftBodyCreationSettings         JPH_SoftBodyCreationSettings;
@@ -734,16 +733,23 @@ typedef void JPH_JobFunction(void* arg);
 typedef void JPH_QueueJobCallback(void* context, JPH_JobFunction* job, void* arg);
 typedef void JPH_QueueJobsCallback(void* context, JPH_JobFunction* job, void** args, uint32_t count);
 
-typedef struct {
+typedef struct JobSystemThreadPoolConfig {
+	uint32_t maxJobs;
+	uint32_t maxBarriers;
+	int32_t numThreads;
+} JobSystemThreadPoolConfig;
+
+typedef struct JPH_JobSystemConfig {
 	void* context;
 	JPH_QueueJobCallback* queueJob;
 	JPH_QueueJobsCallback* queueJobs;
 	uint32_t maxConcurrency;
+	uint32_t maxBarriers;
 } JPH_JobSystemConfig;
 
 typedef struct JPH_JobSystem JPH_JobSystem;
 
-JPH_CAPI JPH_JobSystem* JPH_JobSystemThreadPool_Create(void);
+JPH_CAPI JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPoolConfig* config);
 JPH_CAPI JPH_JobSystem* JPH_JobSystemCallback_Create(const JPH_JobSystemConfig* config);
 JPH_CAPI void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem);
 
@@ -828,7 +834,6 @@ JPH_CAPI void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, JP
 
 JPH_CAPI void JPH_PhysicsSystem_OptimizeBroadPhase(JPH_PhysicsSystem* system);
 JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem);
-JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Step(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem);
 
 JPH_CAPI JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterface(JPH_PhysicsSystem* system);
 JPH_CAPI JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterfaceNoLock(JPH_PhysicsSystem* system);
@@ -901,8 +906,8 @@ JPH_CAPI void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID 
 JPH_CAPI float JPH_Shape_GetVolume(const JPH_Shape* shape);
 JPH_CAPI bool JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit);
 JPH_CAPI bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData);
-JPH_CAPI bool JPH_Shape_CollidePoint(const JPH_Shape* shape, const JPH_Vec3* point);
-JPH_CAPI bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_CollisionCollectorType collectorType, JPH_CollidePointResultCallback* callback, void* userData);
+JPH_CAPI bool JPH_Shape_CollidePoint(const JPH_Shape* shape, const JPH_Vec3* point, const JPH_ShapeFilter* shapeFilter);
+JPH_CAPI bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point, JPH_CollisionCollectorType collectorType, JPH_CollidePointResultCallback* callback, void* userData, const JPH_ShapeFilter* shapeFilter);
 
 /* JPH_ConvexShape */
 JPH_CAPI float JPH_ConvexShapeSettings_GetDensity(const JPH_ConvexShapeSettings* shape);
@@ -1094,22 +1099,6 @@ JPH_CAPI void JPH_BodyCreationSettings_SetAllowedDOFs(JPH_BodyCreationSettings* 
 /* JPH_SoftBodyCreationSettings */
 JPH_CAPI JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void);
 JPH_CAPI void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings* settings);
-
-/* JPH_TransformedShape */
-JPH_CAPI JPH_BodyID JPH_TransformedShape_GetBodyID(const JPH_TransformedShape* shape);
-JPH_CAPI bool JPH_TransformedShape_CastRay(const JPH_TransformedShape* shape, const JPH_RVec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit);
-JPH_CAPI bool JPH_TransformedShape_CastRay2(const JPH_TransformedShape* shape, const JPH_RVec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData, const JPH_ShapeFilter* shapeFilter);
-
-JPH_CAPI void JPH_TransformedShape_GetShapeScale(const JPH_TransformedShape* shape, JPH_Vec3* result);
-JPH_CAPI void JPH_TransformedShape_SetShapeScale(JPH_TransformedShape* shape, const JPH_Vec3* value);
-JPH_CAPI void JPH_TransformedShape_GetCenterOfMassTransform(const JPH_TransformedShape* shape, JPH_RMatrix4x4* result);
-JPH_CAPI void JPH_TransformedShape_GetInverseCenterOfMassTransform(const JPH_TransformedShape* shape, JPH_RMatrix4x4* result);
-JPH_CAPI void JPH_TransformedShape_SetWorldTransform(JPH_TransformedShape* shape, const JPH_RMatrix4x4* value);
-JPH_CAPI void JPH_TransformedShape_SetWorldTransform2(JPH_TransformedShape* shape, const JPH_RVec3* position, JPH_Quat* rotation, const JPH_Vec3* scale);
-JPH_CAPI void JPH_TransformedShape_GetWorldTransform(const JPH_TransformedShape* shape, JPH_RMatrix4x4* result);
-JPH_CAPI void JPH_TransformedShape_GetWorldSpaceBounds(const JPH_TransformedShape* shape, JPH_AABox* result);
-
-JPH_CAPI void JPH_TransformedShape_GetWorldSpaceSurfaceNormal(const JPH_TransformedShape* shape, JPH_SubShapeID subShapeID, const JPH_RVec3* position, JPH_Vec3* normal);
 
 /* JPH_ConstraintSettings */
 JPH_CAPI void JPH_ConstraintSettings_Destroy(JPH_ConstraintSettings* settings);
@@ -1423,8 +1412,6 @@ JPH_CAPI float JPH_BodyInterface_GetGravityFactor(JPH_BodyInterface* interface, 
 JPH_CAPI void JPH_BodyInterface_SetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId, bool value);
 JPH_CAPI bool JPH_BodyInterface_GetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 
-JPH_CAPI const JPH_TransformedShape* JPH_BodyInterface_GetTransformedShape(JPH_BodyInterface* interface, JPH_BodyID bodyId);
-
 JPH_CAPI void JPH_BodyInterface_SetUserData(JPH_BodyInterface* interface, JPH_BodyID bodyId, uint64_t inUserData);
 JPH_CAPI uint64_t JPH_BodyInterface_GetUserData(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 
@@ -1679,7 +1666,6 @@ JPH_CAPI void JPH_Body_GetInverseCenterOfMassTransform(const JPH_Body* body, JPH
 
 JPH_CAPI void JPH_Body_GetWorldSpaceBounds(const JPH_Body* body, JPH_AABox* result);
 JPH_CAPI void JPH_Body_GetWorldSpaceSurfaceNormal(const JPH_Body* body, JPH_SubShapeID subShapeID, const JPH_RVec3* position, JPH_Vec3* normal);
-JPH_CAPI const JPH_TransformedShape* JPH_Body_GetTransformedShape(const JPH_Body* body);
 
 JPH_CAPI JPH_MotionProperties* JPH_Body_GetMotionProperties(JPH_Body* body);
 JPH_CAPI JPH_MotionProperties* JPH_Body_GetMotionPropertiesUnchecked(JPH_Body* body);
