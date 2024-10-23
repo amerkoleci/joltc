@@ -426,9 +426,95 @@ static JPH::IndexedTriangle ToIndexedTriangle(const JPH_IndexedTriangle& triangl
 
 // 10 MB was not enough for large simulation, let's use TempAllocatorMalloc
 static TempAllocator* s_TempAllocator = nullptr;
-static JobSystemThreadPool* s_JobSystem = nullptr;
 
-bool JPH_Init(void)
+class JobSystemCallback final : public JPH::JobSystemWithBarrier
+{
+public:
+	JobSystemCallback(const JPH_JobSystemConfig* config)
+	{
+		JobSystemWithBarrier::Init(JPH::cMaxPhysicsBarriers);
+		mJobs.Init(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsJobs);
+		mConfig = *config;
+	}
+
+	virtual JobHandle CreateJob(const char* name, JPH::ColorArg color, const JPH::JobSystem::JobFunction& callback, uint32_t dependencies = 0) override
+	{
+		uint32_t index;
+
+		for (;;)
+		{
+			index = mJobs.ConstructObject(name, color, this, callback, dependencies);
+			if (index != FixedSizeFreeList<Job>::cInvalidObjectIndex)
+				break;
+			JPH_ASSERT(false, "No jobs available!");
+			std::this_thread::sleep_for(std::chrono::microseconds(100));
+		}
+
+		Job* job = &mJobs.Get(index);
+		JobHandle handle(job);
+
+		if (dependencies == 0)
+			QueueJob(job);
+
+		return handle;
+	}
+
+	virtual void FreeJob(Job* job) override
+	{
+		mJobs.DestructObject(job);
+	}
+
+	virtual int GetMaxConcurrency() const override
+	{
+		return mConfig.maxConcurrency;
+	}
+
+protected:
+	static void RunJob(void* arg)
+	{
+		Job* job = reinterpret_cast<Job*>(arg);
+		job->Execute();
+		job->Release();
+	}
+
+	virtual void QueueJob(Job* job) override
+	{
+		job->AddRef();
+		mConfig.queueJob(mConfig.context, RunJob, job);
+	}
+
+	virtual void QueueJobs(Job** jobs, uint32_t count) override
+	{
+		for (uint32_t i = 0; i < count; i++) {
+			jobs[i]->AddRef();
+		}
+
+		mConfig.queueJobs(mConfig.context, RunJob, (void**) jobs, count);
+	}
+
+private:
+	FixedSizeFreeList<Job> mJobs;
+	JPH_JobSystemConfig mConfig;
+};
+
+JPH_JobSystem* JPH_JobSystemThreadPool_Create(void)
+{
+	JPH::JobSystem* jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, (int) std::thread::hardware_concurrency() - 1);
+	return reinterpret_cast<JPH_JobSystem*>(jobSystem);
+}
+
+JPH_JobSystem* JPH_JobSystemCallback_Create(const JPH_JobSystemConfig* config)
+{
+	JPH::JobSystem* jobSystem = new JobSystemCallback(config);
+	return reinterpret_cast<JPH_JobSystem*>(jobSystem);
+}
+
+void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem)
+{
+	delete reinterpret_cast<JPH::JobSystem*>(jobSystem);
+}
+
+bool JPH_Init()
 {
 	JPH::RegisterDefaultAllocator();
 
@@ -445,15 +531,11 @@ bool JPH_Init(void)
 	// Init temp allocator
 	s_TempAllocator = new TempAllocatorImplWithMallocFallback(8 * 1024 * 1024);
 
-	// Init Job system.
-	s_JobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, (int)std::thread::hardware_concurrency() - 1);
-
 	return true;
 }
 
 void JPH_Shutdown(void)
 {
-	delete s_JobSystem; s_JobSystem = nullptr;
 	delete s_TempAllocator; s_TempAllocator = nullptr;
 
 	// Unregisters all types with the factory and cleans up the default material
@@ -722,14 +804,16 @@ void JPH_PhysicsSystem_OptimizeBroadPhase(JPH_PhysicsSystem* system)
 	system->physicsSystem->OptimizeBroadPhase();
 }
 
-JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps)
+JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem)
 {
-	return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, s_TempAllocator, s_JobSystem));
+	JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
+	return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, s_TempAllocator, joltJobSystem));
 }
 
-JPH_PhysicsUpdateError JPH_PhysicsSystem_Step(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps)
+JPH_PhysicsUpdateError JPH_PhysicsSystem_Step(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem)
 {
-	return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, s_TempAllocator, s_JobSystem));
+	JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
+	return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, s_TempAllocator, joltJobSystem));
 }
 
 JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterface(JPH_PhysicsSystem* system)

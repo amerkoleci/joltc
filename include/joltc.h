@@ -730,6 +730,23 @@ typedef struct JPH_CharacterVirtual                 JPH_CharacterVirtual;  /* In
 typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* mssage);
 typedef bool(JPH_API_CALL* JPH_AssertFailureFunc)(const char* expression, const char* mssage, const char* file, uint32_t line);
 
+typedef void JPH_JobFunction(void* arg);
+typedef void JPH_QueueJobCallback(void* context, JPH_JobFunction* job, void* arg);
+typedef void JPH_QueueJobsCallback(void* context, JPH_JobFunction* job, void** args, uint32_t count);
+
+typedef struct {
+	void* context;
+	JPH_QueueJobCallback* queueJob;
+	JPH_QueueJobsCallback* queueJobs;
+	uint32_t maxConcurrency;
+} JPH_JobSystemConfig;
+
+typedef struct JPH_JobSystem JPH_JobSystem;
+
+JPH_CAPI JPH_JobSystem* JPH_JobSystemThreadPool_Create(void);
+JPH_CAPI JPH_JobSystem* JPH_JobSystemCallback_Create(const JPH_JobSystemConfig* config);
+JPH_CAPI void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem);
+
 JPH_CAPI bool JPH_Init(void);
 JPH_CAPI void JPH_Shutdown(void);
 JPH_CAPI void JPH_SetTraceHandler(JPH_TraceFunc handler);
@@ -810,8 +827,8 @@ JPH_CAPI void JPH_PhysicsSystem_SetPhysicsSettings(JPH_PhysicsSystem* system, JP
 JPH_CAPI void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, JPH_PhysicsSettings* result);
 
 JPH_CAPI void JPH_PhysicsSystem_OptimizeBroadPhase(JPH_PhysicsSystem* system);
-JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps);
-JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Step(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps);
+JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem);
+JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Step(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem);
 
 JPH_CAPI JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterface(JPH_PhysicsSystem* system);
 JPH_CAPI JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterfaceNoLock(JPH_PhysicsSystem* system);
