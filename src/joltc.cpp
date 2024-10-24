@@ -5308,8 +5308,8 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 	JPH_CollideShapeResultCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter)
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter)
 {
 
 	JPH_ASSERT(query && shape && scale && centerOfMassTransform && callback);
@@ -5436,8 +5436,8 @@ bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	JPH_CastShapeCollector* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
-	JPH_BodyFilter* bodyFilter,
-	JPH_ShapeFilter* shapeFilter)
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter)
 {
 	JPH_ASSERT(query && shape && worldTransform && direction && callback);
 
