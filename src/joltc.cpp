@@ -103,6 +103,8 @@ DEF_MAP_DECL(Shape, JPH_Shape)
 DEF_MAP_DECL(MotionProperties, JPH_MotionProperties)
 DEF_MAP_DECL(BroadPhaseQuery, JPH_BroadPhaseQuery)
 DEF_MAP_DECL(NarrowPhaseQuery, JPH_NarrowPhaseQuery)
+DEF_MAP_DECL(Character, JPH_Character)
+DEF_MAP_DECL(CharacterVirtual, JPH_CharacterVirtual)
 
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
@@ -4275,30 +4277,23 @@ void JPH_BodyInterface_GetRotation(JPH_BodyInterface* interface, JPH_BodyID body
 	FromJolt(joltBodyInterface->GetRotation(JPH::BodyID(bodyId)), result);
 }
 
-void JPH_BodyInterface_SetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Activation activationMode)
+void JPH_BodyInterface_SetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode)
 {
-	JPH_ASSERT(interface);
-	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
-
-	joltBodyInterface->SetPositionAndRotation(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(interface)->SetPositionAndRotation(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
 }
 
-void JPH_BodyInterface_SetPositionAndRotationWhenChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Activation activationMode)
+void JPH_BodyInterface_SetPositionAndRotationWhenChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode)
 {
-	JPH_ASSERT(interface);
-	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
-
-	joltBodyInterface->SetPositionAndRotationWhenChanged(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(interface)->SetPositionAndRotationWhenChanged(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
 }
 
 void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation)
 {
 	JPH_ASSERT(interface);
-	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
 
 	JPH::RVec3 joltPosition;
 	JPH::Quat joltRotation;
-	joltBodyInterface->GetPositionAndRotation(JPH::BodyID(bodyId), joltPosition, joltRotation);
+	AsBodyInterface(interface)->GetPositionAndRotation(JPH::BodyID(bodyId), joltPosition, joltRotation);
 	FromJolt(joltPosition, position);
 	FromJolt(joltRotation, rotation);
 }
@@ -4321,11 +4316,7 @@ const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* interface, JPH_Bo
 
 void JPH_BodyInterface_SetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_Shape* shape, bool updateMassProperties, JPH_Activation activationMode)
 {
-	JPH_ASSERT(interface);
-	auto joltBodyInterface = reinterpret_cast<JPH::BodyInterface*>(interface);
-
-	auto jphShape = reinterpret_cast<const JPH::Shape*>(shape);
-	joltBodyInterface->SetShape(JPH::BodyID(bodyId), jphShape, updateMassProperties, static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(interface)->SetShape(JPH::BodyID(bodyId), AsShape(shape), updateMassProperties, static_cast<JPH::EActivation>(activationMode));
 }
 
 void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* previousCenterOfMass, bool updateMassProperties, JPH_Activation activationMode)
@@ -6401,26 +6392,115 @@ JPH_Character* JPH_Character_Create(const JPH_CharacterSettings* settings,
 
 void JPH_Character_AddToPhysicsSystem(JPH_Character* character, JPH_Activation activationMode, bool lockBodies)
 {
-	auto joltCharacter = reinterpret_cast<JPH::Character*>(character);
-	joltCharacter->AddToPhysicsSystem(static_cast<JPH::EActivation>(activationMode), lockBodies);
+	AsCharacter(character)->AddToPhysicsSystem(static_cast<JPH::EActivation>(activationMode), lockBodies);
 }
 
 void JPH_Character_RemoveFromPhysicsSystem(JPH_Character* character, bool lockBodies)
 {
-	auto joltCharacter = reinterpret_cast<JPH::Character*>(character);
-	joltCharacter->RemoveFromPhysicsSystem(lockBodies);
+	AsCharacter(character)->RemoveFromPhysicsSystem(lockBodies);
 }
 
 void JPH_Character_Activate(JPH_Character* character, bool lockBodies)
 {
-	auto joltCharacter = reinterpret_cast<JPH::Character*>(character);
-	joltCharacter->Activate(lockBodies);
+	AsCharacter(character)->Activate(lockBodies);
 }
 
 void JPH_Character_PostSimulation(JPH_Character* character, float maxSeparationDistance, bool lockBodies)
 {
-	auto joltCharacter = reinterpret_cast<JPH::Character*>(character);
-	joltCharacter->PostSimulation(maxSeparationDistance, lockBodies);
+	AsCharacter(character)->PostSimulation(maxSeparationDistance, lockBodies);
+}
+
+void JPH_Character_SetLinearAndAngularVelocity(JPH_Character* character, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity, bool lockBodies)
+{
+	AsCharacter(character)->SetLinearAndAngularVelocity(ToJolt(linearVelocity), ToJolt(angularVelocity), lockBodies);
+}
+
+void JPH_Character_GetLinearVelocity(JPH_Character* character, JPH_Vec3* result)
+{
+	FromJolt(AsCharacter(character)->GetLinearVelocity(), result);
+}
+
+void JPH_Character_SetLinearVelocity(JPH_Character* character, const JPH_Vec3* value, bool lockBodies)
+{
+	AsCharacter(character)->SetLinearVelocity(ToJolt(value), lockBodies);
+}
+
+void JPH_Character_AddLinearVelocity(JPH_Character* character, const JPH_Vec3* value, bool lockBodies)
+{
+	AsCharacter(character)->AddLinearVelocity(ToJolt(value), lockBodies);
+}
+
+void JPH_Character_AddImpulse(JPH_Character* character, const JPH_Vec3* value, bool lockBodies)
+{
+	AsCharacter(character)->AddImpulse(ToJolt(value), lockBodies);
+}
+
+JPH_BodyID JPH_Character_GetBodyID(const JPH_Character* character)
+{
+	return AsCharacter(character)->GetBodyID().GetIndexAndSequenceNumber();
+}
+
+void JPH_Character_GetPositionAndRotation(JPH_Character* character, JPH_RVec3* position, JPH_Quat* rotation, bool lockBodies)
+{
+	JPH::RVec3 joltPosition;
+	JPH::Quat joltRotation;
+	AsCharacter(character)->GetPositionAndRotation(joltPosition, joltRotation, lockBodies);
+	FromJolt(joltPosition, position);
+	FromJolt(joltRotation, rotation);
+}
+
+void JPH_Character_SetPositionAndRotation(JPH_Character* character, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode, bool lockBodies /* = true */)
+{
+	AsCharacter(character)->SetPositionAndRotation(
+		ToJolt(position),
+		ToJolt(rotation), 
+		static_cast<JPH::EActivation>(activationMode), 
+		lockBodies);
+}
+
+void JPH_Character_GetPosition(JPH_Character* character, JPH_RVec3* position, bool lockBodies)
+{
+	FromJolt(AsCharacter(character)->GetPosition(lockBodies), position);
+}
+
+void JPH_Character_SetPosition(JPH_Character* character, const JPH_RVec3* position, JPH_Activation activationMode, bool lockBodies)
+{
+	AsCharacter(character)->SetPosition(ToJolt(position), static_cast<JPH::EActivation>(activationMode), lockBodies);
+}
+
+void JPH_Character_SetShape(JPH_Character* character, const JPH_Shape* shape, float maxPenetrationDepth, bool lockBodies)
+{
+	AsCharacter(character)->SetShape(AsShape(shape), maxPenetrationDepth, lockBodies);
+}
+
+void JPH_Character_GetRotation(JPH_Character* character, JPH_Quat* rotation, bool lockBodies)
+{
+	FromJolt(AsCharacter(character)->GetRotation(lockBodies), rotation);
+}
+
+void JPH_Character_SetRotation(JPH_Character* character, const JPH_Quat* rotation, JPH_Activation activationMode, bool lockBodies)
+{
+	AsCharacter(character)->SetRotation(ToJolt(rotation), static_cast<JPH::EActivation>(activationMode), lockBodies);
+}
+
+void JPH_Character_GetCenterOfMassPosition(JPH_Character* character, JPH_RVec3* result, bool lockBodies)
+{
+	FromJolt(AsCharacter(character)->GetCenterOfMassPosition(lockBodies), result);
+}
+
+void JPH_Character_GetWorldTransform(JPH_Character* character, JPH_RMatrix4x4* result, bool lockBodies)
+{
+	FromJolt(AsCharacter(character)->GetWorldTransform(lockBodies), result);
+}
+
+JPH_ObjectLayer JPH_Character_GetLayer(const JPH_Character* character)
+{
+	return static_cast<JPH_ObjectLayer>(AsCharacter(character)->GetLayer());
+}
+
+void JPH_Character_SetLayer(JPH_Character* character, JPH_ObjectLayer value, bool lockBodies)
+{
+	AsCharacter(character)->SetLayer(static_cast<JPH::ObjectLayer>(value), lockBodies);
 }
 
 /* CharacterVirtualSettings */
@@ -6512,28 +6592,23 @@ void JPH_CharacterVirtual_SetListener(JPH_CharacterVirtual* character, JPH_Chara
 
 void JPH_CharacterVirtual_GetLinearVelocity(JPH_CharacterVirtual* character, JPH_Vec3* velocity)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	auto jolt_vector = joltCharacter->GetLinearVelocity();
-	FromJolt(jolt_vector, velocity);
+	auto joltVector = AsCharacterVirtual(character)->GetLinearVelocity();
+	FromJolt(joltVector, velocity);
 }
 
 void JPH_CharacterVirtual_SetLinearVelocity(JPH_CharacterVirtual* character, const JPH_Vec3* velocity)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetLinearVelocity(ToJolt(velocity));
+	AsCharacterVirtual(character)->SetLinearVelocity(ToJolt(velocity));
 }
 
 void JPH_CharacterVirtual_GetPosition(JPH_CharacterVirtual* character, JPH_RVec3* position)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	auto jolt_vector = joltCharacter->GetPosition();
-	FromJolt(jolt_vector, position);
+	FromJolt(AsCharacterVirtual(character)->GetPosition(), position);
 }
 
 void JPH_CharacterVirtual_SetPosition(JPH_CharacterVirtual* character, const JPH_RVec3* position)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetPosition(ToJolt(position));
+	AsCharacterVirtual(character)->SetPosition(ToJolt(position));
 }
 
 void JPH_CharacterVirtual_GetRotation(JPH_CharacterVirtual* character, JPH_Quat* rotation)
@@ -6559,22 +6634,18 @@ void JPH_CharacterVirtual_GetWorldTransform(JPH_CharacterVirtual* character, JPH
 
 void JPH_CharacterVirtual_GetCenterOfMassTransform(JPH_CharacterVirtual* character, JPH_RMatrix4x4* result)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-
-	const JPH::RMat44& mat = joltCharacter->GetCenterOfMassTransform();
+	const JPH::RMat44& mat = AsCharacterVirtual(character)->GetCenterOfMassTransform();
 	FromJolt(mat, result);
 }
 
 float JPH_CharacterVirtual_GetMass(JPH_CharacterVirtual* character)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetMass();
+	return AsCharacterVirtual(character)->GetMass();
 }
 
 void JPH_CharacterVirtual_SetMass(JPH_CharacterVirtual* character, float value)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetMass(value);
+	AsCharacterVirtual(character)->SetMass(value);
 }
 
 float JPH_CharacterVirtual_GetMaxStrength(JPH_CharacterVirtual* character)
@@ -6649,80 +6720,147 @@ bool JPH_CharacterVirtual_GetMaxHitsExceeded(JPH_CharacterVirtual* character)
 	return joltCharacter->GetMaxHitsExceeded();
 }
 
-uint64_t JPH_CharacterVirtual_GetUserData(JPH_CharacterVirtual* character)
+void JPH_CharacterVirtual_GetShapeOffset(JPH_CharacterVirtual* character, JPH_Vec3* result)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetUserData();
+	auto joltVector = AsCharacterVirtual(character)->GetShapeOffset();
+	FromJolt(joltVector, result);
+}
+
+void JPH_CharacterVirtual_SetShapeOffset(JPH_CharacterVirtual* character, const JPH_Vec3* value)
+{
+	AsCharacterVirtual(character)->SetShapeOffset(ToJolt(value));
+}
+
+uint64_t JPH_CharacterVirtual_GetUserData(const JPH_CharacterVirtual* character)
+{
+	return AsCharacterVirtual(character)->GetUserData();
 }
 
 void JPH_CharacterVirtual_SetUserData(JPH_CharacterVirtual* character, uint64_t value)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetUserData(value);
+	AsCharacterVirtual(character)->SetUserData(value);
+}
+
+JPH_BodyID JPH_CharacterVirtual_GetInnerBodyID(const JPH_CharacterVirtual* character)
+{
+	return AsCharacterVirtual(character)->GetInnerBodyID().GetIndexAndSequenceNumber();
 }
 
 void JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(JPH_CharacterVirtual* character, const JPH_Vec3* desiredVelocity, JPH_Vec3* velocity)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	FromJolt(joltCharacter->CancelVelocityTowardsSteepSlopes(ToJolt(desiredVelocity)), velocity);
+	FromJolt(AsCharacterVirtual(character)->CancelVelocityTowardsSteepSlopes(ToJolt(desiredVelocity)), velocity);
 }
 
-void JPH_CharacterVirtual_Update(JPH_CharacterVirtual* character, float deltaTime, JPH_ObjectLayer layer, JPH_PhysicsSystem* system)
+void JPH_CharacterVirtual_Update(JPH_CharacterVirtual* character, 
+	float deltaTime, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, 
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
 {
-	auto jolt_character = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	auto jolt_object_layer = static_cast<JPH::ObjectLayer>(layer);
+	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
-	jolt_character->Update(deltaTime,
+	AsCharacterVirtual(character)->Update(deltaTime,
 		system->physicsSystem->GetGravity(),
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(jolt_object_layer),
-		system->physicsSystem->GetDefaultLayerFilter(jolt_object_layer),
-		{},
-		{},
+		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		ToJolt(bodyFilter),
+		ToJolt(shapeFilter),
 		*s_TempAllocator
 	);
 }
 
 void JPH_CharacterVirtual_ExtendedUpdate(JPH_CharacterVirtual* character, float deltaTime,
-	const JPH_ExtendedUpdateSettings* settings, JPH_ObjectLayer layer, JPH_PhysicsSystem* system)
+	const JPH_ExtendedUpdateSettings* settings, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, 
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
 {
 	JPH_ASSERT(settings);
 
-	auto jolt_character = reinterpret_cast<JPH::CharacterVirtual*>(character);
-
 	// Convert to Jolt
-	JPH::CharacterVirtual::ExtendedUpdateSettings jolt_settings = {};
-	jolt_settings.mStickToFloorStepDown = ToJolt(&settings->stickToFloorStepDown);
-	jolt_settings.mWalkStairsStepUp = ToJolt(&settings->walkStairsStepUp);
-	jolt_settings.mWalkStairsMinStepForward = settings->walkStairsMinStepForward;
-	jolt_settings.mWalkStairsStepForwardTest = settings->walkStairsStepForwardTest;
-	jolt_settings.mWalkStairsCosAngleForwardContact = settings->walkStairsCosAngleForwardContact;
-	jolt_settings.mWalkStairsStepDownExtra = ToJolt(&settings->walkStairsStepDownExtra);
+	JPH::CharacterVirtual::ExtendedUpdateSettings joltSettings = {};
+	joltSettings.mStickToFloorStepDown = ToJolt(&settings->stickToFloorStepDown);
+	joltSettings.mWalkStairsStepUp = ToJolt(&settings->walkStairsStepUp);
+	joltSettings.mWalkStairsMinStepForward = settings->walkStairsMinStepForward;
+	joltSettings.mWalkStairsStepForwardTest = settings->walkStairsStepForwardTest;
+	joltSettings.mWalkStairsCosAngleForwardContact = settings->walkStairsCosAngleForwardContact;
+	joltSettings.mWalkStairsStepDownExtra = ToJolt(&settings->walkStairsStepDownExtra);
 
-	auto jolt_object_layer = static_cast<JPH::ObjectLayer>(layer);
+	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
-	jolt_character->ExtendedUpdate(deltaTime,
+	AsCharacterVirtual(character)->ExtendedUpdate(deltaTime,
 		system->physicsSystem->GetGravity(),
-		jolt_settings,
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(jolt_object_layer),
-		system->physicsSystem->GetDefaultLayerFilter(jolt_object_layer),
-		{},
-		{},
+		joltSettings,
+		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		ToJolt(bodyFilter),
+		ToJolt(shapeFilter),
 		*s_TempAllocator
 	);
 }
 
-void JPH_CharacterVirtual_RefreshContacts(JPH_CharacterVirtual* character, JPH_ObjectLayer layer, JPH_PhysicsSystem* system)
+void JPH_CharacterVirtual_RefreshContacts(JPH_CharacterVirtual* character, 
+	JPH_ObjectLayer layer, 
+	JPH_PhysicsSystem* system, 
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
 {
-	auto jolt_character = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	auto jolt_object_layer = static_cast<JPH::ObjectLayer>(layer);
+	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
-	jolt_character->RefreshContacts(
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(jolt_object_layer),
-		system->physicsSystem->GetDefaultLayerFilter(jolt_object_layer),
-		{},
-		{},
+	AsCharacterVirtual(character)->RefreshContacts(
+		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		ToJolt(bodyFilter),
+		ToJolt(shapeFilter),
 		*s_TempAllocator
 	);
+}
+
+bool JPH_CharacterVirtual_CanWalkStairs(JPH_CharacterVirtual* character, const JPH_Vec3* linearVelocity)
+{
+	return AsCharacterVirtual(character)->CanWalkStairs(ToJolt(linearVelocity));
+}
+
+bool JPH_CharacterVirtual_WalkStairs(JPH_CharacterVirtual* character, float deltaTime, 
+	const JPH_Vec3* stepUp, 
+	const JPH_Vec3* stepForward, 
+	const JPH_Vec3* stepForwardTest, 
+	const JPH_Vec3* stepDownExtra,
+	JPH_ObjectLayer layer,
+	JPH_PhysicsSystem* system, 
+	const JPH_BodyFilter* bodyFilter, 
+	const JPH_ShapeFilter* shapeFilter)
+{
+	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
+
+	return AsCharacterVirtual(character)->WalkStairs(
+		deltaTime,
+		ToJolt(stepUp),
+		ToJolt(stepForward),
+		ToJolt(stepForwardTest),
+		ToJolt(stepDownExtra),
+		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		ToJolt(bodyFilter),
+		ToJolt(shapeFilter),
+		*s_TempAllocator
+	);
+}
+
+bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character, const JPH_Vec3* stepDown,
+	JPH_ObjectLayer layer, JPH_PhysicsSystem* system,
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
+{
+	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
+
+	return AsCharacterVirtual(character)->StickToFloor(
+		ToJolt(stepDown),
+		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		ToJolt(bodyFilter),
+		ToJolt(shapeFilter),
+		*s_TempAllocator
+	);
+}
+
+void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character)
+{
+	AsCharacterVirtual(character)->UpdateGroundVelocity();
 }
 
 /* CharacterContactListener */
