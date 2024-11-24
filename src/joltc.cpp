@@ -6939,13 +6939,13 @@ public:
 		if (procs.OnContactSolve)
 		{
 			JPH_RVec3 contactPosition;
-			JPH_Vec3 contactNormal, contactVelocity, characterVelocity;
+			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
 
 			FromJolt(inContactPosition, &contactPosition);
 			FromJolt(inContactNormal, &contactNormal);
 			FromJolt(inContactVelocity, &contactVelocity);
 			FromJolt(inCharacterVelocity, &characterVelocity);
-			JPH_Vec3 newCharacterVelocity;
+			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
 			procs.OnContactSolve(
 				userData,
