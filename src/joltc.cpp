@@ -1184,11 +1184,10 @@ void JPH_Shape_GetMassProperties(const JPH_Shape* shape, JPH_MassProperties* res
 
 const JPH_Shape* JPH_Shape_GetLeafShape(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_SubShapeID* remainder)
 {
-	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
 	auto joltSubShapeID = JPH::SubShapeID();
 	joltSubShapeID.SetValue(subShapeID);
 	JPH::SubShapeID joltRemainder = JPH::SubShapeID();
-	const JPH::Shape* leaf = joltShape->GetLeafShape(joltSubShapeID, joltRemainder);
+	const JPH::Shape* leaf = AsShape(shape)->GetLeafShape(joltSubShapeID, joltRemainder);
 	*remainder = joltRemainder.GetValue();
 	return reinterpret_cast<const JPH_Shape*>(leaf);
 }
@@ -1211,6 +1210,30 @@ void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeI
 float JPH_Shape_GetVolume(const JPH_Shape* shape)
 {
 	return AsShape(shape)->GetVolume();
+}
+
+bool JPH_Shape_IsValidScale(const JPH_Shape* shape, const JPH_Vec3* scale)
+{
+	return AsShape(shape)->IsValidScale(ToJolt(scale));
+}
+
+void JPH_Shape_MakeScaleValid(const JPH_Shape* shape, const JPH_Vec3* scale, JPH_Vec3* result)
+{
+	FromJolt(AsShape(shape)->MakeScaleValid(ToJolt(scale)), result);
+}
+
+JPH_Shape* JPH_Shape_ScaleSpae(const JPH_Shape* shape, const JPH_Vec3* scale)
+{
+	auto shapeResult = AsShape(shape)->ScaleShape(ToJolt(scale));
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
+
+	auto scaleShape = shapeResult.Get().GetPtr();
+	scaleShape->AddRef();
+
+	return ToShape(scaleShape);
 }
 
 bool JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit)
@@ -2155,6 +2178,8 @@ JPH_ScaledShape* JPH_ScaledShapeSettings_CreateShape(const JPH_ScaledShapeSettin
 {
 	const JPH::ScaledShapeSettings* jolt_settings = reinterpret_cast<const JPH::ScaledShapeSettings*>(settings);
 	auto shape_res = jolt_settings->Create();
+	if (!shape_res.IsValid())
+		return nullptr;
 
 	auto shape = shape_res.Get().GetPtr();
 	shape->AddRef();
@@ -6861,6 +6886,31 @@ bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character, const JP
 void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character)
 {
 	AsCharacterVirtual(character)->UpdateGroundVelocity();
+}
+
+bool JPH_CharacterVirtual_SetShape(JPH_CharacterVirtual* character,
+	const JPH_Shape* shape, 
+	float maxPenetrationDepth, 
+	JPH_ObjectLayer layer, 
+	JPH_PhysicsSystem* system, 
+	const JPH_BodyFilter* bodyFilter, 
+	const JPH_ShapeFilter* shapeFilter)
+{
+	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
+	return AsCharacterVirtual(character)->SetShape(
+		AsShape(shape),
+		maxPenetrationDepth,
+		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		ToJolt(bodyFilter),
+		ToJolt(shapeFilter),
+		*s_TempAllocator
+	);
+}
+
+void JPH_CharacterVirtual_SetInnerBodyShape(JPH_CharacterVirtual* character, const JPH_Shape* shape)
+{
+	AsCharacterVirtual(character)->SetInnerBodyShape(AsShape(shape));
 }
 
 /* CharacterContactListener */
