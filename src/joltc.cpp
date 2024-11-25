@@ -1222,7 +1222,7 @@ void JPH_Shape_MakeScaleValid(const JPH_Shape* shape, const JPH_Vec3* scale, JPH
 	FromJolt(AsShape(shape)->MakeScaleValid(ToJolt(scale)), result);
 }
 
-JPH_Shape* JPH_Shape_ScaleSpae(const JPH_Shape* shape, const JPH_Vec3* scale)
+JPH_Shape* JPH_Shape_ScaleShape(const JPH_Shape* shape, const JPH_Vec3* scale)
 {
 	auto shapeResult = AsShape(shape)->ScaleShape(ToJolt(scale));
 	if (!shapeResult.IsValid())
