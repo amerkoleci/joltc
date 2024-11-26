@@ -906,7 +906,7 @@ JPH_CAPI void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID 
 JPH_CAPI float JPH_Shape_GetVolume(const JPH_Shape* shape);
 JPH_CAPI bool JPH_Shape_IsValidScale(const JPH_Shape* shape, const JPH_Vec3* scale);
 JPH_CAPI void JPH_Shape_MakeScaleValid(const JPH_Shape* shape, const JPH_Vec3* scale, JPH_Vec3* result);
-JPH_CAPI JPH_Shape* JPH_Shape_ScaleSpae(const JPH_Shape* shape, const JPH_Vec3* scale);
+JPH_CAPI JPH_Shape* JPH_Shape_ScaleShape(const JPH_Shape* shape, const JPH_Vec3* scale);
 JPH_CAPI bool JPH_Shape_CastRay(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, JPH_RayCastResult* hit);
 JPH_CAPI bool JPH_Shape_CastRay2(const JPH_Shape* shape, const JPH_Vec3* origin, const JPH_Vec3* direction, const JPH_RayCastSettings* rayCastSettings, JPH_CollisionCollectorType collectorType, JPH_CastRayResultCallback* callback, void* userData, const JPH_ShapeFilter* shapeFilter);
 JPH_CAPI bool JPH_Shape_CollidePoint(const JPH_Shape* shape, const JPH_Vec3* point, const JPH_ShapeFilter* shapeFilter);
