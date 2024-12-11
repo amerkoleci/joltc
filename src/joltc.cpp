@@ -3792,6 +3792,11 @@ void JPH_MotionProperties_SetInverseInertia(JPH_MotionProperties* properties, JP
 	reinterpret_cast<JPH::MotionProperties*>(properties)->SetInverseInertia(ToJolt(diagonal), ToJolt(rot));
 }
 
+void JPH_MotionProperties_ScaleToMass(JPH_MotionProperties* properties, float mass)
+{
+	reinterpret_cast<JPH::MotionProperties*>(properties)->ScaleToMass(mass);
+}
+
 const JPH_BroadPhaseQuery* JPH_PhysicsSystem_GetBroadPhaseQuery(const JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
