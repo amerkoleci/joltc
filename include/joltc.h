@@ -1445,6 +1445,7 @@ JPH_CAPI void JPH_MotionProperties_SetInverseMass(JPH_MotionProperties* properti
 JPH_CAPI void JPH_MotionProperties_GetInverseInertiaDiagonal(JPH_MotionProperties* properties, JPH_Vec3* result);
 JPH_CAPI void JPH_MotionProperties_GetInertiaRotation(JPH_MotionProperties* properties, JPH_Quat* result);
 JPH_CAPI void JPH_MotionProperties_SetInverseInertia(JPH_MotionProperties* properties, JPH_Vec3* diagonal, JPH_Quat* rot);
+JPH_CAPI void JPH_MotionProperties_ScaleToMass(JPH_MotionProperties* properties, float mass);
 
 //--------------------------------------------------------------------------------------------------
 // JPH_MassProperties
