@@ -135,7 +135,14 @@ static_assert(JPH_ConstraintSpace_WorldSpace == (int)JPH::EConstraintSpace::Worl
 static_assert(JPH_MotionQuality_Discrete == (int)JPH::EMotionQuality::Discrete);
 static_assert(JPH_MotionQuality_LinearCast == (int)JPH::EMotionQuality::LinearCast);
 
-// JPH_AllowedDOFs
+// EOverrideMassProperties
+static_assert(sizeof(JPH_OverrideMassProperties) == sizeof(uint32_t));
+static_assert(sizeof(JPH::EOverrideMassProperties) == sizeof(uint8_t));
+static_assert(JPH_OverrideMassProperties_CalculateMassAndInertia == (int)JPH::EOverrideMassProperties::CalculateMassAndInertia);
+static_assert(JPH_OverrideMassProperties_CalculateInertia == (int)JPH::EOverrideMassProperties::CalculateInertia);
+static_assert(JPH_OverrideMassProperties_MassAndInertiaProvided == (int)JPH::EOverrideMassProperties::MassAndInertiaProvided);
+
+// EAllowedDOFs
 static_assert(sizeof(JPH_AllowedDOFs) == sizeof(uint32_t));
 static_assert(JPH_AllowedDOFs_All == (int)JPH::EAllowedDOFs::All);
 static_assert(JPH_AllowedDOFs_TranslationX == (int)JPH::EAllowedDOFs::TranslationX);

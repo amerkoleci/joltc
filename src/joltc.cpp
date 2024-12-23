@@ -96,6 +96,7 @@ using namespace JPH;
     }
 
 //DEF_MAP_DECL(Quat, JPH_Quat)
+DEF_MAP_DECL(BodyCreationSettings, JPH_BodyCreationSettings)
 DEF_MAP_DECL(Body, JPH_Body)
 DEF_MAP_DECL(BodyInterface, JPH_BodyInterface)
 DEF_MAP_DECL(BodyLockInterface, JPH_BodyLockInterface)
@@ -2056,28 +2057,32 @@ JPH_MutableCompoundShape* JPH_MutableCompoundShape_Create(const JPH_MutableCompo
 	return reinterpret_cast<JPH_MutableCompoundShape*>(shape);
 }
 
-uint32_t JPH_MutableCompoundShape_AddShape(JPH_MutableCompoundShape* shape, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* child, uint32_t userData) {
+uint32_t JPH_MutableCompoundShape_AddShape(JPH_MutableCompoundShape* shape, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* child, uint32_t userData, uint32_t index)
+{
 	auto joltShape = reinterpret_cast<JPH::MutableCompoundShape*>(shape);
-	auto joltChild = reinterpret_cast<const JPH::Shape*>(child);
-	return joltShape->AddShape(ToJolt(position), ToJolt(rotation), joltChild, userData);
+	return joltShape->AddShape(ToJolt(position), ToJolt(rotation), AsShape(child), userData, index);
 }
 
-void JPH_MutableCompoundShape_RemoveShape(JPH_MutableCompoundShape* shape, uint32_t index) {
+void JPH_MutableCompoundShape_RemoveShape(JPH_MutableCompoundShape* shape, uint32_t index) 
+{
 	reinterpret_cast<JPH::MutableCompoundShape*>(shape)->RemoveShape(index);
 }
 
-void JPH_MutableCompoundShape_ModifyShape(JPH_MutableCompoundShape* shape, uint32_t index, const JPH_Vec3* position, const JPH_Quat* rotation) {
+void JPH_MutableCompoundShape_ModifyShape(JPH_MutableCompoundShape* shape, uint32_t index, const JPH_Vec3* position, const JPH_Quat* rotation) 
+{
 	auto joltShape = reinterpret_cast<JPH::MutableCompoundShape*>(shape);
 	joltShape->ModifyShape(index, ToJolt(position), ToJolt(rotation));
 }
 
-void JPH_MutableCompoundShape_ModifyShape2(JPH_MutableCompoundShape* shape, uint32_t index, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* newShape) {
+void JPH_MutableCompoundShape_ModifyShape2(JPH_MutableCompoundShape* shape, uint32_t index, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* newShape) 
+{
 	auto joltShape = reinterpret_cast<JPH::MutableCompoundShape*>(shape);
 	auto joltNewShape = reinterpret_cast<const JPH::Shape*>(newShape);
 	joltShape->ModifyShape(index, ToJolt(position), ToJolt(rotation), joltNewShape);
 }
 
-void JPH_MutableCompoundShape_AdjustCenterOfMass(JPH_MutableCompoundShape* shape) {
+void JPH_MutableCompoundShape_AdjustCenterOfMass(JPH_MutableCompoundShape* shape)
+{
 	reinterpret_cast<JPH::MutableCompoundShape*>(shape)->AdjustCenterOfMass();
 }
 
@@ -2304,7 +2309,7 @@ JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create3(
 	JPH_MotionType motionType,
 	JPH_ObjectLayer objectLayer)
 {
-	const JPH::Shape* joltShape = reinterpret_cast<const JPH::Shape*>(shape);
+	const JPH::Shape* joltShape = AsShape(shape);
 	auto bodyCreationSettings = new JPH::BodyCreationSettings(
 		joltShape,
 		ToJolt(position),
@@ -2312,112 +2317,296 @@ JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create3(
 		(JPH::EMotionType)motionType,
 		objectLayer
 	);
-	return reinterpret_cast<JPH_BodyCreationSettings*>(bodyCreationSettings);
+	return ToBodyCreationSettings(bodyCreationSettings);
 }
 void JPH_BodyCreationSettings_Destroy(JPH_BodyCreationSettings* settings)
 {
 	if (settings)
 	{
-		delete reinterpret_cast<JPH::BodyCreationSettings*>(settings);
+		delete AsBodyCreationSettings(settings);
 	}
 }
 
 void JPH_BodyCreationSettings_GetPosition(JPH_BodyCreationSettings* settings, JPH_RVec3* result)
 {
-	JPH_ASSERT(settings);
-
-	FromJolt(reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mPosition, result);
+	FromJolt(AsBodyCreationSettings(settings)->mPosition, result);
 }
 
 void JPH_BodyCreationSettings_SetPosition(JPH_BodyCreationSettings* settings, const JPH_RVec3* value)
 {
-	JPH_ASSERT(settings);
-
-	reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mPosition = ToJolt(value);
+	AsBodyCreationSettings(settings)->mPosition = ToJolt(value);
 }
 
 void JPH_BodyCreationSettings_GetRotation(JPH_BodyCreationSettings* settings, JPH_Quat* result)
 {
-	JPH_ASSERT(settings);
-
-	FromJolt(reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mRotation, result);
+	FromJolt(AsBodyCreationSettings(settings)->mRotation, result);
 }
 
 void JPH_BodyCreationSettings_SetRotation(JPH_BodyCreationSettings* settings, const JPH_Quat* value)
 {
-	JPH_ASSERT(settings);
-
-	reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mRotation = ToJolt(value);
+	AsBodyCreationSettings(settings)->mRotation = ToJolt(value);
 }
 
 void JPH_BodyCreationSettings_GetLinearVelocity(JPH_BodyCreationSettings* settings, JPH_Vec3* velocity)
 {
-	JPH_ASSERT(settings);
-
-	auto joltVector = reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mLinearVelocity;
-	FromJolt(joltVector, velocity);
+	FromJolt(AsBodyCreationSettings(settings)->mLinearVelocity, velocity);
 }
 
 void JPH_BodyCreationSettings_SetLinearVelocity(JPH_BodyCreationSettings* settings, const JPH_Vec3* velocity)
 {
-	JPH_ASSERT(settings);
-
-	reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mLinearVelocity = ToJolt(velocity);
+	AsBodyCreationSettings(settings)->mLinearVelocity = ToJolt(velocity);
 }
 
 void JPH_BodyCreationSettings_GetAngularVelocity(JPH_BodyCreationSettings* settings, JPH_Vec3* velocity)
 {
-	JPH_ASSERT(settings);
-
-	auto joltVector = reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mAngularVelocity;
-	FromJolt(joltVector, velocity);
+	FromJolt(AsBodyCreationSettings(settings)->mAngularVelocity, velocity);
 }
 
 void JPH_BodyCreationSettings_SetAngularVelocity(JPH_BodyCreationSettings* settings, const JPH_Vec3* velocity)
 {
 	JPH_ASSERT(settings);
 
-	reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mAngularVelocity = ToJolt(velocity);
+	AsBodyCreationSettings(settings)->mAngularVelocity = ToJolt(velocity);
 }
 
-JPH_MotionType JPH_BodyCreationSettings_GetMotionType(JPH_BodyCreationSettings* settings)
+uint64_t JPH_BodyCreationSettings_GetUserData(const JPH_BodyCreationSettings* settings)
 {
-	JPH_ASSERT(settings);
+	return AsBodyCreationSettings(settings)->mUserData;
+}
 
-	return static_cast<JPH_MotionType>(reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mMotionType);
+void JPH_BodyCreationSettings_SetUserData(JPH_BodyCreationSettings* settings, uint64_t value)
+{
+	AsBodyCreationSettings(settings)->mUserData = value;
+}
+
+JPH_ObjectLayer JPH_BodyCreationSettings_GetObjectLayer(const JPH_BodyCreationSettings* settings)
+{
+	return static_cast<JPH_ObjectLayer>(AsBodyCreationSettings(settings)->mObjectLayer);
+}
+
+void JPH_BodyCreationSettings_SetObjectLayer(JPH_BodyCreationSettings* settings, JPH_ObjectLayer value)
+{
+	AsBodyCreationSettings(settings)->mObjectLayer = static_cast<JPH::ObjectLayer>(value);
+}
+
+JPH_MotionType JPH_BodyCreationSettings_GetMotionType(const JPH_BodyCreationSettings* settings)
+{
+	return static_cast<JPH_MotionType>(AsBodyCreationSettings(settings)->mMotionType);
 }
 
 void JPH_BodyCreationSettings_SetMotionType(JPH_BodyCreationSettings* settings, JPH_MotionType value)
 {
-	JPH_ASSERT(settings);
-
-	reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mMotionType = (JPH::EMotionType)value;
+	AsBodyCreationSettings(settings)->mMotionType = static_cast<JPH::EMotionType>(value);
 }
 
-JPH_MotionQuality JPH_BodyCreationSettings_GetMotionQuality(JPH_BodyCreationSettings* settings)
+JPH_AllowedDOFs JPH_BodyCreationSettings_GetAllowedDOFs(const JPH_BodyCreationSettings* settings)
 {
-	JPH_ASSERT(settings);
-
-	return static_cast<JPH_MotionQuality>(reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mMotionQuality);
-}
-
-void JPH_BodyCreationSettings_SetMotionQuality(JPH_BodyCreationSettings* settings, JPH_MotionQuality value)
-{
-	JPH_ASSERT(settings);
-
-	reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mMotionQuality = (JPH::EMotionQuality)value;
-}
-
-JPH_AllowedDOFs JPH_BodyCreationSettings_GetAllowedDOFs(JPH_BodyCreationSettings* settings)
-{
-	JPH_ASSERT(settings);
-
-	return static_cast<JPH_AllowedDOFs>(reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mAllowedDOFs);
+	return static_cast<JPH_AllowedDOFs>(AsBodyCreationSettings(settings)->mAllowedDOFs);
 }
 
 void JPH_BodyCreationSettings_SetAllowedDOFs(JPH_BodyCreationSettings* settings, JPH_AllowedDOFs value)
 {
-	reinterpret_cast<JPH::BodyCreationSettings*>(settings)->mAllowedDOFs = (JPH::EAllowedDOFs)value;
+	AsBodyCreationSettings(settings)->mAllowedDOFs = (JPH::EAllowedDOFs)value;
+}
+
+bool JPH_BodyCreationSettings_GetAllowDynamicOrKinematic(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mAllowDynamicOrKinematic;
+}
+
+void JPH_BodyCreationSettings_SetAllowDynamicOrKinematic(JPH_BodyCreationSettings* settings, bool value) 
+{
+	AsBodyCreationSettings(settings)->mAllowDynamicOrKinematic = value;
+}
+
+bool JPH_BodyCreationSettings_GetIsSensor(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mIsSensor;
+}
+
+void JPH_BodyCreationSettings_SetIsSensor(JPH_BodyCreationSettings* settings, bool value)
+{
+	AsBodyCreationSettings(settings)->mIsSensor = value;
+}
+
+bool JPH_BodyCreationSettings_GetCollideKinematicVsNonDynamic(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mCollideKinematicVsNonDynamic;
+}
+
+void JPH_BodyCreationSettings_SetCollideKinematicVsNonDynamic(JPH_BodyCreationSettings* settings, bool value)
+{
+	AsBodyCreationSettings(settings)->mCollideKinematicVsNonDynamic = value;
+}
+
+bool JPH_BodyCreationSettings_GetUseManifoldReduction(const JPH_BodyCreationSettings* settings) 
+{
+	return AsBodyCreationSettings(settings)->mUseManifoldReduction;
+}
+
+void JPH_BodyCreationSettings_SetUseManifoldReduction(JPH_BodyCreationSettings* settings, bool value)
+{
+	AsBodyCreationSettings(settings)->mUseManifoldReduction = value;
+}
+
+bool JPH_BodyCreationSettings_GetApplyGyroscopicForce(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mApplyGyroscopicForce;
+}
+
+void JPH_BodyCreationSettings_SetApplyGyroscopicForce(JPH_BodyCreationSettings* settings, bool value)
+{
+	AsBodyCreationSettings(settings)->mApplyGyroscopicForce = value;
+}
+
+JPH_MotionQuality JPH_BodyCreationSettings_GetMotionQuality(const JPH_BodyCreationSettings* settings)
+{
+	return static_cast<JPH_MotionQuality>(AsBodyCreationSettings(settings)->mMotionQuality);
+}
+
+void JPH_BodyCreationSettings_SetMotionQuality(JPH_BodyCreationSettings* settings, JPH_MotionQuality value)
+{
+	AsBodyCreationSettings(settings)->mMotionQuality = (JPH::EMotionQuality)value;
+}
+
+bool JPH_BodyCreationSettings_GetEnhancedInternalEdgeRemoval(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mEnhancedInternalEdgeRemoval;
+}
+
+void JPH_BodyCreationSettings_SetEnhancedInternalEdgeRemoval(JPH_BodyCreationSettings* settings, bool value)
+{
+	AsBodyCreationSettings(settings)->mEnhancedInternalEdgeRemoval = value;
+}
+
+bool JPH_BodyCreationSettings_GetAllowSleeping(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mAllowSleeping;
+}
+
+void JPH_BodyCreationSettings_SetAllowSleeping(JPH_BodyCreationSettings* settings, bool value)
+{
+	AsBodyCreationSettings(settings)->mAllowSleeping = value;
+}
+
+float JPH_BodyCreationSettings_GetFriction(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mFriction;
+}
+
+void JPH_BodyCreationSettings_SetFriction(JPH_BodyCreationSettings* settings, float value)
+{
+	AsBodyCreationSettings(settings)->mFriction = value;
+}
+
+float JPH_BodyCreationSettings_GetRestitution(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mRestitution;
+}
+
+void JPH_BodyCreationSettings_SetRestitution(JPH_BodyCreationSettings* settings, float value)
+{
+	AsBodyCreationSettings(settings)->mRestitution = value;
+}
+
+float JPH_BodyCreationSettings_GetLinearDamping(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mLinearDamping;
+}
+
+void JPH_BodyCreationSettings_SetLinearDamping(JPH_BodyCreationSettings* settings, float value) 
+{
+	AsBodyCreationSettings(settings)->mLinearDamping = value;	
+}
+
+float JPH_BodyCreationSettings_GetAngularDamping(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mAngularDamping;
+}
+
+void JPH_BodyCreationSettings_SetAngularDamping(JPH_BodyCreationSettings* settings, float value)
+{
+	AsBodyCreationSettings(settings)->mAngularDamping = value;
+}
+
+float JPH_BodyCreationSettings_GetMaxLinearVelocity(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mMaxLinearVelocity;
+}
+
+void JPH_BodyCreationSettings_SetMaxLinearVelocity(JPH_BodyCreationSettings* settings, float value)
+{
+	AsBodyCreationSettings(settings)->mMaxLinearVelocity = value;
+}
+
+float JPH_BodyCreationSettings_GetMaxAngularVelocity(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mMaxAngularVelocity;
+}
+
+void JPH_BodyCreationSettings_SetMaxAngularVelocity(JPH_BodyCreationSettings* settings, float value)
+{
+	AsBodyCreationSettings(settings)->mMaxAngularVelocity = value;
+}
+
+float JPH_BodyCreationSettings_GetGravityFactor(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mGravityFactor;
+}
+
+void JPH_BodyCreationSettings_SetGravityFactor(JPH_BodyCreationSettings* settings, float value)
+{
+	AsBodyCreationSettings(settings)->mGravityFactor = value;
+}
+
+uint32_t JPH_BodyCreationSettings_GetNumVelocityStepsOverride(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mNumVelocityStepsOverride;
+}
+
+void JPH_BodyCreationSettings_SetNumVelocityStepsOverride(JPH_BodyCreationSettings* settings, uint32_t value)
+{
+	AsBodyCreationSettings(settings)->mNumVelocityStepsOverride = value;
+}
+
+uint32_t JPH_BodyCreationSettings_GetNumPositionStepsOverride(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mNumPositionStepsOverride;
+}
+
+void JPH_BodyCreationSettings_SetNumPositionStepsOverride(JPH_BodyCreationSettings* settings, uint32_t value) 
+{
+	AsBodyCreationSettings(settings)->mNumPositionStepsOverride = value;
+}
+
+JPH_OverrideMassProperties JPH_BodyCreationSettings_GetOverrideMassProperties(const JPH_BodyCreationSettings* settings)
+{
+	return static_cast<JPH_OverrideMassProperties>(AsBodyCreationSettings(settings)->mOverrideMassProperties);
+}
+
+void JPH_BodyCreationSettings_SetOverrideMassProperties(JPH_BodyCreationSettings* settings, JPH_OverrideMassProperties value)
+{
+	AsBodyCreationSettings(settings)->mOverrideMassProperties = static_cast<JPH::EOverrideMassProperties>(value);
+}
+
+float JPH_BodyCreationSettings_GetInertiaMultiplier(const JPH_BodyCreationSettings* settings)
+{
+	return AsBodyCreationSettings(settings)->mInertiaMultiplier;
+}
+
+void JPH_BodyCreationSettings_SetInertiaMultiplier(JPH_BodyCreationSettings* settings, float value)
+{
+	AsBodyCreationSettings(settings)->mInertiaMultiplier = value;
+}
+
+void JPH_BodyCreationSettings_GetMassPropertiesOverride(const JPH_BodyCreationSettings* settings, JPH_MassProperties* result)
+{
+	FromJolt(AsBodyCreationSettings(settings)->mMassPropertiesOverride, result);
+}
+
+void JPH_BodyCreationSettings_SetMassPropertiesOverride(JPH_BodyCreationSettings* settings, const JPH_MassProperties* massProperties)
+{
+	AsBodyCreationSettings(settings)->mMassPropertiesOverride = ToJolt(massProperties);
 }
 
 /* JPH_SoftBodyCreationSettings */
@@ -6236,9 +6425,9 @@ void JPH_ContactSettings_SetInvInertiaScale2(JPH_ContactSettings* settings, floa
 	reinterpret_cast<JPH::ContactSettings*>(settings)->mInvInertiaScale2 = scale;
 }
 
-bool JPH_ContactSettings_GetIsSensor(JPH_ContactSettings* settings)
+bool JPH_ContactSettings_GetIsSensor(const JPH_ContactSettings* settings)
 {
-	return reinterpret_cast<JPH::ContactSettings*>(settings)->mIsSensor;
+	return reinterpret_cast<const JPH::ContactSettings*>(settings)->mIsSensor;
 }
 
 void JPH_ContactSettings_SetIsSensor(JPH_ContactSettings* settings, bool sensor)
