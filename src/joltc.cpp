@@ -1066,6 +1066,76 @@ void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* q
 	FromJolt(JPH::Quat::sFromTo(ToJolt(from), ToJolt(to)), quat);
 }
 
+void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result) {
+    const JPH::Mat44 mat = JPH::Mat44::sZero();
+    FromJolt(mat, result);
+}
+
+void JPH_Matrix4x4_Identity(JPH_Matrix4x4* result) {
+    const JPH::Mat44 mat = JPH::Mat44::sIdentity();
+    FromJolt(mat, result);
+}
+
+void JPH_Matrix4x4_Rotation(JPH_Matrix4x4* result, const JPH_Quat* rotation) {
+    const JPH::Mat44 mat = JPH::Mat44::sRotation(ToJolt(rotation));
+    FromJolt(mat, result);
+}
+
+void JPH_Matrix4x4_Translation(JPH_Matrix4x4* result, const JPH_Vec3* translation) {
+    const JPH::Mat44 mat = JPH::Mat44::sTranslation(ToJolt(translation));
+    FromJolt(mat, result);
+}
+
+void JPH_Matrix4x4_RotationTranslation(JPH_Matrix4x4* result, const JPH_Quat* rotation, const JPH_Vec3* translation) {
+    const JPH::Mat44 mat = JPH::Mat44::sRotationTranslation(ToJolt(rotation), ToJolt(translation));
+    FromJolt(mat, result);
+}
+
+void JPH_Matrix4x4_InverseRotationTranslation(JPH_Matrix4x4* result, const JPH_Quat* rotation, const JPH_Vec3* translation) {
+    const JPH::Mat44 mat = JPH::Mat44::sInverseRotationTranslation(ToJolt(rotation), ToJolt(translation));
+    FromJolt(mat, result);
+}
+
+void JPH_Matrix4x4_Scale(JPH_Matrix4x4* result, const JPH_Vec3* scale) {
+    const JPH::Mat44 mat = JPH::Mat44::sScale(ToJolt(scale));
+    FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_Zero(JPH_RMatrix4x4* result) {
+    const JPH::RMat44 mat = JPH::RMat44::sZero();
+    FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_Identity(JPH_RMatrix4x4* result) {
+    const JPH::RMat44 mat = JPH::RMat44::sIdentity();
+    FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_Rotation(JPH_RMatrix4x4* result, const JPH_Quat* rotation) {
+    const JPH::RMat44 mat = JPH::RMat44::sRotation(ToJolt(rotation));
+    FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_Translation(JPH_RMatrix4x4* result, const JPH_RVec3* translation) {
+    const JPH::RMat44 mat = JPH::RMat44::sTranslation(ToJolt(translation));
+    FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_RotationTranslation(JPH_RMatrix4x4* result, const JPH_Quat* rotation, const JPH_RVec3* translation) {
+    const JPH::RMat44 mat = JPH::RMat44::sRotationTranslation(ToJolt(rotation), ToJolt(translation));
+    FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_InverseRotationTranslation(JPH_RMatrix4x4* result, const JPH_Quat* rotation, const JPH_RVec3* translation) {
+    const JPH::RMat44 mat = JPH::RMat44::sInverseRotationTranslation(ToJolt(rotation), ToJolt(translation));
+    FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_Scale(JPH_RMatrix4x4* result, const JPH_Vec3* scale) {
+    const JPH::RMat44 mat = JPH::RMat44::sScale(ToJolt(scale));
+    FromJolt(mat, result);
+}
+
 /* Material */
 JPH_PhysicsMaterial* JPH_PhysicsMaterial_Create(const char* name, uint32_t color)
 {
