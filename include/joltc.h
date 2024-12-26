@@ -885,6 +885,22 @@ JPH_CAPI void JPH_PhysicsSystem_DrawConstraintReferenceFrame(JPH_PhysicsSystem* 
 /* Math */
 JPH_CAPI void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* quat);
 
+JPH_CAPI void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result);
+JPH_CAPI void JPH_Matrix4x4_Identity(JPH_Matrix4x4* result); 
+JPH_CAPI void JPH_Matrix4x4_Rotation(JPH_Matrix4x4* result, const JPH_Quat* rotation);
+JPH_CAPI void JPH_Matrix4x4_Translation(JPH_Matrix4x4* result, const JPH_Vec3* translation);
+JPH_CAPI void JPH_Matrix4x4_RotationTranslation(JPH_Matrix4x4* result, const JPH_Quat* rotation, const JPH_Vec3* translation);
+JPH_CAPI void JPH_Matrix4x4_InverseRotationTranslation(JPH_Matrix4x4* result, const JPH_Quat* rotation, const JPH_Vec3* translation);
+JPH_CAPI void JPH_Matrix4x4_Scale(JPH_Matrix4x4* result, const JPH_Vec3* scale);
+
+JPH_CAPI void JPH_RMatrix4x4_Zero(JPH_RMatrix4x4* result);
+JPH_CAPI void JPH_RMatrix4x4_Identity(JPH_RMatrix4x4* result);
+JPH_CAPI void JPH_RMatrix4x4_Rotation(JPH_RMatrix4x4* result, const JPH_Quat* rotation); 
+JPH_CAPI void JPH_RMatrix4x4_Translation(JPH_RMatrix4x4* result, const JPH_RVec3* translation);
+JPH_CAPI void JPH_RMatrix4x4_RotationTranslation(JPH_RMatrix4x4* result, const JPH_Quat* rotation, const JPH_RVec3* translation);
+JPH_CAPI void JPH_RMatrix4x4_InverseRotationTranslation(JPH_RMatrix4x4* result, const JPH_Quat* rotation, const JPH_RVec3* translation);
+JPH_CAPI void JPH_RMatrix4x4_Scale(JPH_RMatrix4x4* result, const JPH_Vec3* scale);
+
 /* Material */
 JPH_CAPI JPH_PhysicsMaterial* JPH_PhysicsMaterial_Create(const char* name, uint32_t color);
 JPH_CAPI void JPH_PhysicsMaterial_Destroy(JPH_PhysicsMaterial* material);
