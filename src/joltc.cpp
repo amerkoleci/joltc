@@ -104,6 +104,11 @@ DEF_MAP_DECL(Shape, JPH_Shape)
 DEF_MAP_DECL(MotionProperties, JPH_MotionProperties)
 DEF_MAP_DECL(BroadPhaseQuery, JPH_BroadPhaseQuery)
 DEF_MAP_DECL(NarrowPhaseQuery, JPH_NarrowPhaseQuery)
+DEF_MAP_DECL(ConstraintSettings, JPH_ConstraintSettings)
+DEF_MAP_DECL(DistanceConstraintSettings, JPH_DistanceConstraintSettings)
+DEF_MAP_DECL(DistanceConstraint, JPH_DistanceConstraint)
+DEF_MAP_DECL(HingeConstraintSettings, JPH_HingeConstraintSettings)
+DEF_MAP_DECL(HingeConstraint, JPH_HingeConstraint)
 DEF_MAP_DECL(Character, JPH_Character)
 DEF_MAP_DECL(CharacterVirtual, JPH_CharacterVirtual)
 
@@ -2705,100 +2710,64 @@ void JPH_ConstraintSettings_Destroy(JPH_ConstraintSettings* settings)
 	}
 }
 
-bool JPH_ConstraintSettings_GetEnabled(JPH_ConstraintSettings* settings)
+bool JPH_ConstraintSettings_GetEnabled(const JPH_ConstraintSettings* settings)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	return joltSettings->mEnabled;
+	return AsConstraintSettings(settings)->mEnabled;
 }
 
-void JPH_FixedConstraintSettings_SetEnabled(JPH_ConstraintSettings* settings, bool value)
+void JPH_ConstraintSettings_SetEnabled(JPH_ConstraintSettings* settings, bool value)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	joltSettings->mEnabled = value;
+	AsConstraintSettings(settings)->mEnabled = value;
 }
 
-uint32_t JPH_ConstraintSettings_GetConstraintPriority(JPH_ConstraintSettings* settings)
+uint32_t JPH_ConstraintSettings_GetConstraintPriority(const JPH_ConstraintSettings* settings)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	return joltSettings->mConstraintPriority;
+	return AsConstraintSettings(settings)->mConstraintPriority;
 }
 
-void JPH_FixedConstraintSettings_SetConstraintPriority(JPH_ConstraintSettings* settings, uint32_t value)
+void JPH_ConstraintSettings_SetConstraintPriority(JPH_ConstraintSettings* settings, uint32_t value)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	joltSettings->mConstraintPriority = value;
+	AsConstraintSettings(settings)->mConstraintPriority = value;
 }
 
-uint32_t JPH_ConstraintSettings_GetNumVelocityStepsOverride(JPH_ConstraintSettings* settings)
+uint32_t JPH_ConstraintSettings_GetNumVelocityStepsOverride(const JPH_ConstraintSettings* settings)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	return joltSettings->mNumVelocityStepsOverride;
+	return AsConstraintSettings(settings)->mNumVelocityStepsOverride;
 }
 
 void JPH_ConstraintSettings_SetNumVelocityStepsOverride(JPH_ConstraintSettings* settings, uint32_t value)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	joltSettings->mNumVelocityStepsOverride = value;
+	AsConstraintSettings(settings)->mNumVelocityStepsOverride = value;
 }
 
-uint32_t JPH_ConstraintSettings_GetNumPositionStepsOverride(JPH_ConstraintSettings* settings)
+uint32_t JPH_ConstraintSettings_GetNumPositionStepsOverride(const JPH_ConstraintSettings* settings)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	return joltSettings->mNumPositionStepsOverride;
+	return AsConstraintSettings(settings)->mNumPositionStepsOverride;
 }
 
 void JPH_ConstraintSettings_SetNumPositionStepsOverride(JPH_ConstraintSettings* settings, uint32_t value)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	joltSettings->mNumPositionStepsOverride = value;
+	AsConstraintSettings(settings)->mNumPositionStepsOverride = value;
 }
 
-float JPH_ConstraintSettings_GetDrawConstraintSize(JPH_ConstraintSettings* settings)
+float JPH_ConstraintSettings_GetDrawConstraintSize(const JPH_ConstraintSettings* settings)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	return joltSettings->mDrawConstraintSize;
+	return AsConstraintSettings(settings)->mDrawConstraintSize;
 }
 
 void JPH_ConstraintSettings_SetDrawConstraintSize(JPH_ConstraintSettings* settings, float value)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	joltSettings->mDrawConstraintSize = value;
+	AsConstraintSettings(settings)->mDrawConstraintSize = value;
 }
 
-uint64_t JPH_ConstraintSettings_GetUserData(JPH_ConstraintSettings* settings)
+uint64_t JPH_ConstraintSettings_GetUserData(const JPH_ConstraintSettings* settings)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	return joltSettings->mUserData;
+	return AsConstraintSettings(settings)->mUserData;
 }
 
 void JPH_ConstraintSettings_SetUserData(JPH_ConstraintSettings* settings, uint64_t value)
 {
-	JPH_ASSERT(settings);
-
-	JPH::ConstraintSettings* joltSettings = reinterpret_cast<JPH::ConstraintSettings*>(settings);
-	joltSettings->mUserData = value;
+	AsConstraintSettings(settings)->mUserData = value;
 }
 
 /* JPH_Constraint */
@@ -3043,72 +3012,77 @@ JPH_DistanceConstraintSettings* JPH_DistanceConstraintSettings_Create(void)
 	auto settings = new JPH::DistanceConstraintSettings();
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_DistanceConstraintSettings*>(settings);
+	return ToDistanceConstraintSettings(settings);
 }
 
-JPH_ConstraintSpace JPH_DistanceConstraintSettings_GetSpace(JPH_DistanceConstraintSettings* settings)
+JPH_ConstraintSpace JPH_DistanceConstraintSettings_GetSpace(const JPH_DistanceConstraintSettings* settings)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::DistanceConstraintSettings*>(settings);
-
-	return static_cast<JPH_ConstraintSpace>(joltSettings->mSpace);
+	return static_cast<JPH_ConstraintSpace>(AsDistanceConstraintSettings(settings)->mSpace);
 }
 
 void JPH_DistanceConstraintSettings_SetSpace(JPH_DistanceConstraintSettings* settings, JPH_ConstraintSpace space)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::DistanceConstraintSettings*>(settings);
-
-	joltSettings->mSpace = static_cast<JPH::EConstraintSpace>(space);
+	AsDistanceConstraintSettings(settings)->mSpace = static_cast<JPH::EConstraintSpace>(space);
 }
 
 
-void JPH_DistanceConstraintSettings_GetPoint1(JPH_DistanceConstraintSettings* settings, JPH_RVec3* result)
+void JPH_DistanceConstraintSettings_GetPoint1(const JPH_DistanceConstraintSettings* settings, JPH_RVec3* result)
 {
-	JPH_ASSERT(settings);
-	JPH_ASSERT(result);
-	auto joltSettings = reinterpret_cast<JPH::PointConstraintSettings*>(settings);
-
-	auto joltVector = joltSettings->mPoint1;
-	FromJolt(joltVector, result);
+	FromJolt(AsDistanceConstraintSettings(settings)->mPoint1, result);
 }
 
 void JPH_DistanceConstraintSettings_SetPoint1(JPH_DistanceConstraintSettings* settings, const JPH_RVec3* value)
 {
-	JPH_ASSERT(settings);
-	JPH_ASSERT(value);
-	auto joltSettings = reinterpret_cast<JPH::PointConstraintSettings*>(settings);
-
-	joltSettings->mPoint1 = ToJolt(value);
+	AsDistanceConstraintSettings(settings)->mPoint1 = ToJolt(value);
 }
 
-void JPH_DistanceConstraintSettings_GetPoint2(JPH_DistanceConstraintSettings* settings, JPH_RVec3* result)
+void JPH_DistanceConstraintSettings_GetPoint2(const JPH_DistanceConstraintSettings* settings, JPH_RVec3* result)
 {
-	JPH_ASSERT(settings);
-	JPH_ASSERT(result);
-	auto joltSettings = reinterpret_cast<JPH::PointConstraintSettings*>(settings);
-
-	auto joltVector = joltSettings->mPoint2;
-	FromJolt(joltVector, result);
+	FromJolt(AsDistanceConstraintSettings(settings)->mPoint2, result);
 }
 
 void JPH_DistanceConstraintSettings_SetPoint2(JPH_DistanceConstraintSettings* settings, const JPH_RVec3* value)
 {
-	JPH_ASSERT(settings);
-	JPH_ASSERT(value);
-	auto joltSettings = reinterpret_cast<JPH::PointConstraintSettings*>(settings);
+	AsDistanceConstraintSettings(settings)->mPoint2 = ToJolt(value);
+}
 
-	joltSettings->mPoint2 = ToJolt(value);
+float JPH_DistanceConstraintSettings_GetMinDistance(const JPH_DistanceConstraintSettings* settings)
+{
+	return AsDistanceConstraintSettings(settings)->mMinDistance;
+}
+void JPH_DistanceConstraintSettings_SetMinDistance(JPH_DistanceConstraintSettings* settings, float value)
+{
+	AsDistanceConstraintSettings(settings)->mMinDistance = value;
+}
+
+float JPH_DistanceConstraintSettings_GetMaxDistance(const JPH_DistanceConstraintSettings* settings)
+{
+	return AsDistanceConstraintSettings(settings)->mMaxDistance;
+}
+
+void JPH_DistanceConstraintSettings_SetMaxDistance(JPH_DistanceConstraintSettings* settings, float value)
+{
+	AsDistanceConstraintSettings(settings)->mMaxDistance = value;
+}
+
+void JPH_DistanceConstraintSettings_GetLimitsSpringSettings(const JPH_DistanceConstraintSettings* settings, JPH_SpringSettings* result)
+{
+	FromJolt(AsDistanceConstraintSettings(settings)->mLimitsSpringSettings, result);
+}
+
+void JPH_DistanceConstraintSettings_SetLimitsSpringSettings(JPH_DistanceConstraintSettings* settings, JPH_SpringSettings* limitsSpringSettings)
+{
+	AsDistanceConstraintSettings(settings)->mLimitsSpringSettings = ToJolt(limitsSpringSettings);
 }
 
 JPH_DistanceConstraint* JPH_DistanceConstraintSettings_CreateConstraint(JPH_DistanceConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2)
 {
 	auto joltBody1 = reinterpret_cast<JPH::Body*>(body1);
 	auto joltBody2 = reinterpret_cast<JPH::Body*>(body2);
-	JPH::TwoBodyConstraint* constraint = reinterpret_cast<JPH::DistanceConstraintSettings*>(settings)->Create(*joltBody1, *joltBody2);
+	JPH::TwoBodyConstraint* constraint = AsDistanceConstraintSettings(settings)->Create(*joltBody1, *joltBody2);
 	constraint->AddRef();
 
-	return reinterpret_cast<JPH_DistanceConstraint*>(static_cast<JPH::DistanceConstraint*>(constraint));
+	return ToDistanceConstraint(static_cast<JPH::DistanceConstraint*>(constraint));
 }
 
 /* JPH_HingeConstraintSettings */
@@ -3118,95 +3092,77 @@ JPH_HingeConstraintSettings* JPH_HingeConstraintSettings_Create(void)
 	auto settings = new JPH::HingeConstraintSettings();
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_HingeConstraintSettings*>(settings);
+	return ToHingeConstraintSettings(settings);
 }
 
-void JPH_HingeConstraintSettings_GetPoint1(JPH_HingeConstraintSettings* settings, JPH_RVec3* result)
+JPH_ConstraintSpace JPH_HingeConstraintSettings_GetSpace(const JPH_HingeConstraintSettings* settings)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
+	return static_cast<JPH_ConstraintSpace>(AsHingeConstraintSettings(settings)->mSpace);
+}
 
-	auto joltVector = joltSettings->mPoint1;
-	FromJolt(joltVector, result);
+void JPH_HingeConstraintSettings_SetSpace(JPH_HingeConstraintSettings* settings, JPH_ConstraintSpace space)
+{
+	AsHingeConstraintSettings(settings)->mSpace = static_cast<JPH::EConstraintSpace>(space);
+}
+
+void JPH_HingeConstraintSettings_GetPoint1(const JPH_HingeConstraintSettings* settings, JPH_RVec3* result)
+{
+	FromJolt(AsHingeConstraintSettings(settings)->mPoint1, result);
 }
 
 void JPH_HingeConstraintSettings_SetPoint1(JPH_HingeConstraintSettings* settings, const JPH_RVec3* value)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-
-	joltSettings->mPoint1 = ToJolt(value);
+	AsHingeConstraintSettings(settings)->mPoint1 = ToJolt(value);
 }
 
-void JPH_HingeConstraintSettings_GetPoint2(JPH_HingeConstraintSettings* settings, JPH_RVec3* result)
+void JPH_HingeConstraintSettings_GetPoint2(const JPH_HingeConstraintSettings* settings, JPH_RVec3* result)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	auto joltVector = joltSettings->mPoint2;
-	FromJolt(joltVector, result);
+	FromJolt(AsHingeConstraintSettings(settings)->mPoint2, result);
 }
 
 void JPH_HingeConstraintSettings_SetPoint2(JPH_HingeConstraintSettings* settings, const JPH_RVec3* value)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	joltSettings->mPoint2 = ToJolt(value);
+	AsHingeConstraintSettings(settings)->mPoint2 = ToJolt(value);
 }
 
 void JPH_HingeConstraintSettings_SetHingeAxis1(JPH_HingeConstraintSettings* settings, const JPH_Vec3* value)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	joltSettings->mHingeAxis1 = ToJolt(value);
+	AsHingeConstraintSettings(settings)->mHingeAxis1 = ToJolt(value);
 }
 
-void JPH_HingeConstraintSettings_GetHingeAxis1(JPH_HingeConstraintSettings* settings, JPH_Vec3* result)
+void JPH_HingeConstraintSettings_GetHingeAxis1(const JPH_HingeConstraintSettings* settings, JPH_Vec3* result)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	FromJolt(joltSettings->mHingeAxis1, result);
+	FromJolt(AsHingeConstraintSettings(settings)->mHingeAxis1, result);
 }
 
 void JPH_HingeConstraintSettings_SetNormalAxis1(JPH_HingeConstraintSettings* settings, const JPH_Vec3* value)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	joltSettings->mNormalAxis1 = ToJolt(value);
+	AsHingeConstraintSettings(settings)->mNormalAxis1 = ToJolt(value);
 }
 
-void JPH_HingeConstraintSettings_GetNormalAxis1(JPH_HingeConstraintSettings* settings, JPH_Vec3* result)
+void JPH_HingeConstraintSettings_GetNormalAxis1(const JPH_HingeConstraintSettings* settings, JPH_Vec3* result)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	FromJolt(joltSettings->mNormalAxis1, result);
+	FromJolt(AsHingeConstraintSettings(settings)->mNormalAxis1, result);
 }
 
 void JPH_HingeConstraintSettings_SetHingeAxis2(JPH_HingeConstraintSettings* settings, const JPH_Vec3* value)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	joltSettings->mHingeAxis2 = ToJolt(value);
+	AsHingeConstraintSettings(settings)->mHingeAxis2 = ToJolt(value);
 }
 
-void JPH_HingeConstraintSettings_GetHingeAxis2(JPH_HingeConstraintSettings* settings, JPH_Vec3* result)
+void JPH_HingeConstraintSettings_GetHingeAxis2(const JPH_HingeConstraintSettings* settings, JPH_Vec3* result)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	FromJolt(joltSettings->mHingeAxis2, result);
+	FromJolt(AsHingeConstraintSettings(settings)->mHingeAxis2, result);
 }
 
 void JPH_HingeConstraintSettings_SetNormalAxis2(JPH_HingeConstraintSettings* settings, const JPH_Vec3* value)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	joltSettings->mNormalAxis2 = ToJolt(value);
+	AsHingeConstraintSettings(settings)->mNormalAxis2 = ToJolt(value);
 }
 
-void JPH_HingeConstraintSettings_GetNormalAxis2(JPH_HingeConstraintSettings* settings, JPH_Vec3* result)
+void JPH_HingeConstraintSettings_GetNormalAxis2(const JPH_HingeConstraintSettings* settings, JPH_Vec3* result)
 {
-	JPH_ASSERT(settings);
-	auto joltSettings = reinterpret_cast<JPH::HingeConstraintSettings*>(settings);
-	FromJolt(joltSettings->mNormalAxis2, result);
+	FromJolt(AsHingeConstraintSettings(settings)->mNormalAxis2, result);
 }
 
 JPH_HingeConstraint* JPH_HingeConstraintSettings_CreateConstraint(JPH_HingeConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2)
@@ -3216,29 +3172,28 @@ JPH_HingeConstraint* JPH_HingeConstraintSettings_CreateConstraint(JPH_HingeConst
 	JPH::TwoBodyConstraint* constraint = reinterpret_cast<JPH::HingeConstraintSettings*>(settings)->Create(*joltBody1, *joltBody2);
 	constraint->AddRef();
 
-	return reinterpret_cast<JPH_HingeConstraint*>(static_cast<JPH::HingeConstraint*>(constraint));
+	return ToHingeConstraint(static_cast<JPH::HingeConstraint*>(constraint));
 }
 
 JPH_HingeConstraintSettings* JPH_HingeConstraint_GetSettings(JPH_HingeConstraint* constraint)
 {
-	auto joltConstraint = reinterpret_cast<JPH::HingeConstraint*>(constraint);
-	auto joltSettings = joltConstraint->GetConstraintSettings().GetPtr();
+	auto joltSettings = AsHingeConstraint(constraint)->GetConstraintSettings().GetPtr();
 	return reinterpret_cast<JPH_HingeConstraintSettings*>(joltSettings);
 }
 
 float JPH_HingeConstraint_GetCurrentAngle(JPH_HingeConstraint* constraint)
 {
-	return reinterpret_cast<JPH::HingeConstraint*>(constraint)->GetCurrentAngle();
+	return AsHingeConstraint(constraint)->GetCurrentAngle();
 }
 
 void JPH_HingeConstraint_SetMaxFrictionTorque(JPH_HingeConstraint* constraint, float frictionTorque)
 {
-	reinterpret_cast<JPH::HingeConstraint*>(constraint)->SetMaxFrictionTorque(frictionTorque);
+	AsHingeConstraint(constraint)->SetMaxFrictionTorque(frictionTorque);
 }
 
 float JPH_HingeConstraint_GetMaxFrictionTorque(JPH_HingeConstraint* constraint)
 {
-	return reinterpret_cast<JPH::HingeConstraint*>(constraint)->GetMaxFrictionTorque();
+	return AsHingeConstraint(constraint)->GetMaxFrictionTorque();
 }
 
 void JPH_HingeConstraint_SetMotorSettings(JPH_HingeConstraint* constraint, JPH_MotorSettings* settings)

@@ -1196,17 +1196,17 @@ JPH_CAPI void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings*
 
 /* JPH_ConstraintSettings */
 JPH_CAPI void JPH_ConstraintSettings_Destroy(JPH_ConstraintSettings* settings);
-JPH_CAPI bool JPH_ConstraintSettings_GetEnabled(JPH_ConstraintSettings* settings);
-JPH_CAPI void JPH_FixedConstraintSettings_SetEnabled(JPH_ConstraintSettings* settings, bool value);
-JPH_CAPI uint32_t JPH_ConstraintSettings_GetConstraintPriority(JPH_ConstraintSettings* settings);
-JPH_CAPI void JPH_FixedConstraintSettings_SetConstraintPriority(JPH_ConstraintSettings* settings, uint32_t value);
-JPH_CAPI uint32_t JPH_ConstraintSettings_GetNumVelocityStepsOverride(JPH_ConstraintSettings* settings);
+JPH_CAPI bool JPH_ConstraintSettings_GetEnabled(const JPH_ConstraintSettings* settings);
+JPH_CAPI void JPH_ConstraintSettings_SetEnabled(JPH_ConstraintSettings* settings, bool value);
+JPH_CAPI uint32_t JPH_ConstraintSettings_GetConstraintPriority(const JPH_ConstraintSettings* settings);
+JPH_CAPI void JPH_ConstraintSettings_SetConstraintPriority(JPH_ConstraintSettings* settings, uint32_t value);
+JPH_CAPI uint32_t JPH_ConstraintSettings_GetNumVelocityStepsOverride(const JPH_ConstraintSettings* settings);
 JPH_CAPI void JPH_ConstraintSettings_SetNumVelocityStepsOverride(JPH_ConstraintSettings* settings, uint32_t value);
-JPH_CAPI uint32_t JPH_ConstraintSettings_GetNumPositionStepsOverride(JPH_ConstraintSettings* settings);
+JPH_CAPI uint32_t JPH_ConstraintSettings_GetNumPositionStepsOverride(const JPH_ConstraintSettings* settings);
 JPH_CAPI void JPH_ConstraintSettings_SetNumPositionStepsOverride(JPH_ConstraintSettings* settings, uint32_t value);
-JPH_CAPI float JPH_ConstraintSettings_GetDrawConstraintSize(JPH_ConstraintSettings* settings);
+JPH_CAPI float JPH_ConstraintSettings_GetDrawConstraintSize(const JPH_ConstraintSettings* settings);
 JPH_CAPI void JPH_ConstraintSettings_SetDrawConstraintSize(JPH_ConstraintSettings* settings, float value);
-JPH_CAPI uint64_t JPH_ConstraintSettings_GetUserData(JPH_ConstraintSettings* settings);
+JPH_CAPI uint64_t JPH_ConstraintSettings_GetUserData(const JPH_ConstraintSettings* settings);
 JPH_CAPI void JPH_ConstraintSettings_SetUserData(JPH_ConstraintSettings* settings, uint64_t value);
 
 /* JPH_Constraint */
@@ -1248,12 +1248,18 @@ JPH_CAPI void JPH_FixedConstraint_GetTotalLambdaRotation(const JPH_FixedConstrai
 
 /* JPH_DistanceConstraintSettings */
 JPH_CAPI JPH_DistanceConstraintSettings* JPH_DistanceConstraintSettings_Create(void);
-JPH_CAPI JPH_ConstraintSpace JPH_DistanceConstraintSettings_GetSpace(JPH_DistanceConstraintSettings* settings);
+JPH_CAPI JPH_ConstraintSpace JPH_DistanceConstraintSettings_GetSpace(const JPH_DistanceConstraintSettings* settings);
 JPH_CAPI void JPH_DistanceConstraintSettings_SetSpace(JPH_DistanceConstraintSettings* settings, JPH_ConstraintSpace space);
-JPH_CAPI void JPH_DistanceConstraintSettings_GetPoint1(JPH_DistanceConstraintSettings* settings, JPH_RVec3* result);
+JPH_CAPI void JPH_DistanceConstraintSettings_GetPoint1(const JPH_DistanceConstraintSettings* settings, JPH_RVec3* result);
 JPH_CAPI void JPH_DistanceConstraintSettings_SetPoint1(JPH_DistanceConstraintSettings* settings, const JPH_RVec3* value);
-JPH_CAPI void JPH_DistanceConstraintSettings_GetPoint2(JPH_DistanceConstraintSettings* settings, JPH_RVec3* result);
+JPH_CAPI void JPH_DistanceConstraintSettings_GetPoint2(const JPH_DistanceConstraintSettings* settings, JPH_RVec3* result);
 JPH_CAPI void JPH_DistanceConstraintSettings_SetPoint2(JPH_DistanceConstraintSettings* settings, const JPH_RVec3* value);
+JPH_CAPI float JPH_DistanceConstraintSettings_GetMinDistance(const JPH_DistanceConstraintSettings* settings);
+JPH_CAPI void JPH_DistanceConstraintSettings_SetMinDistance(JPH_DistanceConstraintSettings* settings, float value);
+JPH_CAPI float JPH_DistanceConstraintSettings_GetMaxDistance(const JPH_DistanceConstraintSettings* settings);
+JPH_CAPI void JPH_DistanceConstraintSettings_SetMaxDistance(JPH_DistanceConstraintSettings* settings, float value);
+JPH_CAPI void JPH_DistanceConstraintSettings_GetLimitsSpringSettings(const JPH_DistanceConstraintSettings* settings, JPH_SpringSettings* result);
+JPH_CAPI void JPH_DistanceConstraintSettings_SetLimitsSpringSettings(JPH_DistanceConstraintSettings* settings, JPH_SpringSettings* limitsSpringSettings);
 JPH_CAPI JPH_DistanceConstraint* JPH_DistanceConstraintSettings_CreateConstraint(JPH_DistanceConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2); // binding for DistanceConstraintSettings::Create()
 
 /* JPH_DistanceConstraint */
@@ -1281,18 +1287,20 @@ JPH_CAPI void JPH_PointConstraint_GetTotalLambdaPosition(const JPH_PointConstrai
 
 /* JPH_HingeConstraintSettings */
 JPH_CAPI JPH_HingeConstraintSettings* JPH_HingeConstraintSettings_Create(void);
-JPH_CAPI void JPH_HingeConstraintSettings_GetPoint1(JPH_HingeConstraintSettings* settings, JPH_RVec3* result);
+JPH_CAPI JPH_ConstraintSpace JPH_HingeConstraintSettings_GetSpace(const JPH_HingeConstraintSettings* settings);
+JPH_CAPI void JPH_HingeConstraintSettings_SetSpace(JPH_HingeConstraintSettings* settings, JPH_ConstraintSpace space);
+JPH_CAPI void JPH_HingeConstraintSettings_GetPoint1(const JPH_HingeConstraintSettings* settings, JPH_RVec3* result);
 JPH_CAPI void JPH_HingeConstraintSettings_SetPoint1(JPH_HingeConstraintSettings* settings, const JPH_RVec3* value);
-JPH_CAPI void JPH_HingeConstraintSettings_GetPoint2(JPH_HingeConstraintSettings* settings, JPH_RVec3* result);
+JPH_CAPI void JPH_HingeConstraintSettings_GetPoint2(const JPH_HingeConstraintSettings* settings, JPH_RVec3* result);
 JPH_CAPI void JPH_HingeConstraintSettings_SetPoint2(JPH_HingeConstraintSettings* settings, const JPH_RVec3* value);
 JPH_CAPI void JPH_HingeConstraintSettings_SetHingeAxis1(JPH_HingeConstraintSettings* settings, const JPH_Vec3* value);
-JPH_CAPI void JPH_HingeConstraintSettings_GetHingeAxis1(JPH_HingeConstraintSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_HingeConstraintSettings_GetHingeAxis1(const JPH_HingeConstraintSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_HingeConstraintSettings_SetNormalAxis1(JPH_HingeConstraintSettings* settings, const JPH_Vec3* value);
-JPH_CAPI void JPH_HingeConstraintSettings_GetNormalAxis1(JPH_HingeConstraintSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_HingeConstraintSettings_GetNormalAxis1(const JPH_HingeConstraintSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_HingeConstraintSettings_SetHingeAxis2(JPH_HingeConstraintSettings* settings, const JPH_Vec3* value);
-JPH_CAPI void JPH_HingeConstraintSettings_GetHingeAxis2(JPH_HingeConstraintSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_HingeConstraintSettings_GetHingeAxis2(const JPH_HingeConstraintSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_HingeConstraintSettings_SetNormalAxis2(JPH_HingeConstraintSettings* settings, const JPH_Vec3* value);
-JPH_CAPI void JPH_HingeConstraintSettings_GetNormalAxis2(JPH_HingeConstraintSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_HingeConstraintSettings_GetNormalAxis2(const JPH_HingeConstraintSettings* settings, JPH_Vec3* result);
 JPH_CAPI JPH_HingeConstraint* JPH_HingeConstraintSettings_CreateConstraint(JPH_HingeConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2); // binding for HingeConstraintSettings::Create()
 
 /* JPH_HingeConstraint */
