@@ -662,20 +662,20 @@ typedef struct JPH_SharedMutex                      JPH_SharedMutex;
 
 typedef struct JPH_DebugRenderer                    JPH_DebugRenderer;
 
-typedef struct JPH_BodyLockRead
-{
+typedef struct JPH_BodyLockRead {
 	const JPH_BodyLockInterface* lockInterface;
 	JPH_SharedMutex* mutex;
 	const JPH_Body* body;
 } JPH_BodyLockRead;
 
-typedef struct JPH_BodyLockWrite
-{
+typedef struct JPH_BodyLockWrite {
 	const JPH_BodyLockInterface* lockInterface;
 	JPH_SharedMutex* mutex;
 	JPH_Body* body;
 } JPH_BodyLockWrite;
 
+typedef struct JPH_BodyLockMultiRead JPH_BodyLockMultiRead;
+typedef struct JPH_BodyLockMultiWrite JPH_BodyLockMultiWrite;
 
 typedef struct JPH_ExtendedUpdateSettings {
 	JPH_Vec3	stickToFloorStepDown;
@@ -1224,21 +1224,21 @@ JPH_CAPI void JPH_Constraint_Destroy(JPH_Constraint* constraint);
 
 /* JPH_FixedConstraintSettings */
 JPH_CAPI JPH_FixedConstraintSettings* JPH_FixedConstraintSettings_Create(void);
-JPH_CAPI JPH_ConstraintSpace JPH_FixedConstraintSettings_GetSpace(JPH_FixedConstraintSettings* settings);
+JPH_CAPI JPH_ConstraintSpace JPH_FixedConstraintSettings_GetSpace(const JPH_FixedConstraintSettings* settings);
 JPH_CAPI void JPH_FixedConstraintSettings_SetSpace(JPH_FixedConstraintSettings* settings, JPH_ConstraintSpace space);
-JPH_CAPI bool JPH_FixedConstraintSettings_GetAutoDetectPoint(JPH_FixedConstraintSettings* settings);
+JPH_CAPI bool JPH_FixedConstraintSettings_GetAutoDetectPoint(const JPH_FixedConstraintSettings* settings);
 JPH_CAPI void JPH_FixedConstraintSettings_SetAutoDetectPoint(JPH_FixedConstraintSettings* settings, bool value);
-JPH_CAPI void JPH_FixedConstraintSettings_GetPoint1(JPH_FixedConstraintSettings* settings, JPH_RVec3* result);
+JPH_CAPI void JPH_FixedConstraintSettings_GetPoint1(const JPH_FixedConstraintSettings* settings, JPH_RVec3* result);
 JPH_CAPI void JPH_FixedConstraintSettings_SetPoint1(JPH_FixedConstraintSettings* settings, const JPH_RVec3* value);
-JPH_CAPI void JPH_FixedConstraintSettings_GetAxisX1(JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_FixedConstraintSettings_GetAxisX1(const JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_FixedConstraintSettings_SetAxisX1(JPH_FixedConstraintSettings* settings, const JPH_Vec3* value);
-JPH_CAPI void JPH_FixedConstraintSettings_GetAxisY1(JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_FixedConstraintSettings_GetAxisY1(const JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_FixedConstraintSettings_SetAxisY1(JPH_FixedConstraintSettings* settings, const JPH_Vec3* value);
-JPH_CAPI void JPH_FixedConstraintSettings_GetPoint2(JPH_FixedConstraintSettings* settings, JPH_RVec3* result);
+JPH_CAPI void JPH_FixedConstraintSettings_GetPoint2(const JPH_FixedConstraintSettings* settings, JPH_RVec3* result);
 JPH_CAPI void JPH_FixedConstraintSettings_SetPoint2(JPH_FixedConstraintSettings* settings, const JPH_RVec3* value);
-JPH_CAPI void JPH_FixedConstraintSettings_GetAxisX2(JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_FixedConstraintSettings_GetAxisX2(const JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_FixedConstraintSettings_SetAxisX2(JPH_FixedConstraintSettings* settings, const JPH_Vec3* value);
-JPH_CAPI void JPH_FixedConstraintSettings_GetAxisY2(JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_FixedConstraintSettings_GetAxisY2(const JPH_FixedConstraintSettings* settings, JPH_Vec3* result);
 JPH_CAPI void JPH_FixedConstraintSettings_SetAxisY2(JPH_FixedConstraintSettings* settings, const JPH_Vec3* value);
 JPH_CAPI JPH_FixedConstraint* JPH_FixedConstraintSettings_CreateConstraint(JPH_FixedConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
@@ -1529,6 +1529,14 @@ JPH_CAPI void JPH_BodyLockInterface_UnlockRead(const JPH_BodyLockInterface* lock
 
 JPH_CAPI void JPH_BodyLockInterface_LockWrite(const JPH_BodyLockInterface* lockInterface, JPH_BodyID bodyID, JPH_BodyLockWrite* outLock);
 JPH_CAPI void JPH_BodyLockInterface_UnlockWrite(const JPH_BodyLockInterface* lockInterface, JPH_BodyLockWrite* ioLock);
+
+JPH_CAPI JPH_BodyLockMultiRead* JPH_BodyLockInterface_LockMultiRead(const JPH_BodyLockInterface* lockInterface, const JPH_BodyID* bodyIDs, uint32_t count);
+JPH_CAPI void JPH_BodyLockMultiRead_Destroy(JPH_BodyLockMultiRead* ioLock);
+JPH_CAPI const JPH_Body* JPH_BodyLockMultiRead_GetBody(JPH_BodyLockMultiRead* ioLock, uint32_t bodyIndex);
+
+JPH_CAPI JPH_BodyLockMultiWrite* JPH_BodyLockInterface_LockMultiWrite(const JPH_BodyLockInterface* lockInterface, const JPH_BodyID* bodyIDs, uint32_t count);
+JPH_CAPI void JPH_BodyLockMultiWrite_Destroy(JPH_BodyLockMultiWrite* ioLock);
+JPH_CAPI JPH_Body* JPH_BodyLockMultiWrite_GetBody(JPH_BodyLockMultiWrite* ioLock, uint32_t bodyIndex);
 
 //--------------------------------------------------------------------------------------------------
 // JPH_MotionProperties
