@@ -885,6 +885,16 @@ JPH_CAPI void JPH_PhysicsSystem_DrawConstraintReferenceFrame(JPH_PhysicsSystem* 
 /* Math */
 JPH_CAPI void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* quat);
 
+JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq);
+JPH_CAPI bool JPH_Vec3_IsNearZero(const JPH_Vec3* v, float maxDistSq);
+JPH_CAPI bool JPH_Vec3_IsNormalized(const JPH_Vec3* v, float tolerance);
+JPH_CAPI bool JPH_Vec3_IsNaN(const JPH_Vec3* v);
+
+JPH_CAPI void JPH_Vec3_Negate(const JPH_Vec3* v, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_Normalized(const JPH_Vec3* v, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_Cross(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_Abs(const JPH_Vec3* v, JPH_Vec3* result);
+
 JPH_CAPI void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result);
 JPH_CAPI void JPH_Matrix4x4_Identity(JPH_Matrix4x4* result); 
 JPH_CAPI void JPH_Matrix4x4_Rotation(JPH_Matrix4x4* result, const JPH_Quat* rotation);

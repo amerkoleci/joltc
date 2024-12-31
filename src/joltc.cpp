@@ -1075,6 +1075,79 @@ void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* q
 	FromJolt(JPH::Quat::sFromTo(ToJolt(from), ToJolt(to)), quat);
 }
 
+JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq)
+{
+    JPH_ASSERT(v1 != nullptr);
+    JPH_ASSERT(v2 != nullptr);
+    
+    JPH::Vec3 joltV1 = ToJolt(v1);
+    JPH::Vec3 joltV2 = ToJolt(v2);
+    
+    return joltV1.IsClose(joltV2, maxDistSq);
+}
+
+JPH_CAPI bool JPH_Vec3_IsNearZero(const JPH_Vec3* v, float maxDistSq)
+{
+    JPH_ASSERT(v != nullptr);
+    
+    JPH::Vec3 joltV = ToJolt(v);
+    return joltV.IsNearZero(maxDistSq);
+}
+
+JPH_CAPI bool JPH_Vec3_IsNormalized(const JPH_Vec3* v, float tolerance)
+{
+    JPH_ASSERT(v != nullptr);
+    
+    JPH::Vec3 joltV = ToJolt(v);
+    return joltV.IsNormalized(tolerance);
+}
+
+JPH_CAPI bool JPH_Vec3_IsNaN(const JPH_Vec3* v)
+{
+    JPH_ASSERT(v != nullptr);
+    
+    JPH::Vec3 joltV = ToJolt(v);
+    return joltV.IsNaN();
+}
+
+JPH_CAPI void JPH_Vec3_Negate(const JPH_Vec3* v, JPH_Vec3* result)
+{
+    JPH_ASSERT(v != nullptr);
+    JPH_ASSERT(result != nullptr);
+    
+    JPH::Vec3 joltV = ToJolt(v);
+    FromJolt(-joltV, result);
+}
+
+JPH_CAPI void JPH_Vec3_Normalized(const JPH_Vec3* v, JPH_Vec3* result)
+{
+    JPH_ASSERT(v != nullptr);
+    JPH_ASSERT(result != nullptr);
+    
+    JPH::Vec3 joltV = ToJolt(v);
+    FromJolt(joltV.Normalized(), result);
+}
+
+JPH_CAPI void JPH_Vec3_Cross(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
+{
+    JPH_ASSERT(v1 != nullptr);
+    JPH_ASSERT(v2 != nullptr);
+    JPH_ASSERT(result != nullptr);
+    
+    JPH::Vec3 joltV1 = ToJolt(v1);
+    JPH::Vec3 joltV2 = ToJolt(v2);
+    FromJolt(joltV1.Cross(joltV2), result);
+}
+
+JPH_CAPI void JPH_Vec3_Abs(const JPH_Vec3* v, JPH_Vec3* result)
+{
+    JPH_ASSERT(v != nullptr);
+    JPH_ASSERT(result != nullptr);
+    
+    JPH::Vec3 joltV = ToJolt(v);
+    FromJolt(joltV.Abs(), result);
+}
+
 void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result) {
 	const JPH::Mat44 mat = JPH::Mat44::sZero();
 	FromJolt(mat, result);
