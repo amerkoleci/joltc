@@ -1075,6 +1075,83 @@ void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* q
 	FromJolt(JPH::Quat::sFromTo(ToJolt(from), ToJolt(to)), quat);
 }
 
+void JPH_Quat_GetAxisAngle(const JPH_Quat* quat, JPH_Vec3* outAxis, float* outAngle)
+{
+    JPH_ASSERT(quat);
+    JPH_ASSERT(outAxis);
+    JPH_ASSERT(outAngle);
+    
+    JPH::Vec3 joltAxis;
+    float angle;
+    JPH::Quat joltQuat = ToJolt(quat);
+    joltQuat.GetAxisAngle(joltAxis, angle);
+    FromJolt(joltAxis, outAxis);
+    *outAngle = angle;
+}
+
+void JPH_Quat_GetEulerAngles(const JPH_Quat* quat, JPH_Vec3* result)
+{
+    JPH_ASSERT(quat);
+    JPH_ASSERT(result);
+
+    auto joltQuat = ToJolt(quat);
+    FromJolt(joltQuat.GetEulerAngles(), result);
+}
+
+void JPH_Quat_RotateAxisX(const JPH_Quat* quat, JPH_Vec3* result)
+{
+    JPH_ASSERT(quat);
+    JPH_ASSERT(result);
+    
+    auto joltQuat = ToJolt(quat);
+    FromJolt(joltQuat.RotateAxisX(), result);
+}
+
+void JPH_Quat_RotateAxisY(const JPH_Quat* quat, JPH_Vec3* result)
+{
+    JPH_ASSERT(quat);
+    JPH_ASSERT(result);
+    
+    auto joltQuat = ToJolt(quat);
+    FromJolt(joltQuat.RotateAxisY(), result);
+}
+
+void JPH_Quat_RotateAxisZ(const JPH_Quat* quat, JPH_Vec3* result)
+{
+    JPH_ASSERT(quat);
+    JPH_ASSERT(result);
+    
+    auto joltQuat = ToJolt(quat);
+    FromJolt(joltQuat.RotateAxisZ(), result);
+}
+
+void JPH_Quat_Inversed(const JPH_Quat* quat, JPH_Quat* result)
+{
+    JPH_ASSERT(quat);
+    JPH_ASSERT(result);
+    
+    auto joltQuat = ToJolt(quat);
+    FromJolt(joltQuat.Inversed(), result);
+}
+
+void JPH_Quat_GetPerpendicular(const JPH_Quat* quat, JPH_Quat* result)
+{
+    JPH_ASSERT(quat);
+    JPH_ASSERT(result);
+    
+    auto joltQuat = ToJolt(quat);
+    FromJolt(joltQuat.GetPerpendicular(), result);
+}
+
+float JPH_Quat_GetRotationAngle(const JPH_Quat* quat, const JPH_Vec3* axis)
+{
+    JPH_ASSERT(quat);
+    JPH_ASSERT(axis);
+    
+    auto joltQuat = ToJolt(quat);
+    return joltQuat.GetRotationAngle(ToJolt(axis));
+}
+
 JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq)
 {
     JPH_ASSERT(v1 != nullptr);

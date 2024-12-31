@@ -884,6 +884,14 @@ JPH_CAPI void JPH_PhysicsSystem_DrawConstraintReferenceFrame(JPH_PhysicsSystem* 
 
 /* Math */
 JPH_CAPI void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* quat);
+JPH_CAPI void JPH_Quat_GetAxisAngle(const JPH_Quat* quat, JPH_Vec3* outAxis, float* outAngle);
+JPH_CAPI void JPH_Quat_GetEulerAngles(const JPH_Quat* quat, JPH_Vec3* result);
+JPH_CAPI void JPH_Quat_RotateAxisX(const JPH_Quat* quat, JPH_Vec3* result);
+JPH_CAPI void JPH_Quat_RotateAxisY(const JPH_Quat* quat, JPH_Vec3* result);
+JPH_CAPI void JPH_Quat_RotateAxisZ(const JPH_Quat* quat, JPH_Vec3* result);
+JPH_CAPI void JPH_Quat_Inversed(const JPH_Quat* quat, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_GetPerpendicular(const JPH_Quat* quat, JPH_Quat* result);
+JPH_CAPI float JPH_Quat_GetRotationAngle(const JPH_Quat* quat, const JPH_Vec3* axis);
 
 JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq);
 JPH_CAPI bool JPH_Vec3_IsNearZero(const JPH_Vec3* v, float maxDistSq);
