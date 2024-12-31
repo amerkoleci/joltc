@@ -1141,6 +1141,46 @@ void JPH_RMatrix4x4_Scale(JPH_RMatrix4x4* result, const JPH_Vec3* scale) {
     FromJolt(mat, result);
 }
 
+void JPH_Matrix4x4_GetAxisX(const JPH_Matrix4x4* matrix, JPH_Vec3* result)
+{
+    JPH_ASSERT(matrix);
+    JPH_ASSERT(result);
+    auto joltMatrix = ToJolt(matrix);
+    FromJolt(joltMatrix.GetAxisX(), result);
+}
+
+void JPH_Matrix4x4_GetAxisY(const JPH_Matrix4x4* matrix, JPH_Vec3* result)
+{
+    JPH_ASSERT(matrix);
+    JPH_ASSERT(result);
+    auto joltMatrix = ToJolt(matrix);
+    FromJolt(joltMatrix.GetAxisY(), result);
+}
+
+void JPH_Matrix4x4_GetAxisZ(const JPH_Matrix4x4* matrix, JPH_Vec3* result)
+{
+    JPH_ASSERT(matrix);
+    JPH_ASSERT(result);
+    auto joltMatrix = ToJolt(matrix);
+    FromJolt(joltMatrix.GetAxisZ(), result);
+}
+
+void JPH_Matrix4x4_GetTranslation(const JPH_Matrix4x4* matrix, JPH_Vec3* result)
+{
+    JPH_ASSERT(matrix);
+    JPH_ASSERT(result);
+    auto joltMatrix = ToJolt(matrix);
+    FromJolt(joltMatrix.GetTranslation(), result);
+}
+
+void JPH_Matrix4x4_GetQuaternion(const JPH_Matrix4x4* matrix, JPH_Quat* result)
+{
+    JPH_ASSERT(matrix);
+    JPH_ASSERT(result);
+    auto joltMatrix = ToJolt(matrix);
+    FromJolt(joltMatrix.GetQuaternion(), result);
+}
+
 /* Material */
 JPH_PhysicsMaterial* JPH_PhysicsMaterial_Create(const char* name, uint32_t color)
 {
