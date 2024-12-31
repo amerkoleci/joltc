@@ -901,6 +901,12 @@ JPH_CAPI void JPH_RMatrix4x4_RotationTranslation(JPH_RMatrix4x4* result, const J
 JPH_CAPI void JPH_RMatrix4x4_InverseRotationTranslation(JPH_RMatrix4x4* result, const JPH_Quat* rotation, const JPH_RVec3* translation);
 JPH_CAPI void JPH_RMatrix4x4_Scale(JPH_RMatrix4x4* result, const JPH_Vec3* scale);
 
+JPH_CAPI void JPH_Matrix4x4_GetAxisX(const JPH_Matrix4x4* matrix, JPH_Vec3* result);
+JPH_CAPI void JPH_Matrix4x4_GetAxisY(const JPH_Matrix4x4* matrix, JPH_Vec3* result); 
+JPH_CAPI void JPH_Matrix4x4_GetAxisZ(const JPH_Matrix4x4* matrix, JPH_Vec3* result);
+JPH_CAPI void JPH_Matrix4x4_GetTranslation(const JPH_Matrix4x4* matrix, JPH_Vec3* result);
+JPH_CAPI void JPH_Matrix4x4_GetQuaternion(const JPH_Matrix4x4* matrix, JPH_Quat* result);
+
 /* Material */
 JPH_CAPI JPH_PhysicsMaterial* JPH_PhysicsMaterial_Create(const char* name, uint32_t color);
 JPH_CAPI void JPH_PhysicsMaterial_Destroy(JPH_PhysicsMaterial* material);
