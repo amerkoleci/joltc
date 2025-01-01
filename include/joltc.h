@@ -699,11 +699,12 @@ typedef struct JPH_CharacterBase                    JPH_CharacterBase;
 
 /* Character */
 typedef struct JPH_CharacterSettings {
-	JPH_CharacterBaseSettings           base;    /* Inherics JPH_CharacterBaseSettings */
+	JPH_CharacterBaseSettings                               base;    /* Inherics JPH_CharacterBaseSettings */
 	JPH_ObjectLayer						layer;
-	float								mass;
-	float								friction;
-	float								gravityFactor;
+	float							mass;
+	float							friction;
+	float							gravityFactor;
+	JPH_AllowedDOFs                                         allowedDOFs;
 } JPH_CharacterSettings;
 typedef struct JPH_Character                        JPH_Character;  /* Inherics JPH_CharacterBase */
 

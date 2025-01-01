@@ -6805,6 +6805,7 @@ void JPH_CharacterSettings_Init(JPH_CharacterSettings* settings)
 	settings->mass = joltSettings.mMass;
 	settings->friction = joltSettings.mFriction;
 	settings->gravityFactor = joltSettings.mGravityFactor;
+	settings->allowedDOFs = static_cast<JPH_AllowedDOFs>(joltSettings.mAllowedDOFs);
 }
 
 /* Character */
@@ -6833,6 +6834,7 @@ JPH_Character* JPH_Character_Create(const JPH_CharacterSettings* settings,
 	joltSettings.mMass = settings->mass;
 	joltSettings.mFriction = settings->friction;
 	joltSettings.mGravityFactor = settings->gravityFactor;
+	joltSettings.mAllowedDOFs = static_cast<EAllowedDOFs>(settings->allowedDOFs);
 
 	auto joltCharacter = new JPH::Character(&joltSettings,
 		ToJolt(position),
