@@ -2034,18 +2034,26 @@ JPH_CAPI bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character,
 JPH_CAPI void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character);
 JPH_CAPI bool JPH_CharacterVirtual_SetShape(JPH_CharacterVirtual* character, const JPH_Shape* shape, float maxPenetrationDepth, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
 JPH_CAPI void JPH_CharacterVirtual_SetInnerBodyShape(JPH_CharacterVirtual* character, const JPH_Shape* shape);
+JPH_CAPI uint32_t JPH_CharacterVirtual_GetNumContacts(JPH_CharacterVirtual* character);
+JPH_CAPI bool JPH_CharacterVirtual_HasCollidedWithBody(JPH_CharacterVirtual* character, const JPH_BodyID body);
+JPH_CAPI bool JPH_CharacterVirtual_HasCollidedWith(JPH_CharacterVirtual* character, const JPH_CharacterVirtual* other);
 
 /* CharacterContactListener */
 typedef struct JPH_CharacterContactListener_Procs {
 	void (JPH_API_CALL* OnAdjustBodyVelocity)(void* userData,
 		const JPH_CharacterVirtual* character,
 		const JPH_Body* body2,
-		const JPH_Vec3* linearVelocity,
-		const JPH_Vec3* angularVelocity);
+		JPH_Vec3* ioLinearVelocity,
+		JPH_Vec3* ioAngularVelocity);
 
 	bool(JPH_API_CALL* OnContactValidate)(void* userData,
 		const JPH_CharacterVirtual* character,
 		const JPH_BodyID bodyID2,
+		const JPH_SubShapeID subShapeID2);
+
+	bool(JPH_API_CALL* OnCharacterContactValidate)(void* userData,
+		const JPH_CharacterVirtual* character,
+		const JPH_CharacterVirtual* otherCharacter,
 		const JPH_SubShapeID subShapeID2);
 
 	void(JPH_API_CALL* OnContactAdded)(void* userData,
@@ -2056,9 +2064,29 @@ typedef struct JPH_CharacterContactListener_Procs {
 		const JPH_Vec3* contactNormal,
 		JPH_CharacterContactSettings* ioSettings);
 
+	void(JPH_API_CALL* OnCharacterContactAdded)(void* userData,
+		const JPH_CharacterVirtual* character,
+		const JPH_CharacterVirtual* otherCharacter,
+		const JPH_SubShapeID subShapeID2,
+		const JPH_RVec3* contactPosition,
+		const JPH_Vec3* contactNormal,
+		JPH_CharacterContactSettings* ioSettings);
+
 	void(JPH_API_CALL* OnContactSolve)(void* userData,
 		const JPH_CharacterVirtual* character,
 		const JPH_BodyID bodyID2,
+		const JPH_SubShapeID subShapeID2,
+		const JPH_RVec3* contactPosition,
+		const JPH_Vec3* contactNormal,
+		const JPH_Vec3* contactVelocity,
+		const JPH_PhysicsMaterial* contactMaterial,
+		const JPH_Vec3* characterVelocity,
+		JPH_Vec3* newCharacterVelocity
+		);
+
+	void(JPH_API_CALL* OnCharacterContactSolve)(void* userData,
+		const JPH_CharacterVirtual* character,
+		const JPH_CharacterVirtual* otherCharacter,
 		const JPH_SubShapeID subShapeID2,
 		const JPH_RVec3* contactPosition,
 		const JPH_Vec3* contactNormal,

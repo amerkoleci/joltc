@@ -7344,10 +7344,28 @@ void JPH_CharacterVirtual_SetInnerBodyShape(JPH_CharacterVirtual* character, con
 	AsCharacterVirtual(character)->SetInnerBodyShape(AsShape(shape));
 }
 
+uint32_t JPH_CharacterVirtual_GetNumContacts(JPH_CharacterVirtual* character)
+{
+	return (uint32_t)AsCharacterVirtual(character)->GetActiveContacts().size();
+}
+
+bool JPH_CharacterVirtual_HasCollidedWithBody(JPH_CharacterVirtual* character, const JPH_BodyID body)
+{
+	return AsCharacterVirtual(character)->HasCollidedWith(JPH::BodyID(body));
+}
+
+bool JPH_CharacterVirtual_HasCollidedWith(JPH_CharacterVirtual* character, const JPH_CharacterVirtual* other)
+{
+	return AsCharacterVirtual(character)->HasCollidedWith(AsCharacterVirtual(other));
+}
+
 /* CharacterContactListener */
 class ManagedCharacterContactListener final : public JPH::CharacterContactListener
 {
 public:
+	JPH_CharacterContactListener_Procs procs = {};
+	void* userData = nullptr;
+
 	void OnAdjustBodyVelocity(const CharacterVirtual* inCharacter, const Body& inBody2, Vec3& ioLinearVelocity, Vec3& ioAngularVelocity) override
 	{
 		JPH_Vec3 linearVelocity, angularVelocity;
@@ -7358,11 +7376,14 @@ public:
 		{
 			procs.OnAdjustBodyVelocity(
 				userData,
-				reinterpret_cast<const JPH_CharacterVirtual*>(inCharacter),
-				reinterpret_cast<const JPH_Body*>(&inBody2),
+				ToCharacterVirtual(inCharacter),
+				ToBody(&inBody2),
 				&linearVelocity,
 				&angularVelocity
 			);
+
+			ioLinearVelocity = ToJolt(linearVelocity);
+			ioAngularVelocity = ToJolt(angularVelocity);
 		}
 	}
 
@@ -7372,10 +7393,25 @@ public:
 		{
 			return procs.OnContactValidate(
 				userData,
-				reinterpret_cast<const JPH_CharacterVirtual*>(inCharacter),
+				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
 				(JPH_SubShapeID)inSubShapeID2.GetValue()
-			) == 1;
+			);
+		}
+
+		return true;
+	}
+
+	bool OnCharacterContactValidate(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2)  override
+	{
+		if (procs.OnCharacterContactValidate)
+		{
+			return procs.OnCharacterContactValidate(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				ToCharacterVirtual(inOtherCharacter),
+				(JPH_SubShapeID)inSubShapeID2.GetValue()
+			);
 		}
 
 		return true;
@@ -7383,8 +7419,6 @@ public:
 
 	void OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		JPH_UNUSED(ioSettings);
-
 		if (procs.OnContactAdded)
 		{
 			JPH_RVec3 contactPosition;
@@ -7399,8 +7433,37 @@ public:
 
 			procs.OnContactAdded(
 				userData,
-				reinterpret_cast<const JPH_CharacterVirtual*>(inCharacter),
+				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
+				(JPH_SubShapeID)inSubShapeID2.GetValue(),
+				&contactPosition,
+				&contactNormal,
+				&settings
+			);
+
+			ioSettings.mCanPushCharacter = settings.canPushCharacter;
+			ioSettings.mCanReceiveImpulses = settings.canReceiveImpulses;
+		}
+	}
+
+	void OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+	{
+		if (procs.OnCharacterContactAdded)
+		{
+			JPH_RVec3 contactPosition;
+			JPH_Vec3 contactNormal;
+
+			FromJolt(inContactPosition, &contactPosition);
+			FromJolt(inContactNormal, &contactNormal);
+
+			JPH_CharacterContactSettings settings = {};
+			settings.canPushCharacter = ioSettings.mCanPushCharacter;
+			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
+
+			procs.OnCharacterContactAdded(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				ToCharacterVirtual(inOtherCharacter),
 				(JPH_SubShapeID)inSubShapeID2.GetValue(),
 				&contactPosition,
 				&contactNormal,
@@ -7430,7 +7493,7 @@ public:
 
 			procs.OnContactSolve(
 				userData,
-				reinterpret_cast<const JPH_CharacterVirtual*>(inCharacter),
+				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
 				(JPH_SubShapeID)inSubShapeID2.GetValue(),
 				&contactPosition,
@@ -7441,12 +7504,39 @@ public:
 				&newCharacterVelocity
 			);
 
-			ioNewCharacterVelocity = ToJolt(&newCharacterVelocity);
+			ioNewCharacterVelocity = ToJolt(newCharacterVelocity);
 		}
 	}
 
-	JPH_CharacterContactListener_Procs procs = {};
-	void* userData = nullptr;
+	void OnCharacterContactSolve(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) override
+	{
+		if (procs.OnCharacterContactSolve)
+		{
+			JPH_RVec3 contactPosition;
+			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
+
+			FromJolt(inContactPosition, &contactPosition);
+			FromJolt(inContactNormal, &contactNormal);
+			FromJolt(inContactVelocity, &contactVelocity);
+			FromJolt(inCharacterVelocity, &characterVelocity);
+			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
+
+			procs.OnCharacterContactSolve(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				ToCharacterVirtual(inOtherCharacter),
+				(JPH_SubShapeID)inSubShapeID2.GetValue(),
+				&contactPosition,
+				&contactNormal,
+				&contactVelocity,
+				reinterpret_cast<const JPH_PhysicsMaterial*>(inContactMaterial),
+				&characterVelocity,
+				&newCharacterVelocity
+			);
+
+			ioNewCharacterVelocity = ToJolt(newCharacterVelocity);
+		}
+	}
 };
 
 JPH_CharacterContactListener* JPH_CharacterContactListener_Create(JPH_CharacterContactListener_Procs procs, void* userData)
