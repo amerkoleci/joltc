@@ -346,6 +346,11 @@ static inline JPH::AABox ToJolt(const JPH_AABox* value)
 }
 
 #if defined(JPH_DOUBLE_PRECISION)
+static inline JPH::RVec3 ToJolt(const JPH_RVec3& vec)
+{
+	return JPH::RVec3(vec.x, vec.y, vec.z);
+}
+
 static inline JPH::RVec3 ToJolt(const JPH_RVec3* vec)
 {
 	return JPH::RVec3(vec->x, vec->y, vec->z);
