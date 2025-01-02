@@ -142,7 +142,6 @@ FetchContent_Declare(
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
-set_property(TARGET "Jolt" PROPERTY FOLDER "third_party")
 
 if (XCODE)
 	# Ensure that we enable SSE4.2 for the x86_64 build, XCode builds multiple architectures

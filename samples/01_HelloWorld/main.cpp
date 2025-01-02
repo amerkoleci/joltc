@@ -123,6 +123,8 @@ int main(void)
 		auto mAnimatedCharacterVirtual = JPH_CharacterVirtual_Create(&characterSettings, &characterVirtualPosition, nullptr, 0, system);
 	}
 
+	JPH_SixDOFConstraintSettings jointSettings;
+	JPH_SixDOFConstraintSettings_Init(&jointSettings);
 
 	// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
 	const float cDeltaTime = 1.0f / 60.0f;

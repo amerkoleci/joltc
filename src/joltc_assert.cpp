@@ -159,6 +159,11 @@ static_assert(JPH_MotorState_Off == (int)JPH::EMotorState::Off);
 static_assert(JPH_MotorState_Velocity == (int)JPH::EMotorState::Velocity);
 static_assert(JPH_MotorState_Position == (int)JPH::EMotorState::Position);
 
+// JPH_SwingType
+static_assert(sizeof(JPH_SwingType) == sizeof(uint32_t));
+static_assert(JPH_SwingType_Cone == (int)JPH::ESwingType::Cone);
+static_assert(JPH_SwingType_Pyramid == (int)JPH::ESwingType::Pyramid);
+
 // JPH_SixDOFConstraintAxis
 static_assert(sizeof(JPH_SixDOFConstraintAxis) == sizeof(uint32_t));
 static_assert(JPH_SixDOFConstraintAxis_TranslationX == (int)JPH::SixDOFConstraintSettings::EAxis::TranslationX);
