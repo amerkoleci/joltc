@@ -563,12 +563,12 @@ typedef void JPH_CollidePointResultCallback(void* context, const JPH_CollidePoin
 typedef void JPH_CollideShapeResultCallback(void* context, const JPH_CollideShapeResult* result);
 typedef void JPH_CastShapeResultCallback(void* context, const JPH_ShapeCastResult* result);
 
-typedef float JPH_CastRayCollector(void* context, const JPH_RayCastResult* result);
-typedef float JPH_RayCastBodyCollector(void* context, const JPH_BroadPhaseCastResult* result);
-typedef float JPH_CollideShapeBodyCollector(void* context, const JPH_BodyID result);
-typedef float JPH_CollidePointCollector(void* context, const JPH_CollidePointResult* result);
-typedef float JPH_CollideShapeCollector(void* context, const JPH_CollideShapeResult* result);
-typedef float JPH_CastShapeCollector(void* context, const JPH_ShapeCastResult* result);
+typedef float JPH_CastRayCollectorCallback(void* context, const JPH_RayCastResult* result);
+typedef float JPH_RayCastBodyCollectorCallback(void* context, const JPH_BroadPhaseCastResult* result);
+typedef float JPH_CollideShapeBodyCollectorCallback(void* context, const JPH_BodyID result);
+typedef float JPH_CollidePointCollectorCallback(void* context, const JPH_CollidePointResult* result);
+typedef float JPH_CollideShapeCollectorCallback(void* context, const JPH_CollideShapeResult* result);
+typedef float JPH_CastShapeCollectorCallback(void* context, const JPH_ShapeCastResult* result);
 
 typedef struct JPH_BroadPhaseLayerInterface			JPH_BroadPhaseLayerInterface;
 typedef struct JPH_ObjectVsBroadPhaseLayerFilter	JPH_ObjectVsBroadPhaseLayerFilter;
@@ -868,6 +868,7 @@ typedef struct JPH_CharacterContactSettings {
 
 typedef struct JPH_CharacterContactListener			JPH_CharacterContactListener;
 typedef struct JPH_CharacterVirtual                 JPH_CharacterVirtual;  /* Inherics JPH_CharacterBase */
+typedef struct JPH_CharacterVsCharacterCollision	JPH_CharacterVsCharacterCollision;
 
 typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* mssage);
 typedef bool(JPH_API_CALL* JPH_AssertFailureFunc)(const char* expression, const char* mssage, const char* file, uint32_t line);
@@ -1679,7 +1680,7 @@ JPH_CAPI void JPH_ShapeCastSettings_Init(JPH_ShapeCastSettings* settings);
 //--------------------------------------------------------------------------------------------------
 JPH_CAPI bool JPH_BroadPhaseQuery_CastRay(const JPH_BroadPhaseQuery* query,
 	const JPH_Vec3* origin, const JPH_Vec3* direction,
-	JPH_RayCastBodyCollector* callback, void* userData,
+	JPH_RayCastBodyCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter);
 
@@ -1691,17 +1692,17 @@ JPH_CAPI bool JPH_BroadPhaseQuery_CastRay2(const JPH_BroadPhaseQuery* query,
 	JPH_ObjectLayerFilter* objectLayerFilter);
 
 JPH_CAPI bool JPH_BroadPhaseQuery_CollideAABox(const JPH_BroadPhaseQuery* query,
-	const JPH_AABox* box, JPH_CollideShapeBodyCollector* callback, void* userData,
+	const JPH_AABox* box, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter);
 
 JPH_CAPI bool JPH_BroadPhaseQuery_CollideSphere(const JPH_BroadPhaseQuery* query,
-	const JPH_Vec3* center, float radius, JPH_CollideShapeBodyCollector* callback, void* userData,
+	const JPH_Vec3* center, float radius, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter);
 
 JPH_CAPI bool JPH_BroadPhaseQuery_CollidePoint(const JPH_BroadPhaseQuery* query,
-	const JPH_Vec3* point, JPH_CollideShapeBodyCollector* callback, void* userData,
+	const JPH_Vec3* point, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter);
 
@@ -1718,7 +1719,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay(const JPH_NarrowPhaseQuery* query,
 JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
 	const JPH_RayCastSettings* rayCastSettings,
-	JPH_CastRayCollector* callback, void* userData,
+	JPH_CastRayCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -1736,7 +1737,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
-	JPH_CollidePointCollector* callback, void* userData,
+	JPH_CollidePointCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -1755,7 +1756,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* quer
 	const JPH_Shape* shape, const JPH_Vec3* scale, const JPH_RMatrix4x4* centerOfMassTransform,
 	const JPH_CollideShapeSettings* settings,
 	JPH_RVec3* baseOffset,
-	JPH_CollideShapeCollector* callback, void* userData,
+	JPH_CollideShapeCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -1777,7 +1778,7 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	const JPH_RMatrix4x4* worldTransform, const JPH_Vec3* direction,
 	const JPH_ShapeCastSettings* settings,
 	JPH_RVec3* baseOffset,
-	JPH_CastShapeCollector* callback, void* userData,
+	JPH_CastShapeCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -2062,6 +2063,7 @@ JPH_CAPI JPH_CharacterVirtual* JPH_CharacterVirtual_Create(const JPH_CharacterVi
 	JPH_PhysicsSystem* system);
 
 JPH_CAPI void JPH_CharacterVirtual_SetListener(JPH_CharacterVirtual* character, JPH_CharacterContactListener* listener);
+JPH_CAPI void JPH_CharacterVirtual_SetCharacterVsCharacterCollision(JPH_CharacterVirtual* character, JPH_CharacterVsCharacterCollision* characterVsCharacterCollision);
 
 JPH_CAPI void JPH_CharacterVirtual_GetLinearVelocity(JPH_CharacterVirtual* character, JPH_Vec3* velocity);
 JPH_CAPI void JPH_CharacterVirtual_SetLinearVelocity(JPH_CharacterVirtual* character, const JPH_Vec3* velocity);
@@ -2177,6 +2179,30 @@ typedef struct JPH_CharacterContactListener_Procs {
 
 JPH_CAPI JPH_CharacterContactListener* JPH_CharacterContactListener_Create(JPH_CharacterContactListener_Procs procs, void* userData);
 JPH_CAPI void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener);
+
+/* JPH_CharacterVsCharacterCollision */
+typedef struct JPH_CharacterVsCharacterCollision_Procs {
+	void (JPH_API_CALL* CollideCharacter)(void* userData,
+		const JPH_CharacterVirtual* character,
+		const JPH_RMatrix4x4* centerOfMassTransform,
+		const JPH_CollideShapeSettings* collideShapeSettings,
+		const JPH_RVec3* baseOffset
+		);
+
+	void (JPH_API_CALL* CastCharacter)(void* userData,
+		const JPH_CharacterVirtual* character,
+		const JPH_RMatrix4x4* centerOfMassTransform,
+		const JPH_Vec3* direction,
+		const JPH_ShapeCastSettings* shapeCastSettings,
+		const JPH_RVec3* baseOffset
+		);
+} JPH_CharacterVsCharacterCollision_Procs;
+
+JPH_CAPI JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(JPH_CharacterVsCharacterCollision_Procs procs, void* userData);
+JPH_CAPI JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_CreateSimple(void);
+JPH_CAPI void JPH_CharacterVsCharacterCollisionSimple_AddCharacter(JPH_CharacterVsCharacterCollision* characterVsCharacter, JPH_CharacterVirtual* character);
+JPH_CAPI void JPH_CharacterVsCharacterCollisionSimple_RemoveCharacter(JPH_CharacterVsCharacterCollision* characterVsCharacter, JPH_CharacterVirtual* character);
+JPH_CAPI void JPH_CharacterVsCharacterCollision_Destroy(JPH_CharacterVsCharacterCollision* listener);
 
 /* DebugRenderer */
 typedef struct JPH_DebugRenderer_Procs {

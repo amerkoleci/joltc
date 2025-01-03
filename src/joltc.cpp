@@ -5254,6 +5254,16 @@ static inline JPH::CollideShapeSettings ToJolt(const JPH_CollideShapeSettings* s
 	return result;
 }
 
+static inline JPH_CollideShapeSettings FromJolt(const JPH::CollideShapeSettings& joltSettings)
+{
+	JPH_CollideShapeSettings result{};
+	JPH_CollideSettingsBase_Init(joltSettings, &result.base);
+
+	result.maxSeparationDistance = joltSettings.mMaxSeparationDistance;
+	result.backFaceMode = static_cast<JPH_BackFaceMode>(joltSettings.mBackFaceMode);
+	return result;
+}
+
 void JPH_CollideShapeSettings_Init(JPH_CollideShapeSettings* settings)
 {
 	JPH_ASSERT(settings);
@@ -5269,7 +5279,7 @@ void JPH_CollideShapeSettings_Init(JPH_CollideShapeSettings* settings)
 //--------------------------------------------------------------------------------------------------
 // JPH_ShapeCastSettings
 //--------------------------------------------------------------------------------------------------
-static inline JPH::ShapeCastSettings ToJolt(const JPH_ShapeCastSettings* settings)
+static inline ShapeCastSettings ToJolt(const JPH_ShapeCastSettings* settings)
 {
 	JPH::ShapeCastSettings result{};
 	if (settings == nullptr)
@@ -5286,6 +5296,18 @@ static inline JPH::ShapeCastSettings ToJolt(const JPH_ShapeCastSettings* setting
 	result.mBackFaceModeConvex = static_cast<EBackFaceMode>(settings->backFaceModeConvex);
 	result.mUseShrunkenShapeAndConvexRadius = settings->useShrunkenShapeAndConvexRadius;
 	result.mReturnDeepestPoint = settings->returnDeepestPoint;
+	return result;
+}
+
+static inline JPH_ShapeCastSettings FromJolt(const ShapeCastSettings& joltSettings)
+{
+	JPH_ShapeCastSettings result{};
+	JPH_CollideSettingsBase_Init(joltSettings, &result.base);
+
+	result.backFaceModeTriangles = static_cast<JPH_BackFaceMode>(joltSettings.mBackFaceModeTriangles);
+	result.backFaceModeConvex = static_cast<JPH_BackFaceMode>(joltSettings.mBackFaceModeConvex);
+	result.useShrunkenShapeAndConvexRadius = joltSettings.mUseShrunkenShapeAndConvexRadius;
+	result.returnDeepestPoint = joltSettings.mReturnDeepestPoint;
 	return result;
 }
 
@@ -5306,10 +5328,14 @@ void JPH_ShapeCastSettings_Init(JPH_ShapeCastSettings* settings)
 //--------------------------------------------------------------------------------------------------
 // JPH_BroadPhaseQuery
 //--------------------------------------------------------------------------------------------------
-class RayCastBodyCollectorCallback : public RayCastBodyCollector
+class RayCastBodyCollectorCallback final : public RayCastBodyCollector
 {
 public:
-	RayCastBodyCollectorCallback(JPH_RayCastBodyCollector* proc, void* userData) : proc(proc), userData(userData) {}
+	RayCastBodyCollectorCallback(JPH_RayCastBodyCollectorCallback* proc_, void* userData_)
+		: proc(proc_)
+		, userData(userData_)
+	{
+	}
 
 	void AddHit(const BroadPhaseCastResult& result) override
 	{
@@ -5322,18 +5348,18 @@ public:
 		hadHit = true;
 	}
 
-	JPH_RayCastBodyCollector* proc;
+	JPH_RayCastBodyCollectorCallback* proc;
 	void* userData;
 	bool hadHit = false;
 	uint32_t _padding;
 };
 
-class CollideShapeBodyCollectorCallback : public CollideShapeBodyCollector
+class CollideShapeBodyCollectorCallback final : public CollideShapeBodyCollector
 {
 public:
-	CollideShapeBodyCollectorCallback(JPH_CollideShapeBodyCollector* proc, void* userData)
-		: proc(proc)
-		, userData(userData)
+	CollideShapeBodyCollectorCallback(JPH_CollideShapeBodyCollectorCallback* proc_, void* userData_)
+		: proc(proc_)
+		, userData(userData_)
 	{
 	}
 
@@ -5345,7 +5371,7 @@ public:
 		hadHit = true;
 	}
 
-	JPH_CollideShapeBodyCollector* proc;
+	JPH_CollideShapeBodyCollectorCallback* proc;
 	void* userData;
 	bool hadHit = false;
 	uint32_t _padding;
@@ -5353,7 +5379,7 @@ public:
 
 bool JPH_BroadPhaseQuery_CastRay(const JPH_BroadPhaseQuery* query,
 	const JPH_Vec3* origin, const JPH_Vec3* direction,
-	JPH_RayCastBodyCollector* callback, void* userData,
+	JPH_RayCastBodyCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter)
 {
@@ -5434,7 +5460,7 @@ bool JPH_BroadPhaseQuery_CastRay2(const JPH_BroadPhaseQuery* query,
 }
 
 bool JPH_BroadPhaseQuery_CollideAABox(const JPH_BroadPhaseQuery* query,
-	const JPH_AABox* box, JPH_CollideShapeBodyCollector* callback, void* userData,
+	const JPH_AABox* box, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter)
 {
@@ -5447,7 +5473,7 @@ bool JPH_BroadPhaseQuery_CollideAABox(const JPH_BroadPhaseQuery* query,
 }
 
 bool JPH_BroadPhaseQuery_CollideSphere(const JPH_BroadPhaseQuery* query,
-	const JPH_Vec3* center, float radius, JPH_CollideShapeBodyCollector* callback, void* userData,
+	const JPH_Vec3* center, float radius, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter)
 {
@@ -5459,7 +5485,7 @@ bool JPH_BroadPhaseQuery_CollideSphere(const JPH_BroadPhaseQuery* query,
 }
 
 bool JPH_BroadPhaseQuery_CollidePoint(const JPH_BroadPhaseQuery* query,
-	const JPH_Vec3* point, JPH_CollideShapeBodyCollector* callback, void* userData,
+	const JPH_Vec3* point, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter)
 {
@@ -5476,9 +5502,9 @@ bool JPH_BroadPhaseQuery_CollidePoint(const JPH_BroadPhaseQuery* query,
 class CastRayCollectorCallback final : public  JPH::CastRayCollector
 {
 public:
-	CastRayCollectorCallback(JPH_CastRayCollector* proc, void* userData)
-		: proc(proc)
-		, userData(userData)
+	CastRayCollectorCallback(JPH_CastRayCollectorCallback* proc_, void* userData_)
+		: proc(proc_)
+		, userData(userData_)
 	{
 	}
 
@@ -5494,18 +5520,22 @@ public:
 		hadHit = true;
 	}
 
-	JPH_CastRayCollector* proc;
+	JPH_CastRayCollectorCallback* proc;
 	void* userData;
 	bool hadHit = false;
 	uint32_t _padding;
 };
 
-class CollidePointCollectorCallback : public CollidePointCollector
+class CollidePointCollectorCallback final : public CollidePointCollector
 {
 public:
-	CollidePointCollectorCallback(JPH_CollidePointCollector* proc, void* userData) : proc(proc), userData(userData) {}
+	CollidePointCollectorCallback(JPH_CollidePointCollectorCallback* proc_, void* userData_)
+		: proc(proc_)
+		, userData(userData_)
+	{
+	}
 
-	virtual void AddHit(const CollidePointResult& result)
+	void AddHit(const CollidePointResult& result) override
 	{
 		JPH_CollidePointResult hit;
 		hit.bodyID = result.mBodyID.GetIndexAndSequenceNumber();
@@ -5516,7 +5546,7 @@ public:
 		hadHit = true;
 	}
 
-	JPH_CollidePointCollector* proc;
+	JPH_CollidePointCollectorCallback* proc;
 	void* userData;
 	bool hadHit = false;
 	uint32_t _padding;
@@ -5525,11 +5555,15 @@ public:
 class CollideShapeCollectorCallback : public CollideShapeCollector
 {
 public:
-	CollideShapeCollectorCallback(JPH_CollideShapeCollector* proc, void* userData) : proc(proc), userData(userData) {}
-
-	virtual void AddHit(const CollideShapeResult& result)
+	CollideShapeCollectorCallback(JPH_CollideShapeCollectorCallback* proc, void* userData) 
+		: proc(proc)
+		, userData(userData)
 	{
-		JPH_CollideShapeResult hit;
+	}
+
+	void AddHit(const CollideShapeResult& result) override
+	{
+		JPH_CollideShapeResult hit{};
 		FromJolt(result.mContactPointOn1, &hit.contactPointOn1);
 		FromJolt(result.mContactPointOn2, &hit.contactPointOn2);
 		FromJolt(result.mPenetrationAxis, &hit.penetrationAxis);
@@ -5543,20 +5577,24 @@ public:
 		hadHit = true;
 	}
 
-	JPH_CollideShapeCollector* proc;
+	JPH_CollideShapeCollectorCallback* proc;
 	void* userData;
 	bool hadHit = false;
 	uint32_t _padding;
 };
 
-class CastShapeCollectorCallback : public CastShapeCollector
+class CastShapeCollectorCallback final : public CastShapeCollector
 {
 public:
-	CastShapeCollectorCallback(JPH_CastShapeCollector* proc, void* userData) : proc(proc), userData(userData) {}
-
-	virtual void AddHit(const ShapeCastResult& result)
+	CastShapeCollectorCallback(JPH_CastShapeCollectorCallback* proc_, void* userData_)
+		: proc(proc_)
+		, userData(userData_)
 	{
-		JPH_ShapeCastResult hit;
+	}
+
+	void AddHit(const ShapeCastResult& result) override
+	{
+		JPH_ShapeCastResult hit{};
 		FromJolt(result.mContactPointOn1, &hit.contactPointOn1);
 		FromJolt(result.mContactPointOn2, &hit.contactPointOn2);
 		FromJolt(result.mPenetrationAxis, &hit.penetrationAxis);
@@ -5572,7 +5610,7 @@ public:
 		hadHit = true;
 	}
 
-	JPH_CastShapeCollector* proc;
+	JPH_CastShapeCollectorCallback* proc;
 	void* userData;
 	bool hadHit = false;
 	uint32_t _padding;
@@ -5612,7 +5650,7 @@ bool JPH_NarrowPhaseQuery_CastRay(const JPH_NarrowPhaseQuery* query,
 bool JPH_NarrowPhaseQuery_CastRay2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
 	const JPH_RayCastSettings* rayCastSettings,
-	JPH_CastRayCollector* callback, void* userData,
+	JPH_CastRayCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -5737,7 +5775,7 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 
 bool JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
-	JPH_CollidePointCollector* callback, void* userData,
+	JPH_CollidePointCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -5853,7 +5891,7 @@ bool JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape, const JPH_Vec3* scale, const JPH_RMatrix4x4* centerOfMassTransform,
 	const JPH_CollideShapeSettings* settings,
 	JPH_RVec3* baseOffset,
-	JPH_CollideShapeCollector* callback, void* userData,
+	JPH_CollideShapeCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -6018,7 +6056,7 @@ bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	const JPH_RMatrix4x4* worldTransform, const JPH_Vec3* direction,
 	const JPH_ShapeCastSettings* settings,
 	JPH_RVec3* baseOffset,
-	JPH_CastShapeCollector* callback, void* userData,
+	JPH_CastShapeCollectorCallback* callback, void* userData,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -7176,20 +7214,38 @@ JPH_CharacterVirtual* JPH_CharacterVirtual_Create(const JPH_CharacterVirtualSett
 		system->physicsSystem);
 	joltCharacter->AddRef();
 
-	return reinterpret_cast<JPH_CharacterVirtual*>(joltCharacter);
+	return ToCharacterVirtual(joltCharacter);
 }
 
 void JPH_CharacterVirtual_SetListener(JPH_CharacterVirtual* character, JPH_CharacterContactListener* listener)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	auto joltListener = reinterpret_cast<JPH::CharacterContactListener*>(listener);
-	joltCharacter->SetListener(joltListener);
+	if (listener)
+	{
+		auto joltListener = reinterpret_cast<JPH::CharacterContactListener*>(listener);
+		AsCharacterVirtual(character)->SetListener(joltListener);
+	}
+	else
+	{
+		AsCharacterVirtual(character)->SetListener(nullptr);
+	}
+}
+
+void JPH_CharacterVirtual_SetCharacterVsCharacterCollision(JPH_CharacterVirtual* character, JPH_CharacterVsCharacterCollision* characterVsCharacterCollision)
+{
+	if (characterVsCharacterCollision)
+	{
+		auto joltCharacterVsCharacterCollision = reinterpret_cast<JPH::CharacterVsCharacterCollision*>(characterVsCharacterCollision);
+		AsCharacterVirtual(character)->SetCharacterVsCharacterCollision(joltCharacterVsCharacterCollision);
+	}
+	else
+	{
+		AsCharacterVirtual(character)->SetCharacterVsCharacterCollision(nullptr);
+	}
 }
 
 void JPH_CharacterVirtual_GetLinearVelocity(JPH_CharacterVirtual* character, JPH_Vec3* velocity)
 {
-	auto joltVector = AsCharacterVirtual(character)->GetLinearVelocity();
-	FromJolt(joltVector, velocity);
+	FromJolt(AsCharacterVirtual(character)->GetLinearVelocity(), velocity);
 }
 
 void JPH_CharacterVirtual_SetLinearVelocity(JPH_CharacterVirtual* character, const JPH_Vec3* velocity)
@@ -7209,22 +7265,18 @@ void JPH_CharacterVirtual_SetPosition(JPH_CharacterVirtual* character, const JPH
 
 void JPH_CharacterVirtual_GetRotation(JPH_CharacterVirtual* character, JPH_Quat* rotation)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	auto jolt_quat = joltCharacter->GetRotation();
+	auto jolt_quat = AsCharacterVirtual(character)->GetRotation();
 	FromJolt(jolt_quat, rotation);
 }
 
 void JPH_CharacterVirtual_SetRotation(JPH_CharacterVirtual* character, const JPH_Quat* rotation)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetRotation(ToJolt(rotation));
+	AsCharacterVirtual(character)->SetRotation(ToJolt(rotation));
 }
 
 void JPH_CharacterVirtual_GetWorldTransform(JPH_CharacterVirtual* character, JPH_RMatrix4x4* result)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-
-	const JPH::RMat44& mat = joltCharacter->GetWorldTransform();
+	const JPH::RMat44& mat = AsCharacterVirtual(character)->GetWorldTransform();
 	FromJolt(mat, result);
 }
 
@@ -7246,74 +7298,62 @@ void JPH_CharacterVirtual_SetMass(JPH_CharacterVirtual* character, float value)
 
 float JPH_CharacterVirtual_GetMaxStrength(JPH_CharacterVirtual* character)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetMaxStrength();
+	return AsCharacterVirtual(character)->GetMaxStrength();
 }
 
 void JPH_CharacterVirtual_SetMaxStrength(JPH_CharacterVirtual* character, float value)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetMaxStrength(value);
+	AsCharacterVirtual(character)->SetMaxStrength(value);
 }
 
 float JPH_CharacterVirtual_GetPenetrationRecoverySpeed(JPH_CharacterVirtual* character)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetPenetrationRecoverySpeed();
+	return AsCharacterVirtual(character)->GetPenetrationRecoverySpeed();
 }
 
 void JPH_CharacterVirtual_SetPenetrationRecoverySpeed(JPH_CharacterVirtual* character, float value)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetPenetrationRecoverySpeed(value);
+	AsCharacterVirtual(character)->SetPenetrationRecoverySpeed(value);
 }
 
 bool JPH_CharacterVirtual_GetEnhancedInternalEdgeRemoval(JPH_CharacterVirtual* character)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetEnhancedInternalEdgeRemoval();
+	return AsCharacterVirtual(character)->GetEnhancedInternalEdgeRemoval();
 }
 
 void JPH_CharacterVirtual_SetEnhancedInternalEdgeRemoval(JPH_CharacterVirtual* character, bool value)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetEnhancedInternalEdgeRemoval(value);
+	AsCharacterVirtual(character)->SetEnhancedInternalEdgeRemoval(value);
 }
 
 float JPH_CharacterVirtual_GetCharacterPadding(JPH_CharacterVirtual* character)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetCharacterPadding();
+	return AsCharacterVirtual(character)->GetCharacterPadding();
 }
 
 uint32_t JPH_CharacterVirtual_GetMaxNumHits(JPH_CharacterVirtual* character)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetMaxNumHits();
+	return AsCharacterVirtual(character)->GetMaxNumHits();
 }
 
 void JPH_CharacterVirtual_SetMaxNumHits(JPH_CharacterVirtual* character, uint32_t value)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetMaxNumHits(value);
+	AsCharacterVirtual(character)->SetMaxNumHits(value);
 }
 
 float JPH_CharacterVirtual_GetHitReductionCosMaxAngle(JPH_CharacterVirtual* character)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetHitReductionCosMaxAngle();
+	return AsCharacterVirtual(character)->GetHitReductionCosMaxAngle();
 }
 
 void JPH_CharacterVirtual_SetHitReductionCosMaxAngle(JPH_CharacterVirtual* character, float value)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	joltCharacter->SetHitReductionCosMaxAngle(value);
+	AsCharacterVirtual(character)->SetHitReductionCosMaxAngle(value);
 }
 
 bool JPH_CharacterVirtual_GetMaxHitsExceeded(JPH_CharacterVirtual* character)
 {
-	auto joltCharacter = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	return joltCharacter->GetMaxHitsExceeded();
+	return AsCharacterVirtual(character)->GetMaxHitsExceeded();
 }
 
 void JPH_CharacterVirtual_GetShapeOffset(JPH_CharacterVirtual* character, JPH_Vec3* result)
@@ -7690,7 +7730,103 @@ JPH_CharacterContactListener* JPH_CharacterContactListener_Create(JPH_CharacterC
 void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener)
 {
 	if (listener)
+	{
 		delete reinterpret_cast<ManagedCharacterContactListener*>(listener);
+	}
+}
+
+/* JPH_CharacterVsCharacterCollision */
+class ManagedCharacterVsCharacterCollision final : public JPH::CharacterVsCharacterCollision
+{
+public:
+	JPH_CharacterVsCharacterCollision_Procs procs = {};
+	void* userData = nullptr;
+
+	void CollideCharacter(const CharacterVirtual* inCharacter, 
+		RMat44Arg inCenterOfMassTransform, 
+		const CollideShapeSettings& inCollideShapeSettings, 
+		RVec3Arg inBaseOffset, 
+		CollideShapeCollector& ioCollector) const override
+	{
+		if (procs.CollideCharacter)
+		{
+			JPH_RMatrix4x4 centerOfMassTransform;
+			JPH_RVec3 baseOffset;
+
+			JPH_CollideShapeSettings collideShapeSettings = FromJolt(inCollideShapeSettings);
+			FromJolt(inCenterOfMassTransform, &centerOfMassTransform);
+			FromJolt(inBaseOffset, &baseOffset);
+
+			procs.CollideCharacter(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				&centerOfMassTransform,
+				&collideShapeSettings,
+				&baseOffset
+			);
+		}
+	}
+
+	void CastCharacter(const CharacterVirtual* inCharacter, 
+		RMat44Arg inCenterOfMassTransform, 
+		Vec3Arg inDirection, 
+		const ShapeCastSettings& inShapeCastSettings,
+		RVec3Arg inBaseOffset, 
+		CastShapeCollector& ioCollector) const override
+	{
+		if (procs.CastCharacter)
+		{
+			JPH_RMatrix4x4 centerOfMassTransform;
+			JPH_Vec3 direction;
+			JPH_RVec3 baseOffset;
+
+			JPH_ShapeCastSettings shapeCastSettings = FromJolt(inShapeCastSettings);
+			FromJolt(inCenterOfMassTransform, &centerOfMassTransform);
+			FromJolt(inDirection, &direction);
+			FromJolt(inBaseOffset, &baseOffset);
+
+			procs.CastCharacter(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				&centerOfMassTransform,
+				&direction,
+				&shapeCastSettings,
+				&baseOffset
+			);
+		}
+	}
+};
+
+JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(JPH_CharacterVsCharacterCollision_Procs procs, void* userData)
+{
+	auto impl = new ManagedCharacterVsCharacterCollision();
+	impl->procs = procs;
+	impl->userData = userData;
+	return reinterpret_cast<JPH_CharacterVsCharacterCollision*>(impl);
+}
+
+JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_CreateSimple(void)
+{
+	CharacterVsCharacterCollisionSimple* impl = new CharacterVsCharacterCollisionSimple();
+	return reinterpret_cast<JPH_CharacterVsCharacterCollision*>(impl);
+}
+
+void JPH_CharacterVsCharacterCollisionSimple_AddCharacter(JPH_CharacterVsCharacterCollision* characterVsCharacter, JPH_CharacterVirtual* character)
+{
+	reinterpret_cast<CharacterVsCharacterCollisionSimple*>(characterVsCharacter)->Add(AsCharacterVirtual(character));
+}
+
+void JPH_CharacterVsCharacterCollisionSimple_RemoveCharacter(JPH_CharacterVsCharacterCollision* characterVsCharacter, JPH_CharacterVirtual* character)
+{
+	reinterpret_cast<CharacterVsCharacterCollisionSimple*>(characterVsCharacter)->Remove(AsCharacterVirtual(character));
+}
+
+void JPH_CharacterVsCharacterCollision_Destroy(JPH_CharacterVsCharacterCollision* listener)
+{
+	if (listener)
+	{
+		delete reinterpret_cast<JPH::CharacterVsCharacterCollision*>(listener);
+	}
 }
 
 #ifdef JPH_DEBUG_RENDERER
