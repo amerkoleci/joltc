@@ -1037,6 +1037,17 @@ JPH_CAPI void JPH_Vec3_Normalized(const JPH_Vec3* v, JPH_Vec3* result);
 JPH_CAPI void JPH_Vec3_Cross(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
 JPH_CAPI void JPH_Vec3_Abs(const JPH_Vec3* v, JPH_Vec3* result);
 
+JPH_CAPI float JPH_Vec3_Length(const JPH_Vec3* v);
+JPH_CAPI float JPH_Vec3_LengthSquared(const JPH_Vec3* v);
+
+JPH_CAPI void JPH_Vec3_Multiply(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_MultiplyScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_DotProduct(const JPH_Vec3* v1, const JPH_Vec3* v2, float* result);
+JPH_CAPI void JPH_Vec3_Normalize(const JPH_Vec3* v, JPH_Vec3* result);
+
+JPH_CAPI void JPH_Vec3_Add(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_Subtract(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
+
 JPH_CAPI void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result);
 JPH_CAPI void JPH_Matrix4x4_Identity(JPH_Matrix4x4* result);
 JPH_CAPI void JPH_Matrix4x4_Rotation(JPH_Matrix4x4* result, const JPH_Quat* rotation);

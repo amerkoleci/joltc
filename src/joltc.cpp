@@ -1235,6 +1235,66 @@ JPH_CAPI void JPH_Vec3_Abs(const JPH_Vec3* v, JPH_Vec3* result)
 	FromJolt(joltV.Abs(), result);
 }
 
+float JPH_Vec3_Length(const JPH_Vec3* v)
+{
+    JPH_ASSERT(v);
+    JPH::Vec3 joltVec = ToJolt(v);
+    return joltVec.Length();
+}
+
+float JPH_Vec3_LengthSquared(const JPH_Vec3* v)
+{
+    JPH_ASSERT(v);
+    JPH::Vec3 joltVec = ToJolt(v);
+    return joltVec.LengthSq();
+}
+
+void JPH_Vec3_Multiply(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
+{
+    JPH_ASSERT(v1 && v2 && result);
+    JPH::Vec3 joltVec1 = ToJolt(v1);
+    JPH::Vec3 joltVec2 = ToJolt(v2);
+    FromJolt(joltVec1 * joltVec2, result);
+}
+
+void JPH_Vec3_MultiplyScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result)
+{
+    JPH_ASSERT(v && result);
+    JPH::Vec3 joltVec = ToJolt(v);
+    FromJolt(joltVec * scalar, result);
+}
+
+void JPH_Vec3_DotProduct(const JPH_Vec3* v1, const JPH_Vec3* v2, float* result)
+{
+    JPH_ASSERT(v1 && v2 && result);
+    JPH::Vec3 joltVec1 = ToJolt(v1);
+    JPH::Vec3 joltVec2 = ToJolt(v2);
+    *result = joltVec1.Dot(joltVec2);
+}
+
+void JPH_Vec3_Normalize(const JPH_Vec3* v, JPH_Vec3* result)
+{
+    JPH_ASSERT(v && result);
+    JPH::Vec3 joltVec = ToJolt(v);
+    FromJolt(joltVec.Normalized(), result);
+}
+
+void JPH_Vec3_Add(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
+{
+    JPH_ASSERT(v1 && v2 && result);
+    JPH::Vec3 joltVec1 = ToJolt(v1);
+    JPH::Vec3 joltVec2 = ToJolt(v2);
+    FromJolt(joltVec1 + joltVec2, result);
+}
+
+void JPH_Vec3_Subtract(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
+{
+    JPH_ASSERT(v1 && v2 && result);
+    JPH::Vec3 joltVec1 = ToJolt(v1);
+    JPH::Vec3 joltVec2 = ToJolt(v2);
+    FromJolt(joltVec1 - joltVec2, result);
+}
+
 void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result) {
 	const JPH::Mat44 mat = JPH::Mat44::sZero();
 	FromJolt(mat, result);
