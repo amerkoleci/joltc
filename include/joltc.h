@@ -1422,7 +1422,7 @@ JPH_CAPI void JPH_PointConstraint_GetTotalLambdaPosition(const JPH_PointConstrai
 /* JPH_HingeConstraint */
 JPH_CAPI void JPH_HingeConstraintSettings_Init(JPH_HingeConstraintSettings* settings);
 JPH_CAPI JPH_HingeConstraint* JPH_HingeConstraint_Create(const JPH_HingeConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
-JPH_CAPI JPH_HingeConstraintSettings* JPH_HingeConstraint_GetSettings(JPH_HingeConstraint* constraint);
+JPH_CAPI void JPH_HingeConstraint_GetSettings(JPH_HingeConstraint* constraint, JPH_HingeConstraintSettings* settings);
 JPH_CAPI void JPH_HingeConstraint_GetLocalSpacePoint1(const JPH_HingeConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI void JPH_HingeConstraint_GetLocalSpacePoint2(const JPH_HingeConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI void JPH_HingeConstraint_GetLocalSpaceHingeAxis1(const JPH_HingeConstraint* constraint, JPH_Vec3* result);
@@ -1447,7 +1447,7 @@ JPH_CAPI bool JPH_HingeConstraint_HasLimits(JPH_HingeConstraint* constraint);
 JPH_CAPI void JPH_HingeConstraint_GetLimitsSpringSettings(JPH_HingeConstraint* constraint, JPH_SpringSettings* result);
 JPH_CAPI void JPH_HingeConstraint_SetLimitsSpringSettings(JPH_HingeConstraint* constraint, JPH_SpringSettings* settings);
 JPH_CAPI void JPH_HingeConstraint_GetTotalLambdaPosition(const JPH_HingeConstraint* constraint, JPH_Vec3* result);
-JPH_CAPI void JPH_HingeConstraint_GetTotalLambdaRotation(const JPH_HingeConstraint* constraint, float* x, float* y);
+JPH_CAPI void JPH_HingeConstraint_GetTotalLambdaRotation(const JPH_HingeConstraint* constraint, float rotation[2]);
 JPH_CAPI float JPH_HingeConstraint_GetTotalLambdaRotationLimits(const JPH_HingeConstraint* constraint);
 JPH_CAPI float JPH_HingeConstraint_GetTotalLambdaMotor(const JPH_HingeConstraint* constraint);
 
@@ -1456,12 +1456,12 @@ JPH_CAPI void JPH_SliderConstraintSettings_Init(JPH_SliderConstraintSettings* se
 JPH_CAPI void JPH_SliderConstraintSettings_SetSliderAxis(JPH_SliderConstraintSettings* settings, const JPH_Vec3* axis);
 
 JPH_CAPI JPH_SliderConstraint* JPH_SliderConstraint_Create(const JPH_SliderConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
-JPH_CAPI JPH_SliderConstraintSettings* JPH_SliderConstraint_GetSettings(JPH_SliderConstraint* constraint);
+JPH_CAPI void JPH_SliderConstraint_GetSettings(JPH_SliderConstraint* constraint, JPH_SliderConstraintSettings* settings);
 JPH_CAPI float JPH_SliderConstraint_GetCurrentPosition(JPH_SliderConstraint* constraint);
 JPH_CAPI void JPH_SliderConstraint_SetMaxFrictionForce(JPH_SliderConstraint* constraint, float frictionForce);
 JPH_CAPI float JPH_SliderConstraint_GetMaxFrictionForce(JPH_SliderConstraint* constraint);
 JPH_CAPI void JPH_SliderConstraint_SetMotorSettings(JPH_SliderConstraint* constraint, JPH_MotorSettings* settings);
-JPH_CAPI void JPH_SliderConstraint_GetMotorSettings(JPH_SliderConstraint* constraint, JPH_MotorSettings* result);
+JPH_CAPI void JPH_SliderConstraint_GetMotorSettings(const JPH_SliderConstraint* constraint, JPH_MotorSettings* result);
 JPH_CAPI void JPH_SliderConstraint_SetMotorState(JPH_SliderConstraint* constraint, JPH_MotorState state);
 JPH_CAPI JPH_MotorState JPH_SliderConstraint_GetMotorState(JPH_SliderConstraint* constraint);
 JPH_CAPI void JPH_SliderConstraint_SetTargetVelocity(JPH_SliderConstraint* constraint, float velocity);
@@ -1474,7 +1474,7 @@ JPH_CAPI float JPH_SliderConstraint_GetLimitsMax(JPH_SliderConstraint* constrain
 JPH_CAPI bool JPH_SliderConstraint_HasLimits(JPH_SliderConstraint* constraint);
 JPH_CAPI void JPH_SliderConstraint_GetLimitsSpringSettings(JPH_SliderConstraint* constraint, JPH_SpringSettings* result);
 JPH_CAPI void JPH_SliderConstraint_SetLimitsSpringSettings(JPH_SliderConstraint* constraint, JPH_SpringSettings* settings);
-JPH_CAPI void JPH_SliderConstraint_GetTotalLambdaPosition(const JPH_SliderConstraint* constraint, float* x, float* y);
+JPH_CAPI void JPH_SliderConstraint_GetTotalLambdaPosition(const JPH_SliderConstraint* constraint, float position[2]);
 JPH_CAPI float JPH_SliderConstraint_GetTotalLambdaPositionLimits(const JPH_SliderConstraint* constraint);
 JPH_CAPI void JPH_SliderConstraint_GetTotalLambdaRotation(const JPH_SliderConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI float JPH_SliderConstraint_GetTotalLambdaMotor(const JPH_SliderConstraint* constraint);
@@ -1482,6 +1482,7 @@ JPH_CAPI float JPH_SliderConstraint_GetTotalLambdaMotor(const JPH_SliderConstrai
 /* JPH_ConeConstraint */
 JPH_CAPI void JPH_ConeConstraintSettings_Init(JPH_ConeConstraintSettings* settings);
 JPH_CAPI JPH_ConeConstraint* JPH_ConeConstraint_Create(const JPH_ConeConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+JPH_CAPI void JPH_ConeConstraint_GetSettings(JPH_ConeConstraint* constraint, JPH_ConeConstraintSettings* settings);
 JPH_CAPI void JPH_ConeConstraint_SetHalfConeAngle(JPH_ConeConstraint* constraint, float halfConeAngle);
 JPH_CAPI float JPH_ConeConstraint_GetCosHalfConeAngle(const JPH_ConeConstraint* constraint);
 JPH_CAPI void JPH_ConeConstraint_GetTotalLambdaPosition(const JPH_ConeConstraint* constraint, JPH_Vec3* result);
@@ -1490,7 +1491,7 @@ JPH_CAPI float JPH_ConeConstraint_GetTotalLambdaRotation(const JPH_ConeConstrain
 /* JPH_SwingTwistConstraint */
 JPH_CAPI void JPH_SwingTwistConstraintSettings_Init(JPH_SwingTwistConstraintSettings* settings);
 JPH_CAPI JPH_SwingTwistConstraint* JPH_SwingTwistConstraint_Create(const JPH_SwingTwistConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
-
+JPH_CAPI void JPH_SwingTwistConstraint_GetSettings(JPH_SwingTwistConstraint* constraint, JPH_SwingTwistConstraintSettings* settings);
 JPH_CAPI float JPH_SwingTwistConstraint_GetNormalHalfConeAngle(JPH_SwingTwistConstraint* constraint);
 JPH_CAPI void JPH_SwingTwistConstraint_GetTotalLambdaPosition(const JPH_SwingTwistConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI float JPH_SwingTwistConstraint_GetTotalLambdaTwist(const JPH_SwingTwistConstraint* constraint);
@@ -1507,6 +1508,7 @@ JPH_CAPI bool JPH_SixDOFConstraintSettings_IsFixedAxis(const JPH_SixDOFConstrain
 JPH_CAPI void JPH_SixDOFConstraintSettings_SetLimitedAxis(JPH_SixDOFConstraintSettings* settings, JPH_SixDOFConstraintAxis axis, float min, float max);
 
 JPH_CAPI JPH_SixDOFConstraint* JPH_SixDOFConstraint_Create(const JPH_SixDOFConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+JPH_CAPI void JPH_SixDOFConstraint_GetSettings(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintSettings* settings);
 JPH_CAPI float JPH_SixDOFConstraint_GetLimitsMin(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
 JPH_CAPI float JPH_SixDOFConstraint_GetLimitsMax(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
 JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaPosition(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
@@ -1517,6 +1519,7 @@ JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaMotorRotation(const JPH_SixDOFC
 /* JPH_GearConstraint */
 JPH_CAPI void JPH_GearConstraintSettings_Init(JPH_GearConstraintSettings* settings);
 JPH_CAPI JPH_GearConstraint* JPH_GearConstraint_Create(const JPH_GearConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+JPH_CAPI void JPH_GearConstraint_GetSettings(JPH_GearConstraint* constraint, JPH_GearConstraintSettings* settings);
 JPH_CAPI void JPH_GearConstraint_SetConstraints(JPH_GearConstraint* constraint, const JPH_Constraint* gear1, const JPH_Constraint* gear2);
 JPH_CAPI float JPH_GearConstraint_GetTotalLambda(const JPH_GearConstraint* constraint);
 
