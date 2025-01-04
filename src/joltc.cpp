@@ -25,6 +25,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/CollidePointResult.h"
 #include "Jolt/Physics/Collision/CollideShape.h"
 #include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
+#include <Jolt/Physics/Collision/CollisionDispatch.h>
 #include <Jolt/Physics/Collision/ShapeCast.h>
 #include "Jolt/Physics/Collision/Shape/PlaneShape.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
@@ -7827,6 +7828,93 @@ void JPH_CharacterVsCharacterCollision_Destroy(JPH_CharacterVsCharacterCollision
 	{
 		delete reinterpret_cast<JPH::CharacterVsCharacterCollision*>(listener);
 	}
+}
+
+/* CollisionDispatch */
+bool JPH_CollisionDispatch_CollideShapeVsShape(
+	const JPH_Shape* inShape1, const JPH_Shape* inShape2,
+	JPH_Vec3* inScale1, JPH_Vec3* inScale2,
+	JPH_Matrix4x4* inCenterOfMassTransform1, JPH_Matrix4x4* inCenterOfMassTransform2,
+	const JPH_CollideShapeSettings* inCollideShapeSettings,
+	JPH_CollideShapeCollectorCallback* callback, void* userData,
+	const JPH_ShapeFilter* inShapeFilter)
+{
+	auto joltScale1 = ToJolt(inScale1);
+	auto joltScale2 = ToJolt(inScale2);
+
+	auto joltCOMTransform1 = ToJolt(inCenterOfMassTransform1);
+	auto joltCOMTransform2 = ToJolt(inCenterOfMassTransform2);
+
+	auto joltSettings = ToJolt(inCollideShapeSettings);
+
+	CollideShapeCollectorCallback collector(callback, userData);
+
+	JPH::CollisionDispatch::sCollideShapeVsShape(
+		AsShape(inShape1), AsShape(inShape2),
+		joltScale1, joltScale2,
+		joltCOMTransform1, joltCOMTransform2,
+		JPH::SubShapeIDCreator(), JPH::SubShapeIDCreator(),
+		joltSettings, collector, ToJolt(inShapeFilter));
+
+	return collector.hadHit;
+}
+
+bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace(
+	JPH_Vec3* inDirection, const JPH_Shape* inShape1, const JPH_Shape* inShape2,
+	JPH_Vec3* inScale1InShape2LocalSpace, JPH_Vec3* inScale2,
+	JPH_Matrix4x4* inCenterOfMassTransform1InShape2LocalSpace, JPH_Matrix4x4* inCenterOfMassWorldTransform2,
+	const JPH_ShapeCastSettings* inShapeCastSettings,
+	JPH_CastShapeCollectorCallback* callback, void* userData,
+	const JPH_ShapeFilter* inShapeFilter)
+{
+	ShapeCast shapeCast(
+		AsShape(inShape1),
+		ToJolt(inScale1InShape2LocalSpace),
+		ToJolt(inCenterOfMassTransform1InShape2LocalSpace),
+		ToJolt(inDirection));
+
+	auto joltScale2 = ToJolt(inScale2);
+	auto joltCOMTransform2 = ToJolt(inCenterOfMassWorldTransform2);
+
+	auto joltSettings = ToJolt(inShapeCastSettings);
+
+	CastShapeCollectorCallback collector(callback, userData);
+
+	JPH::CollisionDispatch::sCastShapeVsShapeLocalSpace(
+		shapeCast, joltSettings, AsShape(inShape2),
+		joltScale2, ToJolt(inShapeFilter), joltCOMTransform2,
+		JPH::SubShapeIDCreator(), JPH::SubShapeIDCreator(), collector);
+
+	return collector.hadHit;
+}
+
+bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace(
+	JPH_Vec3* inDirection, const JPH_Shape* inShape1, const JPH_Shape* inShape2,
+	JPH_Vec3* inScale1, JPH_Vec3* inScale2,
+	JPH_Matrix4x4* inCenterOfMassWorldTransform1, JPH_Matrix4x4* inCenterOfMassWorldTransform2,
+	const JPH_ShapeCastSettings* inShapeCastSettings,
+	JPH_CastShapeCollectorCallback* callback, void* userData,
+	const JPH_ShapeFilter* inShapeFilter)
+{
+	ShapeCast shapeCast = ShapeCast::sFromWorldTransform(
+		AsShape(inShape1),
+		ToJolt(inScale1),
+		ToJolt(inCenterOfMassWorldTransform1),
+		ToJolt(inDirection));
+
+	auto joltScale2 = ToJolt(inScale2);
+	auto joltCOMTransform2 = ToJolt(inCenterOfMassWorldTransform2);
+
+	auto joltSettings = ToJolt(inShapeCastSettings);
+
+	CastShapeCollectorCallback collector(callback, userData);
+
+	JPH::CollisionDispatch::sCastShapeVsShapeWorldSpace(
+		shapeCast, joltSettings, AsShape(inShape2),
+		joltScale2, ToJolt(inShapeFilter), joltCOMTransform2,
+		JPH::SubShapeIDCreator(), JPH::SubShapeIDCreator(), collector);
+
+	return collector.hadHit;
 }
 
 #ifdef JPH_DEBUG_RENDERER
