@@ -857,7 +857,8 @@ typedef struct JPH_CharacterVirtualSettings {
 	uint32_t							maxNumHits;
 	float								hitReductionCosMaxAngle;
 	float								penetrationRecoverySpeed;
-	const JPH_Shape* innerBodyShape;
+	const JPH_Shape*					innerBodyShape;
+	JPH_BodyID							innerBodyIDOverride;
 	JPH_ObjectLayer						innerBodyLayer;
 } JPH_CharacterVirtualSettings;
 
@@ -2206,27 +2207,27 @@ JPH_CAPI void JPH_CharacterVsCharacterCollision_Destroy(JPH_CharacterVsCharacter
 
 /* CollisionDispatch */
 JPH_CAPI bool JPH_CollisionDispatch_CollideShapeVsShape(
-	const JPH_Shape* inShape1, const JPH_Shape* inShape2,
-	JPH_Vec3* inScale1, JPH_Vec3* inScale2,
-	JPH_Matrix4x4* inCenterOfMassTransform1, JPH_Matrix4x4* inCenterOfMassTransform2,
-	const JPH_CollideShapeSettings* inCollideShapeSettings,
-	JPH_CollideShapeCollectorCallback* callback, void* userData, const JPH_ShapeFilter* inShapeFilter);
+	const JPH_Shape* shape1, const JPH_Shape* shape2,
+	const JPH_Vec3* scale1, const JPH_Vec3* scale2,
+	const JPH_Matrix4x4* centerOfMassTransform1, const JPH_Matrix4x4* centerOfMassTransform2,
+	const JPH_CollideShapeSettings* collideShapeSettings,
+	JPH_CollideShapeCollectorCallback* callback, void* userData, const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace(
-	JPH_Vec3* inDirection, const JPH_Shape* inShape1, const JPH_Shape* inShape2,
-	JPH_Vec3* inScale1InShape2LocalSpace, JPH_Vec3* inScale2,
-	JPH_Matrix4x4* inCenterOfMassTransform1InShape2LocalSpace, JPH_Matrix4x4* inCenterOfMassWorldTransform2,
-	const JPH_ShapeCastSettings* inShapeCastSettings,
+	const JPH_Vec3* direction, const JPH_Shape* shape1, const JPH_Shape* shape2,
+	const JPH_Vec3* scale1InShape2LocalSpace, const JPH_Vec3* scale2,
+	JPH_Matrix4x4* centerOfMassTransform1InShape2LocalSpace, JPH_Matrix4x4* centerOfMassWorldTransform2,
+	const JPH_ShapeCastSettings* shapeCastSettings,
 	JPH_CastShapeCollectorCallback* callback, void* userData,
-	const JPH_ShapeFilter* inShapeFilter);
+	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace(
-	JPH_Vec3* inDirection, const JPH_Shape* inShape1, const JPH_Shape* inShape2,
-	JPH_Vec3* inScale1, JPH_Vec3* inScale2,
-	JPH_Matrix4x4* inCenterOfMassWorldTransform1, JPH_Matrix4x4* inCenterOfMassWorldTransform2,
-	const JPH_ShapeCastSettings* inShapeCastSettings,
+	const JPH_Vec3* direction, const JPH_Shape* shape1, const JPH_Shape* shape2,
+	const JPH_Vec3* scale1, const JPH_Vec3* inScale2,
+	const JPH_Matrix4x4* centerOfMassWorldTransform1, const JPH_Matrix4x4* centerOfMassWorldTransform2,
+	const JPH_ShapeCastSettings* shapeCastSettings,
 	JPH_CastShapeCollectorCallback* callback, void* userData,
-	const JPH_ShapeFilter* inShapeFilter);
+	const JPH_ShapeFilter* shapeFilter);
 
 /* DebugRenderer */
 typedef struct JPH_DebugRenderer_Procs {

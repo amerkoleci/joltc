@@ -7162,6 +7162,7 @@ void JPH_CharacterVirtualSettings_Init(JPH_CharacterVirtualSettings* settings)
 	{
 		settings->innerBodyShape = reinterpret_cast<const JPH_Shape*>(joltSettings.mInnerBodyShape.GetPtr());
 	}
+	settings->innerBodyIDOverride = joltSettings.mInnerBodyIDOverride.GetIndexAndSequenceNumber();
 	settings->innerBodyLayer = static_cast<JPH_ObjectLayer>(joltSettings.mInnerBodyLayer);
 }
 
@@ -7204,6 +7205,11 @@ JPH_CharacterVirtual* JPH_CharacterVirtual_Create(const JPH_CharacterVirtualSett
 	{
 		auto joltShape = reinterpret_cast<const JPH::Shape*>(settings->innerBodyShape);
 		joltSettings.mInnerBodyShape = joltShape;
+	}
+
+	if (settings->innerBodyIDOverride)
+	{
+		joltSettings.mInnerBodyIDOverride = JPH::BodyID(settings->innerBodyIDOverride);
 	}
 
 	joltSettings.mInnerBodyLayer = static_cast<ObjectLayer>(settings->innerBodyLayer);
@@ -7832,87 +7838,76 @@ void JPH_CharacterVsCharacterCollision_Destroy(JPH_CharacterVsCharacterCollision
 
 /* CollisionDispatch */
 bool JPH_CollisionDispatch_CollideShapeVsShape(
-	const JPH_Shape* inShape1, const JPH_Shape* inShape2,
-	JPH_Vec3* inScale1, JPH_Vec3* inScale2,
-	JPH_Matrix4x4* inCenterOfMassTransform1, JPH_Matrix4x4* inCenterOfMassTransform2,
-	const JPH_CollideShapeSettings* inCollideShapeSettings,
-	JPH_CollideShapeCollectorCallback* callback, void* userData,
-	const JPH_ShapeFilter* inShapeFilter)
+	const JPH_Shape* shape1, const JPH_Shape* shape2,
+	const JPH_Vec3* scale1, const JPH_Vec3* scale2,
+	const JPH_Matrix4x4* centerOfMassTransform1, const JPH_Matrix4x4* centerOfMassTransform2,
+	const JPH_CollideShapeSettings* collideShapeSettings,
+	JPH_CollideShapeCollectorCallback* callback, 
+	void* userData,
+	const JPH_ShapeFilter* shapeFilter)
 {
-	auto joltScale1 = ToJolt(inScale1);
-	auto joltScale2 = ToJolt(inScale2);
-
-	auto joltCOMTransform1 = ToJolt(inCenterOfMassTransform1);
-	auto joltCOMTransform2 = ToJolt(inCenterOfMassTransform2);
-
-	auto joltSettings = ToJolt(inCollideShapeSettings);
-
 	CollideShapeCollectorCallback collector(callback, userData);
 
-	JPH::CollisionDispatch::sCollideShapeVsShape(
-		AsShape(inShape1), AsShape(inShape2),
-		joltScale1, joltScale2,
-		joltCOMTransform1, joltCOMTransform2,
-		JPH::SubShapeIDCreator(), JPH::SubShapeIDCreator(),
-		joltSettings, collector, ToJolt(inShapeFilter));
+	CollisionDispatch::sCollideShapeVsShape(
+		AsShape(shape1), AsShape(shape2),
+		ToJolt(scale1), ToJolt(scale2),
+		ToJolt(centerOfMassTransform1), ToJolt(centerOfMassTransform2),
+		JPH::SubShapeIDCreator(), 
+		JPH::SubShapeIDCreator(),
+		ToJolt(collideShapeSettings), collector, ToJolt(shapeFilter)
+	);
 
 	return collector.hadHit;
 }
 
 bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace(
-	JPH_Vec3* inDirection, const JPH_Shape* inShape1, const JPH_Shape* inShape2,
-	JPH_Vec3* inScale1InShape2LocalSpace, JPH_Vec3* inScale2,
-	JPH_Matrix4x4* inCenterOfMassTransform1InShape2LocalSpace, JPH_Matrix4x4* inCenterOfMassWorldTransform2,
-	const JPH_ShapeCastSettings* inShapeCastSettings,
+	const JPH_Vec3* direction, const JPH_Shape* shape1, const JPH_Shape* shape2,
+	const JPH_Vec3* scale1InShape2LocalSpace, const JPH_Vec3* scale2,
+	JPH_Matrix4x4* centerOfMassTransform1InShape2LocalSpace, JPH_Matrix4x4* centerOfMassWorldTransform2,
+	const JPH_ShapeCastSettings* shapeCastSettings,
 	JPH_CastShapeCollectorCallback* callback, void* userData,
-	const JPH_ShapeFilter* inShapeFilter)
+	const JPH_ShapeFilter* shapeFilter)
 {
 	ShapeCast shapeCast(
-		AsShape(inShape1),
-		ToJolt(inScale1InShape2LocalSpace),
-		ToJolt(inCenterOfMassTransform1InShape2LocalSpace),
-		ToJolt(inDirection));
-
-	auto joltScale2 = ToJolt(inScale2);
-	auto joltCOMTransform2 = ToJolt(inCenterOfMassWorldTransform2);
-
-	auto joltSettings = ToJolt(inShapeCastSettings);
+		AsShape(shape1),
+		ToJolt(scale1InShape2LocalSpace),
+		ToJolt(centerOfMassTransform1InShape2LocalSpace),
+		ToJolt(direction));
 
 	CastShapeCollectorCallback collector(callback, userData);
 
-	JPH::CollisionDispatch::sCastShapeVsShapeLocalSpace(
-		shapeCast, joltSettings, AsShape(inShape2),
-		joltScale2, ToJolt(inShapeFilter), joltCOMTransform2,
-		JPH::SubShapeIDCreator(), JPH::SubShapeIDCreator(), collector);
+	CollisionDispatch::sCastShapeVsShapeLocalSpace(
+		shapeCast, ToJolt(shapeCastSettings), AsShape(shape2),
+		ToJolt(scale2), ToJolt(shapeFilter), ToJolt(centerOfMassWorldTransform2),
+		JPH::SubShapeIDCreator(), 
+		JPH::SubShapeIDCreator(), 
+		collector);
 
 	return collector.hadHit;
 }
 
 bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace(
-	JPH_Vec3* inDirection, const JPH_Shape* inShape1, const JPH_Shape* inShape2,
-	JPH_Vec3* inScale1, JPH_Vec3* inScale2,
-	JPH_Matrix4x4* inCenterOfMassWorldTransform1, JPH_Matrix4x4* inCenterOfMassWorldTransform2,
-	const JPH_ShapeCastSettings* inShapeCastSettings,
+	const JPH_Vec3* direction, const JPH_Shape* shape1, const JPH_Shape* shape2,
+	const JPH_Vec3* scale1, const JPH_Vec3* scale2,
+	const JPH_Matrix4x4* centerOfMassWorldTransform1, const JPH_Matrix4x4* centerOfMassWorldTransform2,
+	const JPH_ShapeCastSettings* shapeCastSettings,
 	JPH_CastShapeCollectorCallback* callback, void* userData,
-	const JPH_ShapeFilter* inShapeFilter)
+	const JPH_ShapeFilter* shapeFilter)
 {
 	ShapeCast shapeCast = ShapeCast::sFromWorldTransform(
-		AsShape(inShape1),
-		ToJolt(inScale1),
-		ToJolt(inCenterOfMassWorldTransform1),
-		ToJolt(inDirection));
-
-	auto joltScale2 = ToJolt(inScale2);
-	auto joltCOMTransform2 = ToJolt(inCenterOfMassWorldTransform2);
-
-	auto joltSettings = ToJolt(inShapeCastSettings);
+		AsShape(shape1),
+		ToJolt(scale1),
+		ToJolt(centerOfMassWorldTransform1),
+		ToJolt(direction));
 
 	CastShapeCollectorCallback collector(callback, userData);
 
-	JPH::CollisionDispatch::sCastShapeVsShapeWorldSpace(
-		shapeCast, joltSettings, AsShape(inShape2),
-		joltScale2, ToJolt(inShapeFilter), joltCOMTransform2,
-		JPH::SubShapeIDCreator(), JPH::SubShapeIDCreator(), collector);
+	CollisionDispatch::sCastShapeVsShapeWorldSpace(
+		shapeCast, ToJolt(shapeCastSettings), AsShape(shape2),
+		ToJolt(scale2), ToJolt(shapeFilter), ToJolt(centerOfMassWorldTransform2),
+		JPH::SubShapeIDCreator(), 
+		JPH::SubShapeIDCreator(), 
+		collector);
 
 	return collector.hadHit;
 }
