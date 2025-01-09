@@ -7145,6 +7145,7 @@ void JPH_CharacterVirtualSettings_Init(JPH_CharacterVirtualSettings* settings)
 	JPH::CharacterVirtualSettings joltSettings;
 	JPH_CharacterBaseSettings_Init(joltSettings, &settings->base);
 
+	settings->ID = (JPH_CharacterID)joltSettings.mID.GetValue();
 	settings->mass = joltSettings.mMass;
 	settings->maxStrength = joltSettings.mMaxStrength;
 	settings->shapeOffset = FromJolt(joltSettings.mShapeOffset);
@@ -7188,6 +7189,11 @@ JPH_CharacterVirtual* JPH_CharacterVirtual_Create(const JPH_CharacterVirtualSett
 		joltSettings.mShape = joltShape;
 	}
 
+	if (settings->ID)
+	{
+		joltSettings.mID = JPH::CharacterID(settings->ID);
+	}
+
 	joltSettings.mMass = settings->mass;
 	joltSettings.mMaxStrength = settings->maxStrength;
 	joltSettings.mShapeOffset = ToJolt(settings->shapeOffset);
@@ -7222,6 +7228,11 @@ JPH_CharacterVirtual* JPH_CharacterVirtual_Create(const JPH_CharacterVirtualSett
 	joltCharacter->AddRef();
 
 	return ToCharacterVirtual(joltCharacter);
+}
+
+JPH_CharacterID JPH_CharacterVirtual_GetID(const JPH_CharacterVirtual* character)
+{
+	return AsCharacterVirtual(character)->GetID().GetValue();
 }
 
 void JPH_CharacterVirtual_SetListener(JPH_CharacterVirtual* character, JPH_CharacterContactListener* listener)
@@ -7394,6 +7405,16 @@ void JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(JPH_CharacterVirtual*
 	FromJolt(AsCharacterVirtual(character)->CancelVelocityTowardsSteepSlopes(ToJolt(desiredVelocity)), velocity);
 }
 
+void JPH_CharacterVirtual_StartTrackingContactChanges(JPH_CharacterVirtual* character)
+{
+	AsCharacterVirtual(character)->StartTrackingContactChanges();
+}
+
+void JPH_CharacterVirtual_FinishTrackingContactChanges(JPH_CharacterVirtual* character)
+{
+	AsCharacterVirtual(character)->FinishTrackingContactChanges();
+}
+
 void JPH_CharacterVirtual_Update(JPH_CharacterVirtual* character,
 	float deltaTime, JPH_ObjectLayer layer, JPH_PhysicsSystem* system,
 	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
@@ -7541,7 +7562,12 @@ bool JPH_CharacterVirtual_HasCollidedWithBody(JPH_CharacterVirtual* character, c
 	return AsCharacterVirtual(character)->HasCollidedWith(JPH::BodyID(body));
 }
 
-bool JPH_CharacterVirtual_HasCollidedWith(JPH_CharacterVirtual* character, const JPH_CharacterVirtual* other)
+bool JPH_CharacterVirtual_HasCollidedWith(JPH_CharacterVirtual* character, const JPH_CharacterID other)
+{
+	return AsCharacterVirtual(character)->HasCollidedWith(JPH::CharacterID(other));
+}
+
+bool JPH_CharacterVirtual_HasCollidedWithCharacter(JPH_CharacterVirtual* character, const JPH_CharacterVirtual* other)
 {
 	return AsCharacterVirtual(character)->HasCollidedWith(AsCharacterVirtual(other));
 }
@@ -7633,6 +7659,48 @@ public:
 		}
 	}
 
+	void OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+	{
+		if (procs.OnContactPersisted)
+		{
+			JPH_RVec3 contactPosition;
+			JPH_Vec3 contactNormal;
+
+			FromJolt(inContactPosition, &contactPosition);
+			FromJolt(inContactNormal, &contactNormal);
+
+			JPH_CharacterContactSettings settings = {};
+			settings.canPushCharacter = ioSettings.mCanPushCharacter;
+			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
+
+			procs.OnContactPersisted(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
+				(JPH_SubShapeID)inSubShapeID2.GetValue(),
+				&contactPosition,
+				&contactNormal,
+				&settings
+			);
+
+			ioSettings.mCanPushCharacter = settings.canPushCharacter;
+			ioSettings.mCanReceiveImpulses = settings.canReceiveImpulses;
+		}
+	}
+
+	void OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
+	{
+		if (procs.OnContactRemoved)
+		{
+			procs.OnContactRemoved(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
+				(JPH_SubShapeID)inSubShapeID2.GetValue()
+			);
+		}
+	}
+
 	void OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
 		if (procs.OnCharacterContactAdded)
@@ -7659,6 +7727,48 @@ public:
 
 			ioSettings.mCanPushCharacter = settings.canPushCharacter;
 			ioSettings.mCanReceiveImpulses = settings.canReceiveImpulses;
+		}
+	}
+
+	void OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+	{
+		if (procs.OnCharacterContactPersisted)
+		{
+			JPH_RVec3 contactPosition;
+			JPH_Vec3 contactNormal;
+
+			FromJolt(inContactPosition, &contactPosition);
+			FromJolt(inContactNormal, &contactNormal);
+
+			JPH_CharacterContactSettings settings = {};
+			settings.canPushCharacter = ioSettings.mCanPushCharacter;
+			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
+
+			procs.OnCharacterContactPersisted(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				ToCharacterVirtual(inOtherCharacter),
+				(JPH_SubShapeID)inSubShapeID2.GetValue(),
+				&contactPosition,
+				&contactNormal,
+				&settings
+			);
+
+			ioSettings.mCanPushCharacter = settings.canPushCharacter;
+			ioSettings.mCanReceiveImpulses = settings.canReceiveImpulses;
+		}
+	}
+
+	void OnCharacterContactRemoved(const CharacterVirtual* inCharacter, const CharacterID& inOtherCharacterID, const SubShapeID& inSubShapeID2) override
+	{
+		if (procs.OnCharacterContactRemoved)
+		{
+			procs.OnCharacterContactRemoved(
+				userData,
+				ToCharacterVirtual(inCharacter),
+				(JPH_CharacterID)inOtherCharacterID.GetValue(),
+				(JPH_SubShapeID)inSubShapeID2.GetValue()
+			);
 		}
 	}
 
