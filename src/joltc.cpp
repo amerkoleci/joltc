@@ -108,6 +108,7 @@ DEF_MAP_DECL(Shape, JPH_Shape)
 DEF_MAP_DECL(MotionProperties, JPH_MotionProperties)
 DEF_MAP_DECL(BroadPhaseQuery, JPH_BroadPhaseQuery)
 DEF_MAP_DECL(NarrowPhaseQuery, JPH_NarrowPhaseQuery)
+DEF_MAP_DECL(PhysicsMaterial, JPH_PhysicsMaterial)
 DEF_MAP_DECL(Constraint, JPH_Constraint)
 DEF_MAP_DECL(TwoBodyConstraint, JPH_TwoBodyConstraint)
 DEF_MAP_DECL(FixedConstraint, JPH_FixedConstraint)
@@ -297,7 +298,29 @@ static inline void FromJolt(const SubShapeID& jolt, JPH_SubShapeID* result)
 
 static inline const JPH_PhysicsMaterial* FromJolt(const JPH::PhysicsMaterial* joltMaterial)
 {
-	return joltMaterial != nullptr ? reinterpret_cast<const JPH_PhysicsMaterial*>(joltMaterial) : nullptr;
+	return joltMaterial != nullptr ? ToPhysicsMaterial(joltMaterial) : nullptr;
+}
+
+static inline void FromJolt(const CharacterVirtual::Contact& jolt, JPH_CharacterVirtualContact* result)
+{
+	result->hash = jolt.GetHash();
+	result->bodyB = (JPH_BodyID)jolt.mBodyB.GetIndexAndSequenceNumber();
+	result->characterIDB = (JPH_BodyID)jolt.mCharacterIDB.GetValue();
+	result->subShapeIDB = (JPH_BodyID)jolt.mSubShapeIDB.GetValue();
+	FromJolt(jolt.mPosition, &result->position);
+	FromJolt(jolt.mLinearVelocity, &result->linearVelocity);
+	FromJolt(jolt.mContactNormal, &result->contactNormal);
+	FromJolt(jolt.mSurfaceNormal, &result->surfaceNormal);
+	result->distance = jolt.mDistance;
+	result->fraction = jolt.mFraction;
+	result->motionTypeB = static_cast<JPH_MotionType>(jolt.mMotionTypeB);
+	result->isSensorB = jolt.mIsSensorB;
+	result->characterB = ToCharacterVirtual(jolt.mCharacterB);
+	result->userData = jolt.mUserData;
+	result->material = ToPhysicsMaterial(jolt.mMaterial);
+	result->hadCollision = jolt.mHadCollision;
+	result->wasDiscarded = jolt.mWasDiscarded;
+	result->canPushCharacter = jolt.mCanPushCharacter;
 }
 
 // To Jolt conversion methods
@@ -1412,28 +1435,25 @@ JPH_PhysicsMaterial* JPH_PhysicsMaterial_Create(const char* name, uint32_t color
 	auto material = new JPH::PhysicsMaterialSimple(name, JPH::Color(color));
 	material->AddRef();
 
-	return reinterpret_cast<JPH_PhysicsMaterial*>(material);
+	return ToPhysicsMaterial(material);
 }
 
 void JPH_PhysicsMaterial_Destroy(JPH_PhysicsMaterial* material)
 {
 	if (material)
 	{
-		auto joltMaterial = reinterpret_cast<JPH::PhysicsMaterialSimple*>(material);
-		joltMaterial->Release();
+		AsPhysicsMaterial(material)->Release();
 	}
 }
 
 const char* JPH_PhysicsMaterial_GetDebugName(const JPH_PhysicsMaterial* material)
 {
-	auto joltMaterial = reinterpret_cast<const JPH::PhysicsMaterialSimple*>(material);
-	return joltMaterial->GetDebugName();
+	return AsPhysicsMaterial(material)->GetDebugName();
 }
 
 uint32_t JPH_PhysicsMaterial_GetDebugColor(const JPH_PhysicsMaterial* material)
 {
-	auto joltMaterial = reinterpret_cast<const JPH::PhysicsMaterialSimple*>(material);
-	return joltMaterial->GetDebugColor().GetUInt32();
+	return AsPhysicsMaterial(material)->GetDebugColor().GetUInt32();
 }
 
 /* ShapeSettings */
@@ -7552,9 +7572,14 @@ void JPH_CharacterVirtual_SetInnerBodyShape(JPH_CharacterVirtual* character, con
 	AsCharacterVirtual(character)->SetInnerBodyShape(AsShape(shape));
 }
 
-uint32_t JPH_CharacterVirtual_GetNumContacts(JPH_CharacterVirtual* character)
+uint32_t JPH_CharacterVirtual_GetNumActiveContacts(JPH_CharacterVirtual* character)
 {
 	return (uint32_t)AsCharacterVirtual(character)->GetActiveContacts().size();
+}
+
+void JPH_CharacterVirtual_GetActiveContact(JPH_CharacterVirtual* character, uint32_t index, JPH_CharacterVirtualContact* result)
+{
+	FromJolt(AsCharacterVirtual(character)->GetActiveContacts().at(index), result);
 }
 
 bool JPH_CharacterVirtual_HasCollidedWithBody(JPH_CharacterVirtual* character, const JPH_BodyID body)

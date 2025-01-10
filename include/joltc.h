@@ -873,6 +873,27 @@ typedef struct JPH_CharacterContactListener			JPH_CharacterContactListener;
 typedef struct JPH_CharacterVirtual                 JPH_CharacterVirtual;  /* Inherics JPH_CharacterBase */
 typedef struct JPH_CharacterVsCharacterCollision	JPH_CharacterVsCharacterCollision;
 
+typedef struct JPH_CharacterVirtualContact {
+	uint64_t						hash;
+	JPH_BodyID						bodyB;
+	JPH_CharacterID					characterIDB;
+	JPH_SubShapeID					subShapeIDB;
+	JPH_RVec3						position;
+	JPH_Vec3						linearVelocity;
+	JPH_Vec3						contactNormal;
+	JPH_Vec3						surfaceNormal;
+	float							distance;
+	float							fraction;
+	JPH_MotionType					motionTypeB;
+	bool							isSensorB;
+	const JPH_CharacterVirtual*		characterB;
+	uint64_t						userData;
+	const JPH_PhysicsMaterial*		material;
+	bool							hadCollision;
+	bool							wasDiscarded;
+	bool							canPushCharacter;
+} JPH_CharacterVirtualContact;
+
 typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* mssage);
 typedef bool(JPH_API_CALL* JPH_AssertFailureFunc)(const char* expression, const char* mssage, const char* file, uint32_t line);
 
@@ -2120,7 +2141,10 @@ JPH_CAPI bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character,
 JPH_CAPI void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character);
 JPH_CAPI bool JPH_CharacterVirtual_SetShape(JPH_CharacterVirtual* character, const JPH_Shape* shape, float maxPenetrationDepth, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
 JPH_CAPI void JPH_CharacterVirtual_SetInnerBodyShape(JPH_CharacterVirtual* character, const JPH_Shape* shape);
-JPH_CAPI uint32_t JPH_CharacterVirtual_GetNumContacts(JPH_CharacterVirtual* character);
+
+JPH_CAPI uint32_t JPH_CharacterVirtual_GetNumActiveContacts(JPH_CharacterVirtual* character);
+JPH_CAPI void JPH_CharacterVirtual_GetActiveContact(JPH_CharacterVirtual* character, uint32_t index, JPH_CharacterVirtualContact* result);
+
 JPH_CAPI bool JPH_CharacterVirtual_HasCollidedWithBody(JPH_CharacterVirtual* character, const JPH_BodyID body);
 JPH_CAPI bool JPH_CharacterVirtual_HasCollidedWith(JPH_CharacterVirtual* character, const JPH_CharacterID other);
 JPH_CAPI bool JPH_CharacterVirtual_HasCollidedWithCharacter(JPH_CharacterVirtual* character, const JPH_CharacterVirtual* other);
