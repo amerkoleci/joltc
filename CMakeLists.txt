@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
+# This code sucks, but I can't do any better.
+set(OLD_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/JoltPhysics/Build)
+include("JoltPhysics/Build/CMakeLists.txt")
+set(CMAKE_CURRENT_SOURCE_DIR ${OLD_CURRENT_SOURCE_DIR})
+
 project(joltc CXX)
 
 # Use solution folders to organize projects
@@ -134,14 +140,6 @@ if (JPH_MASTER_PROJECT AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Distribution" CACHE STRING "The default build type" FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
 endif ()
-
-FetchContent_Declare(
-        JoltPhysics
-        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "dc07f34605c1311eb000ad4c5dee82c13f5d005d"
-		SOURCE_SUBDIR "Build"
-)
-FetchContent_MakeAvailable(JoltPhysics)
 
 if (XCODE)
 	# Ensure that we enable SSE4.2 for the x86_64 build, XCode builds multiple architectures
@@ -299,9 +297,10 @@ if(JPH_BUILD_SHARED)
 	target_compile_definitions(${TARGET_NAME} PRIVATE JPH_SHARED_LIBRARY_BUILD=1)
 endif ()
 
+
 target_include_directories(${TARGET_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	${JoltPhysics_SOURCE_DIR}/..
+	JoltPhysics/
 )
 target_link_libraries(${TARGET_NAME} PRIVATE Jolt)
 
