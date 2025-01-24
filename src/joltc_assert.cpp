@@ -29,6 +29,7 @@ __pragma(warning(push, 0))
 #include "Jolt/Physics/Constraints/SixDOFConstraint.h"
 #include "Jolt/Physics/Character/CharacterBase.h"
 #include "Jolt/Physics/Character/CharacterID.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
 
 #ifdef JPH_DEBUG_RENDERER
 #include <Jolt/Renderer/DebugRendererSimple.h>
@@ -46,7 +47,9 @@ static_assert(sizeof(JPH::ObjectLayer) == sizeof(JPH_ObjectLayer));
 static_assert(sizeof(JPH::BroadPhaseLayer) == sizeof(JPH_BroadPhaseLayer));
 static_assert(sizeof(JPH::BodyID) == sizeof(JPH_BodyID));
 static_assert(sizeof(JPH::SubShapeID) == sizeof(JPH_SubShapeID));
-static_assert(sizeof(JPH::CharacterID) == sizeof(JPH_BodyID));
+static_assert(sizeof(JPH::CharacterID) == sizeof(JPH_CharacterID));
+static_assert(sizeof(JPH::CollisionGroup::GroupID) == sizeof(JPH_CollisionGroupID));
+static_assert(sizeof(JPH::CollisionGroup::SubGroupID) == sizeof(JPH_CollisionSubGroupID));
 
 // EPhysicsUpdateError
 static_assert(sizeof(JPH_PhysicsUpdateError) == sizeof(JPH::EPhysicsUpdateError));
@@ -225,5 +228,9 @@ static_assert(JPH_DebugRenderer_CastShadow_Off == (int)JPH::DebugRenderer::ECast
 // DebugRenderer::EDrawMode
 static_assert(JPH_DebugRenderer_DrawMode_Solid == (int)JPH::DebugRenderer::EDrawMode::Solid);
 static_assert(JPH_DebugRenderer_DrawMode_Wireframe == (int)JPH::DebugRenderer::EDrawMode::Wireframe);
+
+// MeshShapeSettings::EBuildQuality
+static_assert(JPH_Mesh_Shape_BuildQuality_FavorRuntimePerformance == (int)JPH::MeshShapeSettings::EBuildQuality::FavorRuntimePerformance);
+static_assert(JPH_Mesh_Shape_BuildQuality_FavorBuildSpeed == (int)JPH::MeshShapeSettings::EBuildQuality::FavorBuildSpeed);
 
 #endif
