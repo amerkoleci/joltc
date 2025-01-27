@@ -1260,7 +1260,7 @@ JPH_CAPI float JPH_TaperedCapsuleShape_GetBottomRadius(const JPH_TaperedCapsuleS
 JPH_CAPI float JPH_TaperedCapsuleShape_GetHalfHeight(const JPH_TaperedCapsuleShape* shape);
 
 /* CompoundShape */
-JPH_CAPI void JPH_CompoundShapeSettings_AddShape(JPH_CompoundShapeSettings* settings, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_ShapeSettings* shape, uint32_t userData);
+JPH_CAPI void JPH_CompoundShapeSettings_AddShape(JPH_CompoundShapeSettings* settings, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_ShapeSettings* shapeSettings, uint32_t userData);
 JPH_CAPI void JPH_CompoundShapeSettings_AddShape2(JPH_CompoundShapeSettings* settings, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* shape, uint32_t userData);
 JPH_CAPI uint32_t JPH_CompoundShape_GetNumSubShapes(const JPH_CompoundShape* shape);
 JPH_CAPI void JPH_CompoundShape_GetSubShape(const JPH_CompoundShape* shape, uint32_t index, const JPH_Shape** subShape, JPH_Vec3* positionCOM, JPH_Quat* rotation, uint32_t* userData);
@@ -1312,7 +1312,7 @@ JPH_CAPI JPH_EmptyShape* JPH_EmptyShapeSettings_CreateShape(const JPH_EmptyShape
 
 /* JPH_BodyCreationSettings */
 JPH_CAPI JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create(void);
-JPH_CAPI JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create2(JPH_ShapeSettings* settings,
+JPH_CAPI JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create2(const JPH_ShapeSettings* settings,
 	const JPH_RVec3* position,
 	const JPH_Quat* rotation,
 	JPH_MotionType motionType,

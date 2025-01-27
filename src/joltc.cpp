@@ -106,11 +106,18 @@ DEF_MAP_DECL(SoftBodyCreationSettings, JPH_SoftBodyCreationSettings)
 DEF_MAP_DECL(Body, JPH_Body)
 DEF_MAP_DECL(BodyInterface, JPH_BodyInterface)
 DEF_MAP_DECL(BodyLockInterface, JPH_BodyLockInterface)
-DEF_MAP_DECL(Shape, JPH_Shape)
 DEF_MAP_DECL(MotionProperties, JPH_MotionProperties)
 DEF_MAP_DECL(BroadPhaseQuery, JPH_BroadPhaseQuery)
 DEF_MAP_DECL(NarrowPhaseQuery, JPH_NarrowPhaseQuery)
 DEF_MAP_DECL(PhysicsMaterial, JPH_PhysicsMaterial)
+DEF_MAP_DECL(Shape, JPH_Shape)
+DEF_MAP_DECL(ShapeSettings, JPH_ShapeSettings)
+DEF_MAP_DECL(EmptyShape, JPH_EmptyShape)
+DEF_MAP_DECL(EmptyShapeSettings, JPH_EmptyShapeSettings)
+DEF_MAP_DECL(CompoundShape, JPH_CompoundShape)
+DEF_MAP_DECL(CompoundShapeSettings, JPH_CompoundShapeSettings)
+DEF_MAP_DECL(MutableCompoundShape, JPH_MutableCompoundShape)
+DEF_MAP_DECL(MutableCompoundShapeSettings, JPH_MutableCompoundShapeSettings)
 DEF_MAP_DECL(MeshShape, JPH_MeshShape)
 DEF_MAP_DECL(MeshShapeSettings, JPH_MeshShapeSettings)
 DEF_MAP_DECL(Constraint, JPH_Constraint)
@@ -2381,18 +2388,22 @@ float JPH_TaperedCapsuleShape_GetHalfHeight(const JPH_TaperedCapsuleShape* shape
 }
 
 /* CompoundShape */
-void JPH_CompoundShapeSettings_AddShape(JPH_CompoundShapeSettings* settings, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_ShapeSettings* shape, uint32_t userData)
+void JPH_CompoundShapeSettings_AddShape(JPH_CompoundShapeSettings* settings, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_ShapeSettings* shapeSettings, uint32_t userData)
 {
-	auto joltShapeSettings = reinterpret_cast<const JPH::ShapeSettings*>(shape);
-	auto joltSettings = reinterpret_cast<JPH::CompoundShapeSettings*>(settings);
-	joltSettings->AddShape(ToJolt(position), ToJolt(rotation), joltShapeSettings, userData);
+	AsCompoundShapeSettings(settings)->AddShape(
+		ToJolt(position),
+		ToJolt(rotation), 
+		AsShapeSettings(shapeSettings),
+		userData);
 }
 
 void JPH_CompoundShapeSettings_AddShape2(JPH_CompoundShapeSettings* settings, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* shape, uint32_t userData)
 {
-	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
-	auto joltSettings = reinterpret_cast<JPH::CompoundShapeSettings*>(settings);
-	joltSettings->AddShape(ToJolt(position), ToJolt(rotation), joltShape, userData);
+	AsCompoundShapeSettings(settings)->AddShape(
+		ToJolt(position), 
+		ToJolt(rotation), 
+		AsShape(shape),
+		userData);
 }
 
 uint32_t JPH_CompoundShape_GetNumSubShapes(const JPH_CompoundShape* shape)
@@ -2503,12 +2514,11 @@ const JPH_Shape* JPH_DecoratedShape_GetInnerShape(const JPH_DecoratedShape* shap
 /* RotatedTranslatedShape */
 JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create(const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_ShapeSettings* shapeSettings)
 {
-	auto joltSettings = reinterpret_cast<const JPH::ShapeSettings*>(shapeSettings);
-
 	auto settings = new JPH::RotatedTranslatedShapeSettings(
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
-		joltSettings);
+		shapeSettings != nullptr ? AsShapeSettings(shapeSettings) : new EmptyShapeSettings()
+	);
 	settings->AddRef();
 
 	return reinterpret_cast<JPH_RotatedTranslatedShapeSettings*>(settings);
@@ -2516,12 +2526,11 @@ JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create(co
 
 JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create2(const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* shape)
 {
-	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
-
 	auto settings = new JPH::RotatedTranslatedShapeSettings(
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
-		joltShape);
+		AsShape(shape)
+	);
 	settings->AddRef();
 
 	return reinterpret_cast<JPH_RotatedTranslatedShapeSettings*>(settings);
@@ -2569,9 +2578,10 @@ void JPH_RotatedTranslatedShape_GetRotation(const JPH_RotatedTranslatedShape* sh
 
 JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create(const JPH_ShapeSettings* shapeSettings, const JPH_Vec3* scale)
 {
-	auto joltSettings = reinterpret_cast<const JPH::ShapeSettings*>(shapeSettings);
-
-	auto settings = new JPH::ScaledShapeSettings(joltSettings, ToJolt(scale));
+	auto settings = new JPH::ScaledShapeSettings(
+		AsShapeSettings(shapeSettings),
+		ToJolt(scale)
+	);
 	settings->AddRef();
 
 	return reinterpret_cast<JPH_ScaledShapeSettings*>(settings);
@@ -2579,9 +2589,10 @@ JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create(const JPH_ShapeSettings*
 
 JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create2(const JPH_Shape* shape, const JPH_Vec3* scale)
 {
-	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
-
-	auto settings = new JPH::ScaledShapeSettings(joltShape, ToJolt(scale));
+	auto settings = new JPH::ScaledShapeSettings(
+		AsShape(shape),
+		ToJolt(scale)
+	);
 	settings->AddRef();
 
 	return reinterpret_cast<JPH_ScaledShapeSettings*>(settings);
@@ -2671,43 +2682,45 @@ JPH_EmptyShapeSettings* JPH_EmptyShapeSettings_Create(const JPH_Vec3* centerOfMa
 	auto settings = new EmptyShapeSettings(ToJolt(centerOfMass));
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_EmptyShapeSettings*>(settings);
+	return ToEmptyShapeSettings(settings);
 }
 
 JPH_EmptyShape* JPH_EmptyShapeSettings_CreateShape(const JPH_EmptyShapeSettings* settings)
 {
-	const EmptyShapeSettings* joltSettings = reinterpret_cast<const EmptyShapeSettings*>(settings);
-	auto shape_res = joltSettings->Create();
+	auto shape_res = AsEmptyShapeSettings(settings)->Create();
+	if (!shape_res.IsValid())
+	{
+		return nullptr;
+	}
 
 	auto shape = shape_res.Get().GetPtr();
 	shape->AddRef();
 
-	return reinterpret_cast<JPH_EmptyShape*>(shape);
+	return ToEmptyShape(static_cast<EmptyShape*>(shape));
 }
 
 /* JPH_BodyCreationSettings */
 JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create(void)
 {
 	auto bodyCreationSettings = new JPH::BodyCreationSettings();
-	return reinterpret_cast<JPH_BodyCreationSettings*>(bodyCreationSettings);
+	return ToBodyCreationSettings(bodyCreationSettings);
 }
 
 JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create2(
-	JPH_ShapeSettings* shapeSettings,
+	const JPH_ShapeSettings* shapeSettings,
 	const JPH_RVec3* position,
 	const JPH_Quat* rotation,
 	JPH_MotionType motionType,
 	JPH_ObjectLayer objectLayer)
 {
-	JPH::ShapeSettings* joltShapeSettings = reinterpret_cast<JPH::ShapeSettings*>(shapeSettings);
 	auto bodyCreationSettings = new JPH::BodyCreationSettings(
-		joltShapeSettings,
+		AsShapeSettings(shapeSettings),
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
 		(JPH::EMotionType)motionType,
 		objectLayer
 	);
-	return reinterpret_cast<JPH_BodyCreationSettings*>(bodyCreationSettings);
+	return ToBodyCreationSettings(bodyCreationSettings);
 }
 
 JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create3(
@@ -2717,9 +2730,8 @@ JPH_BodyCreationSettings* JPH_BodyCreationSettings_Create3(
 	JPH_MotionType motionType,
 	JPH_ObjectLayer objectLayer)
 {
-	const JPH::Shape* joltShape = AsShape(shape);
 	auto bodyCreationSettings = new JPH::BodyCreationSettings(
-		joltShape,
+		AsShape(shape),
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
 		(JPH::EMotionType)motionType,
