@@ -654,6 +654,14 @@ typedef struct JPH_ContactListener                  JPH_ContactListener;
 typedef struct JPH_ContactManifold                  JPH_ContactManifold;
 typedef struct JPH_ContactSettings                  JPH_ContactSettings;
 
+typedef struct JPH_CollisionEstimationResult		JPH_CollisionEstimationResult;
+
+typedef struct JPH_CollisionEstimationResultImpulse {
+	float ContactImpulse;
+	float FrictionImpulse1;
+	float FrictionImpulse2;
+} JPH_CollisionEstimationResultImpulse;
+
 typedef struct JPH_BodyActivationListener           JPH_BodyActivationListener;
 typedef struct JPH_BodyDrawFilter                   JPH_BodyDrawFilter;
 
@@ -2390,5 +2398,18 @@ JPH_CAPI void JPH_Ragdoll_RemoveFromPhysicsSystem(JPH_Ragdoll* ragdoll, bool loc
 JPH_CAPI void JPH_Ragdoll_Activate(JPH_Ragdoll* ragdoll, bool lockBodies /* = true */);
 JPH_CAPI bool JPH_Ragdoll_IsActive(const JPH_Ragdoll* ragdoll, bool lockBodies /* = true */);
 JPH_CAPI void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
+
+/* CollisionEstimationResult */
+JPH_CAPI void JPH_CollisionEstimationResult_Destroy(JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI void JPH_CollisionEstimationResult_GetLinearVelocity1(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* linearVelocity);
+JPH_CAPI void JPH_CollisionEstimationResult_GetLinearVelocity2(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* linearVelocity);
+JPH_CAPI void JPH_CollisionEstimationResult_GetAngularVelocity1(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* angularVelocity);
+JPH_CAPI void JPH_CollisionEstimationResult_GetAngularVelocity2(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* angularVelocity);
+JPH_CAPI void JPH_CollisionEstimationResult_GetTangent1(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* tangent);
+JPH_CAPI void JPH_CollisionEstimationResult_GetTangent2(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* tangent);
+JPH_CAPI uint32_t JPH_CollisionEstimationResult_GetImpulsesCount(JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI void JPH_CollisionEstimationResult_GetImpulse(JPH_CollisionEstimationResult* collisionEstimationResult, uint32_t index, JPH_CollisionEstimationResultImpulse* impulse);
+
+JPH_CAPI JPH_CollisionEstimationResult* JPH_EstimateCollisionResponse(JPH_Body* body1, JPH_Body* body2, JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations);
 
 #endif /* JOLT_C_H_ */
