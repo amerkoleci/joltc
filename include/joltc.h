@@ -991,7 +991,7 @@ typedef struct JPH_PhysicsSettings {
 	float penetrationSlop;
 	float linearCastThreshold;
 	float linearCastMaxPenetration;
-	float manifoldToleranceSq;
+	float manifoldTolerance;
 	float maxPenetrationDistance;
 	float bodyPairCacheMaxDeltaPositionSq;
 	float bodyPairCacheCosMaxDeltaRotationDiv2;

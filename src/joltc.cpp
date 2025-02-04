@@ -817,7 +817,7 @@ void JPH_PhysicsSystem_SetPhysicsSettings(JPH_PhysicsSystem* system, JPH_Physics
 	joltSettings.mPenetrationSlop = settings->penetrationSlop;
 	joltSettings.mLinearCastThreshold = settings->linearCastThreshold;
 	joltSettings.mLinearCastMaxPenetration = settings->linearCastMaxPenetration;
-	joltSettings.mManifoldToleranceSq = settings->manifoldToleranceSq;
+	joltSettings.mManifoldTolerance = settings->manifoldTolerance;
 	joltSettings.mMaxPenetrationDistance = settings->maxPenetrationDistance;
 	joltSettings.mBodyPairCacheMaxDeltaPositionSq = settings->bodyPairCacheMaxDeltaPositionSq;
 	joltSettings.mBodyPairCacheCosMaxDeltaRotationDiv2 = settings->bodyPairCacheCosMaxDeltaRotationDiv2;
@@ -849,7 +849,7 @@ void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, JPH_Physics
 	result->penetrationSlop = joltSettings.mPenetrationSlop;
 	result->linearCastThreshold = joltSettings.mLinearCastThreshold;
 	result->linearCastMaxPenetration = joltSettings.mLinearCastMaxPenetration;
-	result->manifoldToleranceSq = joltSettings.mManifoldToleranceSq;
+	result->manifoldTolerance = joltSettings.mManifoldTolerance;
 	result->maxPenetrationDistance = joltSettings.mMaxPenetrationDistance;
 	result->bodyPairCacheMaxDeltaPositionSq = joltSettings.mBodyPairCacheMaxDeltaPositionSq;
 	result->bodyPairCacheCosMaxDeltaRotationDiv2 = joltSettings.mBodyPairCacheCosMaxDeltaRotationDiv2;
