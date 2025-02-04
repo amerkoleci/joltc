@@ -2517,7 +2517,7 @@ JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create(co
 	auto settings = new JPH::RotatedTranslatedShapeSettings(
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
-		shapeSettings != nullptr ? AsShapeSettings(shapeSettings) : new EmptyShapeSettings()
+		AsShapeSettings(shapeSettings)
 	);
 	settings->AddRef();
 
