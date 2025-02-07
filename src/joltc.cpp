@@ -920,19 +920,20 @@ public:
 
 	bool ShouldCollide(BroadPhaseLayer inLayer) const override
 	{
-		if (procs.ShouldCollide)
+		if (procs != nullptr 
+			&& procs->ShouldCollide)
 		{
-			return procs.ShouldCollide(userData, static_cast<JPH_BroadPhaseLayer>(inLayer)) == 1;
+			return procs->ShouldCollide(userData, static_cast<JPH_BroadPhaseLayer>(inLayer)) == 1;
 		}
 
 		return true;
 	}
 
-	JPH_BroadPhaseLayerFilter_Procs procs = {};
+	const JPH_BroadPhaseLayerFilter_Procs* procs = nullptr;
 	void* userData = nullptr;
 };
 
-JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(JPH_BroadPhaseLayerFilter_Procs procs, void* userData)
+JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(const JPH_BroadPhaseLayerFilter_Procs* procs, void* userData)
 {
 	auto filter = new ManagedBroadPhaseLayerFilter();
 	filter->procs = procs;
@@ -967,19 +968,20 @@ public:
 
 	bool ShouldCollide(ObjectLayer inLayer) const override
 	{
-		if (procs.ShouldCollide)
+		if (procs != nullptr 
+			&& procs->ShouldCollide)
 		{
-			return procs.ShouldCollide(userData, static_cast<JPH_ObjectLayer>(inLayer)) == 1;
+			return procs->ShouldCollide(userData, static_cast<JPH_ObjectLayer>(inLayer)) == 1;
 		}
 
 		return true;
 	}
 
-	JPH_ObjectLayerFilter_Procs procs = {};
+	const JPH_ObjectLayerFilter_Procs* procs = nullptr;
 	void* userData = nullptr;
 };
 
-JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(JPH_ObjectLayerFilter_Procs procs, void* userData)
+JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(const JPH_ObjectLayerFilter_Procs* procs, void* userData)
 {
 	auto filter = new ManagedObjectLayerFilter();
 	filter->procs = procs;
@@ -1014,9 +1016,10 @@ public:
 
 	bool ShouldCollide(const BodyID& bodyID) const override
 	{
-		if (procs.ShouldCollide)
+		if (procs != nullptr 
+			&& procs->ShouldCollide)
 		{
-			return procs.ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
+			return procs->ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
 		}
 
 		return true;
@@ -1024,19 +1027,20 @@ public:
 
 	bool ShouldCollideLocked(const Body& body) const override
 	{
-		if (procs.ShouldCollideLocked)
+		if (procs != nullptr
+			&& procs->ShouldCollideLocked)
 		{
-			return procs.ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
+			return procs->ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
 		}
 
 		return true;
 	}
 
-	JPH_BodyFilter_Procs procs = {};
+	const JPH_BodyFilter_Procs* procs = nullptr;
 	void* userData = nullptr;
 };
 
-JPH_BodyFilter* JPH_BodyFilter_Create(JPH_BodyFilter_Procs procs, void* userData)
+JPH_BodyFilter* JPH_BodyFilter_Create(const JPH_BodyFilter_Procs* procs, void* userData)
 {
 	auto filter = new ManagedBodyFilter();
 	filter->procs = procs;
@@ -1071,10 +1075,10 @@ public:
 
 	bool ShouldCollide([[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
 	{
-		if (procs.ShouldCollide)
+		if (procs != nullptr && procs->ShouldCollide)
 		{
 			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
-			return procs.ShouldCollide(userData, ToShape(inShape2), &subShapeIDOfShape2);
+			return procs->ShouldCollide(userData, ToShape(inShape2), &subShapeIDOfShape2);
 		}
 
 		return true;
@@ -1082,23 +1086,23 @@ public:
 
 	bool ShouldCollide([[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const
 	{
-		if (procs.ShouldCollide2)
+		if (procs != nullptr && procs->ShouldCollide2)
 		{
 			auto subShapeIDOfShape1 = inSubShapeIDOfShape1.GetValue();
 			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
 
-			return procs.ShouldCollide2(userData, ToShape(inShape1), &subShapeIDOfShape1, ToShape(inShape2), &subShapeIDOfShape2);
+			return procs->ShouldCollide2(userData, ToShape(inShape1), &subShapeIDOfShape1, ToShape(inShape2), &subShapeIDOfShape2);
 		}
 
 		return true;
 	}
 
-	JPH_ShapeFilter_Procs procs = {};
+	const JPH_ShapeFilter_Procs* procs = nullptr;
 	void* userData = nullptr;
 };
 
 
-JPH_ShapeFilter* JPH_ShapeFilter_Create(JPH_ShapeFilter_Procs procs, void* userData)
+JPH_ShapeFilter* JPH_ShapeFilter_Create(const JPH_ShapeFilter_Procs* procs, void* userData)
 {
 	auto filter = new ManagedShapeFilter();
 	filter->procs = procs;
@@ -6644,9 +6648,10 @@ public:
 		JPH_RVec3 baseOffset;
 		FromJolt(inBaseOffset, &baseOffset);
 
-		if (procs.OnContactValidate)
+		if (procs != nullptr
+			&& procs->OnContactValidate)
 		{
-			JPH_ValidateResult result = procs.OnContactValidate(
+			JPH_ValidateResult result = procs->OnContactValidate(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -6665,9 +6670,10 @@ public:
 		JPH_UNUSED(inManifold);
 		JPH_UNUSED(ioSettings);
 
-		if (procs.OnContactAdded)
+		if (procs != nullptr
+			&& procs->OnContactAdded)
 		{
-			procs.OnContactAdded(
+			procs->OnContactAdded(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -6682,9 +6688,10 @@ public:
 		JPH_UNUSED(inManifold);
 		JPH_UNUSED(ioSettings);
 
-		if (procs.OnContactPersisted)
+		if (procs != nullptr
+			&& procs->OnContactPersisted)
 		{
-			procs.OnContactPersisted(
+			procs->OnContactPersisted(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -6696,20 +6703,21 @@ public:
 
 	void OnContactRemoved(const SubShapeIDPair& inSubShapePair) override
 	{
-		if (procs.OnContactRemoved)
+		if (procs != nullptr
+			&& procs->OnContactRemoved)
 		{
-			procs.OnContactRemoved(
+			procs->OnContactRemoved(
 				userData,
 				reinterpret_cast<const JPH_SubShapeIDPair*>(&inSubShapePair)
 			);
 		}
 	}
 
-	JPH_ContactListener_Procs procs = {};
+	const JPH_ContactListener_Procs* procs = nullptr;
 	void* userData = nullptr;
 };
 
-JPH_ContactListener* JPH_ContactListener_Create(JPH_ContactListener_Procs procs, void* userData)
+JPH_ContactListener* JPH_ContactListener_Create(const JPH_ContactListener_Procs* procs, void* userData)
 {
 	auto listener = new ManagedContactListener();
 	listener->procs = procs;
@@ -6731,9 +6739,9 @@ class ManagedBodyActivationListener final : public JPH::BodyActivationListener
 public:
 	void OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (procs.OnBodyDeactivated)
+		if (procs != nullptr && procs->OnBodyDeactivated)
 		{
-			procs.OnBodyActivated(
+			procs->OnBodyActivated(
 				userData,
 				inBodyID.GetIndexAndSequenceNumber(),
 				inBodyUserData
@@ -6743,9 +6751,9 @@ public:
 
 	void OnBodyDeactivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (procs.OnBodyDeactivated)
+		if (procs != nullptr && procs->OnBodyDeactivated)
 		{
-			procs.OnBodyDeactivated(
+			procs->OnBodyDeactivated(
 				userData,
 				inBodyID.GetIndexAndSequenceNumber(),
 				inBodyUserData
@@ -6753,11 +6761,11 @@ public:
 		}
 	}
 
-	JPH_BodyActivationListener_Procs procs = {};
+	const JPH_BodyActivationListener_Procs* procs = nullptr;
 	void* userData = nullptr;
 };
 
-JPH_BodyActivationListener* JPH_BodyActivationListener_Create(JPH_BodyActivationListener_Procs procs, void* userData)
+JPH_BodyActivationListener* JPH_BodyActivationListener_Create(const JPH_BodyActivationListener_Procs* procs, void* userData)
 {
 	auto listener = new ManagedBodyActivationListener();
 	listener->procs = procs;
@@ -7626,7 +7634,7 @@ bool JPH_CharacterVirtual_HasCollidedWithCharacter(JPH_CharacterVirtual* charact
 class ManagedCharacterContactListener final : public JPH::CharacterContactListener
 {
 public:
-	JPH_CharacterContactListener_Procs procs = {};
+	const JPH_CharacterContactListener_Procs* procs = nullptr;
 	void* userData = nullptr;
 
 	void OnAdjustBodyVelocity(const CharacterVirtual* inCharacter, const Body& inBody2, Vec3& ioLinearVelocity, Vec3& ioAngularVelocity) override
@@ -7635,9 +7643,9 @@ public:
 		FromJolt(ioLinearVelocity, &linearVelocity);
 		FromJolt(ioAngularVelocity, &angularVelocity);
 
-		if (procs.OnAdjustBodyVelocity)
+		if (procs != nullptr && procs->OnAdjustBodyVelocity)
 		{
-			procs.OnAdjustBodyVelocity(
+			procs->OnAdjustBodyVelocity(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToBody(&inBody2),
@@ -7652,9 +7660,9 @@ public:
 
 	bool OnContactValidate(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs.OnContactValidate)
+		if (procs != nullptr && procs->OnContactValidate)
 		{
-			return procs.OnContactValidate(
+			return procs->OnContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7667,9 +7675,9 @@ public:
 
 	bool OnCharacterContactValidate(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2)  override
 	{
-		if (procs.OnCharacterContactValidate)
+		if (procs != nullptr && procs->OnCharacterContactValidate)
 		{
-			return procs.OnCharacterContactValidate(
+			return procs->OnCharacterContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -7682,7 +7690,7 @@ public:
 
 	void OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs.OnContactAdded)
+		if (procs != nullptr && procs->OnContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -7694,7 +7702,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs.OnContactAdded(
+			procs->OnContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7711,7 +7719,7 @@ public:
 
 	void OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs.OnContactPersisted)
+		if (procs != nullptr && procs->OnContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -7723,7 +7731,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs.OnContactPersisted(
+			procs->OnContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7740,9 +7748,9 @@ public:
 
 	void OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs.OnContactRemoved)
+		if (procs != nullptr && procs->OnContactRemoved)
 		{
-			procs.OnContactRemoved(
+			procs->OnContactRemoved(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7753,7 +7761,7 @@ public:
 
 	void OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs.OnCharacterContactAdded)
+		if (procs != nullptr && procs->OnCharacterContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -7765,7 +7773,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs.OnCharacterContactAdded(
+			procs->OnCharacterContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -7782,7 +7790,7 @@ public:
 
 	void OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs.OnCharacterContactPersisted)
+		if (procs != nullptr && procs->OnCharacterContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -7794,7 +7802,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs.OnCharacterContactPersisted(
+			procs->OnCharacterContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -7811,9 +7819,9 @@ public:
 
 	void OnCharacterContactRemoved(const CharacterVirtual* inCharacter, const CharacterID& inOtherCharacterID, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs.OnCharacterContactRemoved)
+		if (procs != nullptr && procs->OnCharacterContactRemoved)
 		{
-			procs.OnCharacterContactRemoved(
+			procs->OnCharacterContactRemoved(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_CharacterID)inOtherCharacterID.GetValue(),
@@ -7827,7 +7835,7 @@ public:
 		const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity,
 		Vec3& ioNewCharacterVelocity) override
 	{
-		if (procs.OnContactSolve)
+		if (procs != nullptr && procs->OnContactSolve)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
@@ -7838,7 +7846,7 @@ public:
 			FromJolt(inCharacterVelocity, &characterVelocity);
 			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
-			procs.OnContactSolve(
+			procs->OnContactSolve(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7857,7 +7865,7 @@ public:
 
 	void OnCharacterContactSolve(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) override
 	{
-		if (procs.OnCharacterContactSolve)
+		if (procs != nullptr && procs->OnCharacterContactSolve)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
@@ -7868,7 +7876,7 @@ public:
 			FromJolt(inCharacterVelocity, &characterVelocity);
 			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
-			procs.OnCharacterContactSolve(
+			procs->OnCharacterContactSolve(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -7886,7 +7894,7 @@ public:
 	}
 };
 
-JPH_CharacterContactListener* JPH_CharacterContactListener_Create(JPH_CharacterContactListener_Procs procs, void* userData)
+JPH_CharacterContactListener* JPH_CharacterContactListener_Create(const JPH_CharacterContactListener_Procs* procs, void* userData)
 {
 	auto impl = new ManagedCharacterContactListener();
 	impl->procs = procs;
@@ -7906,7 +7914,7 @@ void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener
 class ManagedCharacterVsCharacterCollision final : public JPH::CharacterVsCharacterCollision
 {
 public:
-	JPH_CharacterVsCharacterCollision_Procs procs = {};
+	const JPH_CharacterVsCharacterCollision_Procs* procs = nullptr;
 	void* userData = nullptr;
 
 	void CollideCharacter(const CharacterVirtual* inCharacter,
@@ -7915,7 +7923,7 @@ public:
 		RVec3Arg inBaseOffset,
 		CollideShapeCollector& ioCollector) const override
 	{
-		if (procs.CollideCharacter)
+		if (procs != nullptr && procs->CollideCharacter)
 		{
 			JPH_RMatrix4x4 centerOfMassTransform;
 			JPH_RVec3 baseOffset;
@@ -7924,7 +7932,7 @@ public:
 			FromJolt(inCenterOfMassTransform, &centerOfMassTransform);
 			FromJolt(inBaseOffset, &baseOffset);
 
-			procs.CollideCharacter(
+			procs->CollideCharacter(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				&centerOfMassTransform,
@@ -7941,7 +7949,7 @@ public:
 		RVec3Arg inBaseOffset,
 		CastShapeCollector& ioCollector) const override
 	{
-		if (procs.CastCharacter)
+		if (procs != nullptr && procs->CastCharacter)
 		{
 			JPH_RMatrix4x4 centerOfMassTransform;
 			JPH_Vec3 direction;
@@ -7952,7 +7960,7 @@ public:
 			FromJolt(inDirection, &direction);
 			FromJolt(inBaseOffset, &baseOffset);
 
-			procs.CastCharacter(
+			procs->CastCharacter(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				&centerOfMassTransform,
@@ -7964,7 +7972,7 @@ public:
 	}
 };
 
-JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(JPH_CharacterVsCharacterCollision_Procs procs, void* userData)
+JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(const JPH_CharacterVsCharacterCollision_Procs* procs, void* userData)
 {
 	auto impl = new ManagedCharacterVsCharacterCollision();
 	impl->procs = procs;
@@ -8088,19 +8096,19 @@ public:
 
 	bool ShouldDraw([[maybe_unused]] const Body& inBody) const override
 	{
-		if (procs.ShouldDraw)
+		if (procs != nullptr && procs->ShouldDraw)
 		{
-			return procs.ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
+			return procs->ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
 		}
 
 		return true;
 	}
 
-	JPH_BodyDrawFilter_Procs procs = {};
+	const JPH_BodyDrawFilter_Procs* procs = nullptr;
 	void* userData = nullptr;
 };
 
-JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(JPH_BodyDrawFilter_Procs procs, void* userData)
+JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(const JPH_BodyDrawFilter_Procs* procs, void* userData)
 {
 	auto filter = new ManagedBodyDrawFilter();
 	filter->procs = procs;
@@ -8120,25 +8128,25 @@ void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter)
 class ManagedDebugRendererSimple final : public DebugRendererSimple
 {
 public:
-	JPH_DebugRenderer_Procs procs = {};
+	const JPH_DebugRenderer_Procs* procs = nullptr;
 	void* userData = nullptr;
 
 	void DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor) override
 	{
-		if (procs.DrawLine)
+		if (procs != nullptr && procs->DrawLine)
 		{
 			JPH_RVec3 from, to;
 
 			FromJolt(inFrom, &from);
 			FromJolt(inTo, &to);
 
-			procs.DrawLine(userData, &from, &to, inColor.GetUInt32());
+			procs->DrawLine(userData, &from, &to, inColor.GetUInt32());
 		}
 	}
 
 	void DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::Off) override
 	{
-		if (procs.DrawTriangle)
+		if (procs != nullptr && procs->DrawTriangle)
 		{
 			JPH_RVec3 v1, v2, v3;
 
@@ -8146,7 +8154,7 @@ public:
 			FromJolt(inV2, &v2);
 			FromJolt(inV3, &v3);
 
-			procs.DrawTriangle(userData, &v1, &v2, &v3, inColor.GetUInt32(), static_cast<JPH_DebugRenderer_CastShadow>(inCastShadow));
+			procs->DrawTriangle(userData, &v1, &v2, &v3, inColor.GetUInt32(), static_cast<JPH_DebugRenderer_CastShadow>(inCastShadow));
 		}
 		else
 		{
@@ -8156,18 +8164,18 @@ public:
 
 	void DrawText3D(RVec3Arg inPosition, const string_view& inString, ColorArg inColor, float inHeight) override
 	{
-		if (procs.DrawText3D)
+		if (procs != nullptr && procs->DrawText3D)
 		{
 			JPH_RVec3 position;
 
 			FromJolt(inPosition, &position);
 
-			procs.DrawText3D(userData, &position, inString.data(), inColor.GetUInt32(), inHeight);
+			procs->DrawText3D(userData, &position, inString.data(), inColor.GetUInt32(), inHeight);
 		}
 	}
 };
 
-JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(JPH_DebugRenderer_Procs procs, void* userData)
+JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(const JPH_DebugRenderer_Procs* procs, void* userData)
 {
 	auto impl = new ManagedDebugRendererSimple();
 	impl->procs = procs;
