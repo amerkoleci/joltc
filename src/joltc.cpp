@@ -6651,12 +6651,21 @@ public:
 		if (procs != nullptr
 			&& procs->OnContactValidate)
 		{
+			JPH_CollideShapeResult collideShapeResult{};
+			FromJolt(inCollisionResult.mContactPointOn1, &collideShapeResult.contactPointOn1);
+			FromJolt(inCollisionResult.mContactPointOn2, &collideShapeResult.contactPointOn2);
+			FromJolt(inCollisionResult.mPenetrationAxis, &collideShapeResult.penetrationAxis);
+			collideShapeResult.penetrationDepth = inCollisionResult.mPenetrationDepth;
+			collideShapeResult.subShapeID1 = inCollisionResult.mSubShapeID1.GetValue();
+			collideShapeResult.subShapeID2 = inCollisionResult.mSubShapeID2.GetValue();
+			collideShapeResult.bodyID2 = inCollisionResult.mBodyID2.GetIndexAndSequenceNumber();
+
 			JPH_ValidateResult result = procs->OnContactValidate(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
 				&baseOffset,
-				nullptr
+				&collideShapeResult
 			);
 
 			return (JPH::ValidateResult)result;
