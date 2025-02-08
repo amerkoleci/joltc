@@ -1068,6 +1068,7 @@ JPH_CAPI void JPH_Quat_RotateAxisZ(const JPH_Quat* quat, JPH_Vec3* result);
 JPH_CAPI void JPH_Quat_Inversed(const JPH_Quat* quat, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_GetPerpendicular(const JPH_Quat* quat, JPH_Quat* result);
 JPH_CAPI float JPH_Quat_GetRotationAngle(const JPH_Quat* quat, const JPH_Vec3* axis);
+JPH_CAPI void JPH_Quat_FromEulerAngles(const JPH_Vec3* angles, JPH_Quat* result);
 
 JPH_CAPI void JPH_Quat_Add(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_Subtract(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
