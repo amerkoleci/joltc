@@ -356,9 +356,9 @@ static inline JPH_CollideShapeResult FromJolt(const JPH::CollideShapeResult& jol
 
 	if (!jolt.mShape1Face.empty())
 	{
-		result.shape1FaceCount = jolt.mShape1Face.size();
+		result.shape1FaceCount = static_cast<uint32_t>(jolt.mShape1Face.size());
 		result.shape1Faces = (JPH_Vec3*)malloc(sizeof(JPH_Vec3) * result.shape1FaceCount);
-		for (size_t i = 0; i < result.shape1FaceCount; i++)
+		for (uint32_t i = 0; i < result.shape1FaceCount; i++)
 		{
 			FromJolt(jolt.mShape1Face[i], &result.shape1Faces[i]);
 		}
@@ -366,9 +366,9 @@ static inline JPH_CollideShapeResult FromJolt(const JPH::CollideShapeResult& jol
 
 	if (!jolt.mShape2Face.empty())
 	{
-		result.shape2FaceCount = jolt.mShape2Face.size();
+		result.shape2FaceCount = static_cast<uint32_t>(jolt.mShape2Face.size());
 		result.shape2Faces = (JPH_Vec3*)malloc(sizeof(JPH_Vec3) * result.shape2FaceCount);
-		for (size_t i = 0; i < result.shape2FaceCount; i++)
+		for (uint32_t i = 0; i < result.shape2FaceCount; i++)
 		{
 			FromJolt(jolt.mShape2Face[i], &result.shape2Faces[i]);
 		}
@@ -8454,9 +8454,9 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 
 	if (!joltResult.mImpulses.empty())
 	{
-		result->impulseCount = joltResult.mImpulses.size();
+		result->impulseCount = static_cast<uint32_t>(joltResult.mImpulses.size());
 		result->impulses = (JPH_CollisionEstimationResultImpulse*)malloc(sizeof(JPH_CollisionEstimationResultImpulse) * joltResult.mImpulses.size());
-		for (size_t i = 0; i < result->impulseCount; i++)
+		for (uint32_t i = 0; i < result->impulseCount; i++)
 		{
 			result->impulses[i].contactImpulse = joltResult.mImpulses[i].mContactImpulse;
 			result->impulses[i].frictionImpulse1 = joltResult.mImpulses[i].mFrictionImpulse1;

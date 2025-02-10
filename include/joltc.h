@@ -518,8 +518,7 @@ typedef struct JPH_CollidePointResult {
 	JPH_SubShapeID subShapeID2;
 } JPH_CollidePointResult;
 
-typedef struct JPH_CollideShapeResult
-{
+typedef struct JPH_CollideShapeResult {
 	JPH_Vec3		contactPointOn1;
 	JPH_Vec3		contactPointOn2;
 	JPH_Vec3		penetrationAxis;
@@ -527,14 +526,13 @@ typedef struct JPH_CollideShapeResult
 	JPH_SubShapeID	subShapeID1;
 	JPH_SubShapeID	subShapeID2;
 	JPH_BodyID		bodyID2;
-	size_t			shape1FaceCount;
+	uint32_t		shape1FaceCount;
 	JPH_Vec3*		shape1Faces;
-	size_t			shape2FaceCount;
+	uint32_t		shape2FaceCount;
 	JPH_Vec3*		shape2Faces;
 } JPH_CollideShapeResult;
 
-typedef struct JPH_ShapeCastResult
-{
+typedef struct JPH_ShapeCastResult {
 	JPH_Vec3           contactPointOn1;
 	JPH_Vec3           contactPointOn2;
 	JPH_Vec3           penetrationAxis;
@@ -546,28 +544,27 @@ typedef struct JPH_ShapeCastResult
 	bool			   isBackFaceHit;
 } JPH_ShapeCastResult;
 
-typedef struct JPH_DrawSettings
-{
-	bool					drawGetSupportFunction;				///< Draw the GetSupport() function, used for convex collision detection
-	bool					drawSupportDirection;				///< When drawing the support function, also draw which direction mapped to a specific support point
-	bool					drawGetSupportingFace;				///< Draw the faces that were found colliding during collision detection
-	bool					drawShape;							///< Draw the shapes of all bodies
-	bool					drawShapeWireframe;					///< When mDrawShape is true and this is true, the shapes will be drawn in wireframe instead of solid.
+typedef struct JPH_DrawSettings {
+	bool						drawGetSupportFunction;				///< Draw the GetSupport() function, used for convex collision detection
+	bool						drawSupportDirection;				///< When drawing the support function, also draw which direction mapped to a specific support point
+	bool						drawGetSupportingFace;				///< Draw the faces that were found colliding during collision detection
+	bool						drawShape;							///< Draw the shapes of all bodies
+	bool						drawShapeWireframe;					///< When mDrawShape is true and this is true, the shapes will be drawn in wireframe instead of solid.
 	JPH_BodyManager_ShapeColor	drawShapeColor;                     ///< Coloring scheme to use for shapes
-	bool					drawBoundingBox;					///< Draw a bounding box per body
-	bool					drawCenterOfMassTransform;			///< Draw the center of mass for each body
-	bool					drawWorldTransform;					///< Draw the world transform (which can be different than the center of mass) for each body
-	bool					drawVelocity;						///< Draw the velocity vector for each body
-	bool					drawMassAndInertia;					///< Draw the mass and inertia (as the box equivalent) for each body
-	bool					drawSleepStats;						///< Draw stats regarding the sleeping algorithm of each body
-	bool					drawSoftBodyVertices;				///< Draw the vertices of soft bodies
-	bool					drawSoftBodyVertexVelocities;		///< Draw the velocities of the vertices of soft bodies
-	bool					drawSoftBodyEdgeConstraints;		///< Draw the edge constraints of soft bodies
-	bool					drawSoftBodyBendConstraints;		///< Draw the bend constraints of soft bodies
-	bool					drawSoftBodyVolumeConstraints;		///< Draw the volume constraints of soft bodies
-	bool					drawSoftBodySkinConstraints;		///< Draw the skin constraints of soft bodies
-	bool					drawSoftBodyLRAConstraints;	        ///< Draw the LRA constraints of soft bodies
-	bool					drawSoftBodyPredictedBounds;		///< Draw the predicted bounds of soft bodies
+	bool						drawBoundingBox;					///< Draw a bounding box per body
+	bool						drawCenterOfMassTransform;			///< Draw the center of mass for each body
+	bool						drawWorldTransform;					///< Draw the world transform (which can be different than the center of mass) for each body
+	bool						drawVelocity;						///< Draw the velocity vector for each body
+	bool						drawMassAndInertia;					///< Draw the mass and inertia (as the box equivalent) for each body
+	bool						drawSleepStats;						///< Draw stats regarding the sleeping algorithm of each body
+	bool						drawSoftBodyVertices;				///< Draw the vertices of soft bodies
+	bool						drawSoftBodyVertexVelocities;		///< Draw the velocities of the vertices of soft bodies
+	bool						drawSoftBodyEdgeConstraints;		///< Draw the edge constraints of soft bodies
+	bool						drawSoftBodyBendConstraints;		///< Draw the bend constraints of soft bodies
+	bool						drawSoftBodyVolumeConstraints;		///< Draw the volume constraints of soft bodies
+	bool						drawSoftBodySkinConstraints;		///< Draw the skin constraints of soft bodies
+	bool						drawSoftBodyLRAConstraints;	        ///< Draw the LRA constraints of soft bodies
+	bool						drawSoftBodyPredictedBounds;		///< Draw the predicted bounds of soft bodies
 	JPH_SoftBodyConstraintColor	drawSoftBodyConstraintColor;        ///< Coloring scheme to use for soft body constraints
 } JPH_DrawSettings;
 
@@ -673,7 +670,7 @@ typedef struct JPH_CollisionEstimationResult {
 	JPH_Vec3								tangent1;
 	JPH_Vec3								tangent2;
 
-	size_t									impulseCount;
+	uint32_t								impulseCount;
 	JPH_CollisionEstimationResultImpulse*	impulses;
 } JPH_CollisionEstimationResult;
 
