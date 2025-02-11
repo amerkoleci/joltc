@@ -1367,6 +1367,12 @@ void JPH_Quat_InverseRotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3*
 	FromJolt(joltQuat.InverseRotate(ToJolt(vec)), result);
 }
 
+void JPH_Quat_FromEulerAngles(const JPH_Vec3* angles, JPH_Quat* result)
+{
+    JPH_ASSERT(angles && result);
+    FromJolt(JPH::Quat::sEulerAngles(ToJolt(angles)), result);
+}
+
 JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq)
 {
 	JPH_ASSERT(v1 != nullptr);
