@@ -591,6 +591,8 @@ typedef struct JPH_ObjectLayerFilter                JPH_ObjectLayerFilter;
 typedef struct JPH_BodyFilter                       JPH_BodyFilter;
 typedef struct JPH_ShapeFilter                      JPH_ShapeFilter;
 
+typedef struct JPH_SimShapeFilter					JPH_SimShapeFilter;
+
 typedef struct JPH_PhysicsSystem                    JPH_PhysicsSystem;
 
 typedef struct JPH_PhysicsMaterial					JPH_PhysicsMaterial;
@@ -1057,6 +1059,7 @@ JPH_CAPI const JPH_NarrowPhaseQuery* JPH_PhysicsSystem_GetNarrowPhaseQueryNoLock
 
 JPH_CAPI void JPH_PhysicsSystem_SetContactListener(JPH_PhysicsSystem* system, JPH_ContactListener* listener);
 JPH_CAPI void JPH_PhysicsSystem_SetBodyActivationListener(JPH_PhysicsSystem* system, JPH_BodyActivationListener* listener);
+JPH_CAPI void JPH_PhysicsSystem_SetSimShapeFilter(JPH_PhysicsSystem* system, JPH_SimShapeFilter* filter);
 
 JPH_CAPI bool JPH_PhysicsSystem_WereBodiesInContact(const JPH_PhysicsSystem* system, JPH_BodyID body1, JPH_BodyID body2);
 
@@ -2020,6 +2023,21 @@ JPH_CAPI JPH_ShapeFilter* JPH_ShapeFilter_Create(const JPH_ShapeFilter_Procs* pr
 JPH_CAPI void JPH_ShapeFilter_Destroy(JPH_ShapeFilter* filter);
 JPH_CAPI JPH_BodyID JPH_ShapeFilter_GetBodyID2(JPH_ShapeFilter* filter);
 JPH_CAPI void JPH_ShapeFilter_SetBodyID2(JPH_ShapeFilter* filter, JPH_BodyID id);
+
+/* JPH_SimShapeFilter */
+typedef struct JPH_SimShapeFilter_Procs {
+	bool(JPH_API_CALL* ShouldCollide)(void* userData, 
+		const JPH_Body* body1, 
+		const JPH_Shape* shape1, 
+		const JPH_SubShapeID* subShapeIDOfShape1,
+		const JPH_Body* body2,
+		const JPH_Shape* shape2, 
+		const JPH_SubShapeID* subShapeIDOfShape2
+		);
+} JPH_SimShapeFilter_Procs;
+
+JPH_CAPI JPH_SimShapeFilter* JPH_SimShapeFilter_Create(const JPH_SimShapeFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_SimShapeFilter_Destroy(JPH_SimShapeFilter* filter);
 
 /* Contact listener */
 typedef struct JPH_ContactListener_Procs {
