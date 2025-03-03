@@ -28,6 +28,7 @@ JPH_SUPPRESS_WARNINGS
 #include <Jolt/Physics/Collision/CollisionDispatch.h>
 #include <Jolt/Physics/Collision/EstimateCollisionResponse.h>
 #include <Jolt/Physics/Collision/ShapeCast.h>
+#include <Jolt/Physics/Collision/SimShapeFilter.h>
 #include "Jolt/Physics/Collision/Shape/PlaneShape.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
@@ -1181,6 +1182,60 @@ JPH_BodyID JPH_ShapeFilter_GetBodyID2(JPH_ShapeFilter* filter)
 void JPH_ShapeFilter_SetBodyID2(JPH_ShapeFilter* filter, JPH_BodyID id)
 {
 	reinterpret_cast<ManagedShapeFilter*>(filter)->mBodyID2 = JPH::BodyID(id);
+}
+
+/* JPH_SimShapeFilter */
+static const JPH::SimShapeFilter& ToJolt(const JPH_SimShapeFilter* filter)
+{
+	static const JPH::SimShapeFilter g_defaultSimShapeFilter = {};
+	return filter ? *reinterpret_cast<const JPH::SimShapeFilter*>(filter) : g_defaultSimShapeFilter;
+}
+
+class ManagedSimShapeFilter final : public JPH::SimShapeFilter
+{
+public:
+	ManagedSimShapeFilter() = default;
+
+	ManagedSimShapeFilter(const ManagedSimShapeFilter&) = delete;
+	ManagedSimShapeFilter(const ManagedSimShapeFilter&&) = delete;
+	ManagedSimShapeFilter& operator=(const ManagedSimShapeFilter&) = delete;
+	ManagedSimShapeFilter& operator=(const ManagedSimShapeFilter&&) = delete;
+
+	bool ShouldCollide(	[[maybe_unused]] const Body& inBody1, [[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1,
+						[[maybe_unused]] const Body& inBody2, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
+	{
+		if (procs != nullptr && procs->ShouldCollide)
+		{
+
+			auto subShapeIDOfShape1 = inSubShapeIDOfShape1.GetValue();
+			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
+			return procs->ShouldCollide(userData,
+				reinterpret_cast<const JPH_Body*>(&inBody1), ToShape(inShape1), &subShapeIDOfShape1,
+				reinterpret_cast<const JPH_Body*>(&inBody2), ToShape(inShape2), &subShapeIDOfShape2);
+		}
+
+		return true;
+	}
+
+	const JPH_SimShapeFilter_Procs* procs = nullptr;
+	void* userData = nullptr;
+};
+
+
+JPH_SimShapeFilter* JPH_SimShapeFilter_Create(const JPH_SimShapeFilter_Procs* procs, void* userData)
+{
+	auto filter = new ManagedSimShapeFilter();
+	filter->procs = procs;
+	filter->userData = userData;
+	return reinterpret_cast<JPH_SimShapeFilter*>(filter);
+}
+
+void JPH_SimShapeFilter_Destroy(JPH_SimShapeFilter* filter)
+{
+	if (filter)
+	{
+		delete reinterpret_cast<ManagedSimShapeFilter*>(filter);
+	}
 }
 
 /* Math */
@@ -4625,6 +4680,14 @@ void JPH_PhysicsSystem_SetBodyActivationListener(JPH_PhysicsSystem* system, JPH_
 
 	auto joltListener = reinterpret_cast<JPH::BodyActivationListener*>(listener);
 	system->physicsSystem->SetBodyActivationListener(joltListener);
+}
+
+void JPH_PhysicsSystem_SetSimShapeFilter(JPH_PhysicsSystem* system, JPH_SimShapeFilter* filter)
+{
+	JPH_ASSERT(system);
+
+	auto joltFilter = reinterpret_cast<JPH::SimShapeFilter*>(filter);
+	system->physicsSystem->SetSimShapeFilter(joltFilter);
 }
 
 bool JPH_PhysicsSystem_WereBodiesInContact(const JPH_PhysicsSystem* system, JPH_BodyID body1, JPH_BodyID body2)
