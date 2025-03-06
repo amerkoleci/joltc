@@ -1643,6 +1643,20 @@ void JPH_Matrix4x4_Scale(JPH_Matrix4x4* result, const JPH_Vec3* scale) {
 	FromJolt(mat, result);
 }
 
+void JPH_Matrix4x4_Transposed(const JPH_Matrix4x4* m, JPH_Matrix4x4* result)
+{
+	JPH_ASSERT(m && result);
+	auto joltM = ToJolt(m);
+	FromJolt(joltM.Transposed(), result);
+}
+
+void JPH_Matrix4x4_Inversed(const JPH_Matrix4x4* m, JPH_Matrix4x4* result)
+{
+	JPH_ASSERT(m && result);
+	auto joltM = ToJolt(m);
+	FromJolt(joltM.Inversed(), result);
+}
+
 void JPH_RMatrix4x4_Zero(JPH_RMatrix4x4* result) {
 	const JPH::RMat44 mat = JPH::RMat44::sZero();
 	FromJolt(mat, result);
@@ -1676,6 +1690,13 @@ void JPH_RMatrix4x4_InverseRotationTranslation(JPH_RMatrix4x4* result, const JPH
 void JPH_RMatrix4x4_Scale(JPH_RMatrix4x4* result, const JPH_Vec3* scale) {
 	const JPH::RMat44 mat = JPH::RMat44::sScale(ToJolt(scale));
 	FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_Inversed(const JPH_RMatrix4x4* m, JPH_RMatrix4x4* result)
+{
+	JPH_ASSERT(m && result);
+	auto joltM = ToJolt(m);
+	FromJolt(joltM.Inversed(), result);
 }
 
 void JPH_Matrix4x4_GetAxisX(const JPH_Matrix4x4* matrix, JPH_Vec3* result)
