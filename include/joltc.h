@@ -568,6 +568,11 @@ typedef struct JPH_DrawSettings {
 	JPH_SoftBodyConstraintColor	drawSoftBodyConstraintColor;        ///< Coloring scheme to use for soft body constraints
 } JPH_DrawSettings;
 
+typedef struct JPH_SupportingFace {
+    uint32_t count;
+    JPH_Vec3 vertices[32];
+} JPH_SupportingFace;
+
 typedef void JPH_CastRayResultCallback(void* context, const JPH_RayCastResult* result);
 typedef void JPH_RayCastBodyResultCallback(void* context, const JPH_BroadPhaseCastResult* result);
 typedef void JPH_CollideShapeBodyResultCallback(void* context, const JPH_BodyID result);
@@ -1192,6 +1197,7 @@ JPH_CAPI void JPH_Shape_GetMassProperties(const JPH_Shape* shape, JPH_MassProper
 JPH_CAPI const JPH_Shape* JPH_Shape_GetLeafShape(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_SubShapeID* remainder);
 JPH_CAPI const JPH_PhysicsMaterial* JPH_Shape_GetMaterial(const JPH_Shape* shape, JPH_SubShapeID subShapeID);
 JPH_CAPI void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_Vec3* localPosition, JPH_Vec3* normal);
+JPH_CAPI void JPH_Shape_GetSupportingFace(const JPH_Shape* shape, const JPH_SubShapeID subShapeID, const JPH_Vec3* direction, const JPH_Vec3* scale, const JPH_Matrix4x4* centerOfMassTransform, JPH_SupportingFace* outVertices);
 JPH_CAPI float JPH_Shape_GetVolume(const JPH_Shape* shape);
 JPH_CAPI bool JPH_Shape_IsValidScale(const JPH_Shape* shape, const JPH_Vec3* scale);
 JPH_CAPI void JPH_Shape_MakeScaleValid(const JPH_Shape* shape, const JPH_Vec3* scale, JPH_Vec3* result);

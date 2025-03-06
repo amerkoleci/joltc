@@ -1878,6 +1878,38 @@ void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeI
 	FromJolt(joltNormal, normal);
 }
 
+JPH_CAPI void JPH_Shape_GetSupportingFace(const JPH_Shape* shape,
+    const JPH_SubShapeID subShapeID,
+    const JPH_Vec3* direction,
+    const JPH_Vec3* scale,
+    const JPH_Matrix4x4* centerOfMassTransform,
+    JPH_SupportingFace* outVertices)
+{
+    JPH_ASSERT(shape);
+    JPH_ASSERT(subShapeID);
+    JPH_ASSERT(direction);
+    JPH_ASSERT(scale);
+    JPH_ASSERT(centerOfMassTransform);
+    JPH_ASSERT(outVertices);
+
+    auto joltSubShapeID = JPH::SubShapeID();
+    joltSubShapeID.SetValue(subShapeID);
+    
+    JPH::Vec3 joltDirection = ToJolt(direction);
+    JPH::Vec3 joltScale = ToJolt(scale);
+    JPH::Mat44 joltTransform = ToJolt(centerOfMassTransform);
+    
+    JPH::Shape::SupportingFace joltFace;
+    AsShape(shape)->GetSupportingFace(joltSubShapeID, joltDirection, joltScale, joltTransform, joltFace);
+    
+    outVertices->count = static_cast<uint32_t>(joltFace.size());
+    JPH_ASSERT(outVertices->count <= 32);
+    
+    for (uint32_t i = 0; i < outVertices->count && i < 32; ++i) {
+        FromJolt(joltFace[i], &outVertices->vertices[i]);
+    }
+}
+
 float JPH_Shape_GetVolume(const JPH_Shape* shape)
 {
 	return AsShape(shape)->GetVolume();
