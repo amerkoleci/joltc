@@ -513,6 +513,28 @@ void JPH_MassProperties_GetEquivalentSolidBoxSize(float mass, const JPH_Vec3* in
 	FromJolt(JPH::MassProperties::sGetEquivalentSolidBoxSize(mass, ToJolt(inertiaDiagonal)), result);
 }
 
+JPH_CAPI void JPH_RayCast_GetPointOnRay(const JPH_Vec3* origin, const JPH_Vec3* direction, float fraction, JPH_Vec3* result)
+{
+	JPH_ASSERT(origin);
+	JPH_ASSERT(direction);
+	JPH_ASSERT(result);
+
+	JPH::RayCast ray(ToJolt(origin), ToJolt(direction));
+	JPH::Vec3 point = ray.GetPointOnRay(fraction);
+	FromJolt(point, result);
+}
+
+JPH_CAPI void JPH_RRayCast_GetPointOnRay(const JPH_RVec3* origin, const JPH_Vec3* direction, float fraction, JPH_RVec3* result)
+{
+	JPH_ASSERT(origin);
+	JPH_ASSERT(direction);
+	JPH_ASSERT(result);
+
+	JPH::RRayCast ray(ToJolt(origin), ToJolt(direction));
+	JPH::RVec3 point = ray.GetPointOnRay(fraction);
+	FromJolt(point, result);
+}
+
 static JPH::Triangle ToTriangle(const JPH_Triangle& triangle)
 {
 	return JPH::Triangle(ToJoltFloat3(triangle.v1), ToJoltFloat3(triangle.v2), ToJoltFloat3(triangle.v3), triangle.materialIndex);
