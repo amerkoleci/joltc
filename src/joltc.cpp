@@ -691,7 +691,7 @@ void JPH_SetAssertFailureHandler(JPH_AssertFailureFunc handler)
 /* JPH_CollideShapeResult */
 JPH_CAPI void JPH_CollideShapeResult_FreeMembers(JPH_CollideShapeResult* result)
 {
-	if (result->shape1FaceCount) 
+	if (result->shape1FaceCount)
 	{
 		free(result->shape1Faces);
 	}
@@ -989,33 +989,37 @@ static const JPH::BroadPhaseLayerFilter& ToJolt(JPH_BroadPhaseLayerFilter* bpFil
 class ManagedBroadPhaseLayerFilter final : public JPH::BroadPhaseLayerFilter
 {
 public:
-	ManagedBroadPhaseLayerFilter() = default;
+	static const JPH_BroadPhaseLayerFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedBroadPhaseLayerFilter(const ManagedBroadPhaseLayerFilter&) = delete;
-	ManagedBroadPhaseLayerFilter(const ManagedBroadPhaseLayerFilter&&) = delete;
-	ManagedBroadPhaseLayerFilter& operator=(const ManagedBroadPhaseLayerFilter&) = delete;
-	ManagedBroadPhaseLayerFilter& operator=(const ManagedBroadPhaseLayerFilter&&) = delete;
+	ManagedBroadPhaseLayerFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldCollide(BroadPhaseLayer inLayer) const override
 	{
-		if (procs != nullptr
-			&& procs->ShouldCollide)
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldCollide)
 		{
-			return procs->ShouldCollide(userData, static_cast<JPH_BroadPhaseLayer>(inLayer)) == 1;
+			return s_Procs->ShouldCollide(userData, static_cast<JPH_BroadPhaseLayer>(inLayer)) == 1;
 		}
 
 		return true;
 	}
-
-	const JPH_BroadPhaseLayerFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(const JPH_BroadPhaseLayerFilter_Procs* procs, void* userData)
+const JPH_BroadPhaseLayerFilter_Procs* ManagedBroadPhaseLayerFilter::s_Procs = nullptr;
+
+void JPH_BroadPhaseLayerFilter_SetProcs(const JPH_BroadPhaseLayerFilter_Procs* procs)
 {
-	auto filter = new ManagedBroadPhaseLayerFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedBroadPhaseLayerFilter::s_Procs = procs;
+}
+
+JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(void* userData)
+{
+	auto filter = new ManagedBroadPhaseLayerFilter(userData);
 	return reinterpret_cast<JPH_BroadPhaseLayerFilter*>(filter);
 }
 
@@ -1037,33 +1041,37 @@ static const JPH::ObjectLayerFilter& ToJolt(JPH_ObjectLayerFilter* opFilter)
 class ManagedObjectLayerFilter final : public JPH::ObjectLayerFilter
 {
 public:
-	ManagedObjectLayerFilter() = default;
+	static const JPH_ObjectLayerFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedObjectLayerFilter(const ManagedObjectLayerFilter&) = delete;
-	ManagedObjectLayerFilter(const ManagedObjectLayerFilter&&) = delete;
-	ManagedObjectLayerFilter& operator=(const ManagedObjectLayerFilter&) = delete;
-	ManagedObjectLayerFilter& operator=(const ManagedObjectLayerFilter&&) = delete;
+	ManagedObjectLayerFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldCollide(ObjectLayer inLayer) const override
 	{
-		if (procs != nullptr
-			&& procs->ShouldCollide)
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldCollide)
 		{
-			return procs->ShouldCollide(userData, static_cast<JPH_ObjectLayer>(inLayer)) == 1;
+			return s_Procs->ShouldCollide(userData, static_cast<JPH_ObjectLayer>(inLayer)) == 1;
 		}
 
 		return true;
 	}
-
-	const JPH_ObjectLayerFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(const JPH_ObjectLayerFilter_Procs* procs, void* userData)
+const JPH_ObjectLayerFilter_Procs* ManagedObjectLayerFilter::s_Procs = nullptr;
+
+void JPH_ObjectLayerFilter_SetProcs(const JPH_ObjectLayerFilter_Procs* procs)
 {
-	auto filter = new ManagedObjectLayerFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedObjectLayerFilter::s_Procs = procs;
+}
+
+JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(void* userData)
+{
+	auto filter = new ManagedObjectLayerFilter(userData);
 	return reinterpret_cast<JPH_ObjectLayerFilter*>(filter);
 }
 
@@ -1085,19 +1093,21 @@ static const JPH::BodyFilter& ToJolt(const JPH_BodyFilter* bodyFilter)
 class ManagedBodyFilter final : public JPH::BodyFilter
 {
 public:
-	ManagedBodyFilter() = default;
+	static const JPH_BodyFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedBodyFilter(const ManagedBodyFilter&) = delete;
-	ManagedBodyFilter(const ManagedBodyFilter&&) = delete;
-	ManagedBodyFilter& operator=(const ManagedBodyFilter&) = delete;
-	ManagedBodyFilter& operator=(const ManagedBodyFilter&&) = delete;
+	ManagedBodyFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldCollide(const BodyID& bodyID) const override
 	{
-		if (procs != nullptr
-			&& procs->ShouldCollide)
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldCollide)
 		{
-			return procs->ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
+			return s_Procs->ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
 		}
 
 		return true;
@@ -1105,24 +1115,26 @@ public:
 
 	bool ShouldCollideLocked(const Body& body) const override
 	{
-		if (procs != nullptr
-			&& procs->ShouldCollideLocked)
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldCollideLocked)
 		{
-			return procs->ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
+			return s_Procs->ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
 		}
 
 		return true;
 	}
-
-	const JPH_BodyFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_BodyFilter* JPH_BodyFilter_Create(const JPH_BodyFilter_Procs* procs, void* userData)
+const JPH_BodyFilter_Procs* ManagedBodyFilter::s_Procs = nullptr;
+
+void JPH_BodyFilter_SetProcs(const JPH_BodyFilter_Procs* procs)
 {
-	auto filter = new ManagedBodyFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedBodyFilter::s_Procs = procs;
+}
+
+JPH_BodyFilter* JPH_BodyFilter_Create(void* userData)
+{
+	auto filter = new ManagedBodyFilter(userData);
 	return reinterpret_cast<JPH_BodyFilter*>(filter);
 }
 
@@ -1144,19 +1156,21 @@ static const JPH::ShapeFilter& ToJolt(const JPH_ShapeFilter* filter)
 class ManagedShapeFilter final : public JPH::ShapeFilter
 {
 public:
-	ManagedShapeFilter() = default;
+	static const JPH_ShapeFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedShapeFilter(const ManagedShapeFilter&) = delete;
-	ManagedShapeFilter(const ManagedShapeFilter&&) = delete;
-	ManagedShapeFilter& operator=(const ManagedShapeFilter&) = delete;
-	ManagedShapeFilter& operator=(const ManagedShapeFilter&&) = delete;
+	ManagedShapeFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldCollide([[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
 	{
-		if (procs != nullptr && procs->ShouldCollide)
+		if (s_Procs != nullptr && s_Procs->ShouldCollide)
 		{
 			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
-			return procs->ShouldCollide(userData, ToShape(inShape2), &subShapeIDOfShape2);
+			return s_Procs->ShouldCollide(userData, ToShape(inShape2), &subShapeIDOfShape2);
 		}
 
 		return true;
@@ -1164,27 +1178,28 @@ public:
 
 	bool ShouldCollide([[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const
 	{
-		if (procs != nullptr && procs->ShouldCollide2)
+		if (s_Procs != nullptr && s_Procs->ShouldCollide2)
 		{
 			auto subShapeIDOfShape1 = inSubShapeIDOfShape1.GetValue();
 			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
 
-			return procs->ShouldCollide2(userData, ToShape(inShape1), &subShapeIDOfShape1, ToShape(inShape2), &subShapeIDOfShape2);
+			return s_Procs->ShouldCollide2(userData, ToShape(inShape1), &subShapeIDOfShape1, ToShape(inShape2), &subShapeIDOfShape2);
 		}
 
 		return true;
 	}
-
-	const JPH_ShapeFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
+const JPH_ShapeFilter_Procs* ManagedShapeFilter::s_Procs = nullptr;
 
-JPH_ShapeFilter* JPH_ShapeFilter_Create(const JPH_ShapeFilter_Procs* procs, void* userData)
+void JPH_ShapeFilter_SetProcs(const JPH_ShapeFilter_Procs* procs)
 {
-	auto filter = new ManagedShapeFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedShapeFilter::s_Procs = procs;
+}
+
+JPH_ShapeFilter* JPH_ShapeFilter_Create(void* userData)
+{
+	auto filter = new ManagedShapeFilter(userData);
 	return reinterpret_cast<JPH_ShapeFilter*>(filter);
 }
 
@@ -1216,39 +1231,47 @@ static const JPH::SimShapeFilter& ToJolt(const JPH_SimShapeFilter* filter)
 class ManagedSimShapeFilter final : public JPH::SimShapeFilter
 {
 public:
-	ManagedSimShapeFilter() = default;
+	static const JPH_SimShapeFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedSimShapeFilter(const ManagedSimShapeFilter&) = delete;
-	ManagedSimShapeFilter(const ManagedSimShapeFilter&&) = delete;
-	ManagedSimShapeFilter& operator=(const ManagedSimShapeFilter&) = delete;
-	ManagedSimShapeFilter& operator=(const ManagedSimShapeFilter&&) = delete;
-
-	bool ShouldCollide(	[[maybe_unused]] const Body& inBody1, [[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1,
-						[[maybe_unused]] const Body& inBody2, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
+	ManagedSimShapeFilter(void* userData_)
+		: userData(userData_)
 	{
-		if (procs != nullptr && procs->ShouldCollide)
+
+	}
+
+	bool ShouldCollide(
+		[[maybe_unused]] const Body& inBody1,
+		[[maybe_unused]] const Shape* inShape1, 
+		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1,
+		[[maybe_unused]] const Body& inBody2, 
+		[[maybe_unused]] const Shape* inShape2, 
+		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
+	{
+		if (s_Procs != nullptr && s_Procs->ShouldCollide)
 		{
 
 			auto subShapeIDOfShape1 = inSubShapeIDOfShape1.GetValue();
 			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
-			return procs->ShouldCollide(userData,
+			return s_Procs->ShouldCollide(userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1), ToShape(inShape1), &subShapeIDOfShape1,
 				reinterpret_cast<const JPH_Body*>(&inBody2), ToShape(inShape2), &subShapeIDOfShape2);
 		}
 
 		return true;
 	}
-
-	const JPH_SimShapeFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
+const JPH_SimShapeFilter_Procs* ManagedSimShapeFilter::s_Procs = nullptr;
 
-JPH_SimShapeFilter* JPH_SimShapeFilter_Create(const JPH_SimShapeFilter_Procs* procs, void* userData)
+void JPH_SimShapeFilter_SetProcs(const JPH_SimShapeFilter_Procs* procs)
 {
-	auto filter = new ManagedSimShapeFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedSimShapeFilter::s_Procs = procs;
+}
+
+JPH_SimShapeFilter* JPH_SimShapeFilter_Create(void* userData)
+{
+	auto filter = new ManagedSimShapeFilter(userData);
 	return reinterpret_cast<JPH_SimShapeFilter*>(filter);
 }
 
@@ -1446,8 +1469,8 @@ void JPH_Quat_InverseRotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3*
 
 void JPH_Quat_FromEulerAngles(const JPH_Vec3* angles, JPH_Quat* result)
 {
-    JPH_ASSERT(angles && result);
-    FromJolt(JPH::Quat::sEulerAngles(ToJolt(angles)), result);
+	JPH_ASSERT(angles && result);
+	FromJolt(JPH::Quat::sEulerAngles(ToJolt(angles)), result);
 }
 
 JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq)
@@ -1812,11 +1835,7 @@ void JPH_ShapeSettings_SetUserData(JPH_ShapeSettings* settings, uint64_t userDat
 /* Shape */
 void JPH_Shape_Destroy(JPH_Shape* shape)
 {
-	if (shape)
-	{
-		auto joltShape = reinterpret_cast<JPH::Shape*>(shape);
-		joltShape->Release();
-	}
+	AsShape(shape)->Release();
 }
 
 JPH_ShapeType JPH_Shape_GetType(const JPH_Shape* shape)
@@ -1901,35 +1920,35 @@ void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeI
 }
 
 JPH_CAPI void JPH_Shape_GetSupportingFace(const JPH_Shape* shape,
-    const JPH_SubShapeID subShapeID,
-    const JPH_Vec3* direction,
-    const JPH_Vec3* scale,
-    const JPH_Matrix4x4* centerOfMassTransform,
-    JPH_SupportingFace* outVertices)
+	const JPH_SubShapeID subShapeID,
+	const JPH_Vec3* direction,
+	const JPH_Vec3* scale,
+	const JPH_Matrix4x4* centerOfMassTransform,
+	JPH_SupportingFace* outVertices)
 {
-    JPH_ASSERT(shape);
-    JPH_ASSERT(subShapeID);
-    JPH_ASSERT(direction);
-    JPH_ASSERT(scale);
-    JPH_ASSERT(centerOfMassTransform);
-    JPH_ASSERT(outVertices);
+	JPH_ASSERT(shape);
+	JPH_ASSERT(subShapeID);
+	JPH_ASSERT(direction);
+	JPH_ASSERT(scale);
+	JPH_ASSERT(centerOfMassTransform);
+	JPH_ASSERT(outVertices);
 
-    auto joltSubShapeID = JPH::SubShapeID();
-    joltSubShapeID.SetValue(subShapeID);
-    
-    JPH::Vec3 joltDirection = ToJolt(direction);
-    JPH::Vec3 joltScale = ToJolt(scale);
-    JPH::Mat44 joltTransform = ToJolt(centerOfMassTransform);
-    
-    JPH::Shape::SupportingFace joltFace;
-    AsShape(shape)->GetSupportingFace(joltSubShapeID, joltDirection, joltScale, joltTransform, joltFace);
-    
-    outVertices->count = static_cast<uint32_t>(joltFace.size());
-    JPH_ASSERT(outVertices->count <= 32);
-    
-    for (uint32_t i = 0; i < outVertices->count && i < 32; ++i) {
-        FromJolt(joltFace[i], &outVertices->vertices[i]);
-    }
+	auto joltSubShapeID = JPH::SubShapeID();
+	joltSubShapeID.SetValue(subShapeID);
+
+	JPH::Vec3 joltDirection = ToJolt(direction);
+	JPH::Vec3 joltScale = ToJolt(scale);
+	JPH::Mat44 joltTransform = ToJolt(centerOfMassTransform);
+
+	JPH::Shape::SupportingFace joltFace;
+	AsShape(shape)->GetSupportingFace(joltSubShapeID, joltDirection, joltScale, joltTransform, joltFace);
+
+	outVertices->count = static_cast<uint32_t>(joltFace.size());
+	JPH_ASSERT(outVertices->count <= 32);
+
+	for (uint32_t i = 0; i < outVertices->count && i < 32; ++i) {
+		FromJolt(joltFace[i], &outVertices->vertices[i]);
+	}
 }
 
 float JPH_Shape_GetVolume(const JPH_Shape* shape)
@@ -6816,18 +6835,27 @@ JPH_Body* JPH_Body_GetFixedToWorldBody(void)
 class ManagedContactListener final : public JPH::ContactListener
 {
 public:
+	static const JPH_ContactListener_Procs* s_Procs;
+	void* userData = nullptr;
+
+	ManagedContactListener(void* userData_)
+		: userData(userData_)
+	{
+
+	}
+
 	ValidateResult OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult) override
 	{
 		JPH_UNUSED(inCollisionResult);
 		JPH_RVec3 baseOffset;
 		FromJolt(inBaseOffset, &baseOffset);
 
-		if (procs != nullptr
-			&& procs->OnContactValidate)
+		if (s_Procs != nullptr
+			&& s_Procs->OnContactValidate)
 		{
 			JPH_CollideShapeResult collideShapeResult = FromJolt(inCollisionResult);
 
-			JPH_ValidateResult result = procs->OnContactValidate(
+			JPH_ValidateResult result = s_Procs->OnContactValidate(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -6846,10 +6874,10 @@ public:
 		JPH_UNUSED(inManifold);
 		JPH_UNUSED(ioSettings);
 
-		if (procs != nullptr
-			&& procs->OnContactAdded)
+		if (s_Procs != nullptr
+			&& s_Procs->OnContactAdded)
 		{
-			procs->OnContactAdded(
+			s_Procs->OnContactAdded(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -6864,10 +6892,10 @@ public:
 		JPH_UNUSED(inManifold);
 		JPH_UNUSED(ioSettings);
 
-		if (procs != nullptr
-			&& procs->OnContactPersisted)
+		if (s_Procs != nullptr
+			&& s_Procs->OnContactPersisted)
 		{
-			procs->OnContactPersisted(
+			s_Procs->OnContactPersisted(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -6879,25 +6907,28 @@ public:
 
 	void OnContactRemoved(const SubShapeIDPair& inSubShapePair) override
 	{
-		if (procs != nullptr
-			&& procs->OnContactRemoved)
+		if (s_Procs != nullptr
+			&& s_Procs->OnContactRemoved)
 		{
-			procs->OnContactRemoved(
+			s_Procs->OnContactRemoved(
 				userData,
 				reinterpret_cast<const JPH_SubShapeIDPair*>(&inSubShapePair)
 			);
 		}
 	}
 
-	const JPH_ContactListener_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_ContactListener* JPH_ContactListener_Create(const JPH_ContactListener_Procs* procs, void* userData)
+const JPH_ContactListener_Procs* ManagedContactListener::s_Procs = nullptr;
+
+void JPH_ContactListener_SetProcs(const JPH_ContactListener_Procs* procs)
 {
-	auto listener = new ManagedContactListener();
-	listener->procs = procs;
-	listener->userData = userData;
+	ManagedContactListener::s_Procs = procs;
+}
+
+JPH_ContactListener* JPH_ContactListener_Create(void* userData)
+{
+	auto listener = new ManagedContactListener(userData);
 	return reinterpret_cast<JPH_ContactListener*>(listener);
 }
 
@@ -6913,11 +6944,20 @@ void JPH_ContactListener_Destroy(JPH_ContactListener* listener)
 class ManagedBodyActivationListener final : public JPH::BodyActivationListener
 {
 public:
+	static const JPH_BodyActivationListener_Procs* s_Procs;
+	void* userData = nullptr;
+
+	ManagedBodyActivationListener(void* userData_)
+		: userData(userData_)
+	{
+
+	}
+
 	void OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (procs != nullptr && procs->OnBodyDeactivated)
+		if (s_Procs != nullptr && s_Procs->OnBodyDeactivated)
 		{
-			procs->OnBodyActivated(
+			s_Procs->OnBodyActivated(
 				userData,
 				inBodyID.GetIndexAndSequenceNumber(),
 				inBodyUserData
@@ -6927,25 +6967,27 @@ public:
 
 	void OnBodyDeactivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (procs != nullptr && procs->OnBodyDeactivated)
+		if (s_Procs != nullptr && s_Procs->OnBodyDeactivated)
 		{
-			procs->OnBodyDeactivated(
+			s_Procs->OnBodyDeactivated(
 				userData,
 				inBodyID.GetIndexAndSequenceNumber(),
 				inBodyUserData
 			);
 		}
 	}
-
-	const JPH_BodyActivationListener_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_BodyActivationListener* JPH_BodyActivationListener_Create(const JPH_BodyActivationListener_Procs* procs, void* userData)
+const JPH_BodyActivationListener_Procs* ManagedBodyActivationListener::s_Procs = nullptr;
+
+void JPH_BodyActivationListener_SetProcs(const JPH_BodyActivationListener_Procs* procs)
 {
-	auto listener = new ManagedBodyActivationListener();
-	listener->procs = procs;
-	listener->userData = userData;
+	ManagedBodyActivationListener::s_Procs = procs;
+}
+
+JPH_BodyActivationListener* JPH_BodyActivationListener_Create(void* userData)
+{
+	auto listener = new ManagedBodyActivationListener(userData);
 	return reinterpret_cast<JPH_BodyActivationListener*>(listener);
 }
 
@@ -7810,8 +7852,14 @@ bool JPH_CharacterVirtual_HasCollidedWithCharacter(JPH_CharacterVirtual* charact
 class ManagedCharacterContactListener final : public JPH::CharacterContactListener
 {
 public:
-	const JPH_CharacterContactListener_Procs* procs = nullptr;
+	static const JPH_CharacterContactListener_Procs* s_Procs;
 	void* userData = nullptr;
+
+	ManagedCharacterContactListener(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	void OnAdjustBodyVelocity(const CharacterVirtual* inCharacter, const Body& inBody2, Vec3& ioLinearVelocity, Vec3& ioAngularVelocity) override
 	{
@@ -7819,9 +7867,9 @@ public:
 		FromJolt(ioLinearVelocity, &linearVelocity);
 		FromJolt(ioAngularVelocity, &angularVelocity);
 
-		if (procs != nullptr && procs->OnAdjustBodyVelocity)
+		if (s_Procs != nullptr && s_Procs->OnAdjustBodyVelocity)
 		{
-			procs->OnAdjustBodyVelocity(
+			s_Procs->OnAdjustBodyVelocity(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToBody(&inBody2),
@@ -7836,9 +7884,9 @@ public:
 
 	bool OnContactValidate(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs != nullptr && procs->OnContactValidate)
+		if (s_Procs != nullptr && s_Procs->OnContactValidate)
 		{
-			return procs->OnContactValidate(
+			return s_Procs->OnContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7851,9 +7899,9 @@ public:
 
 	bool OnCharacterContactValidate(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2)  override
 	{
-		if (procs != nullptr && procs->OnCharacterContactValidate)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactValidate)
 		{
-			return procs->OnCharacterContactValidate(
+			return s_Procs->OnCharacterContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -7866,7 +7914,7 @@ public:
 
 	void OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs != nullptr && procs->OnContactAdded)
+		if (s_Procs != nullptr && s_Procs->OnContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -7878,7 +7926,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs->OnContactAdded(
+			s_Procs->OnContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7895,7 +7943,7 @@ public:
 
 	void OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs != nullptr && procs->OnContactPersisted)
+		if (s_Procs != nullptr && s_Procs->OnContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -7907,7 +7955,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs->OnContactPersisted(
+			s_Procs->OnContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7924,9 +7972,9 @@ public:
 
 	void OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs != nullptr && procs->OnContactRemoved)
+		if (s_Procs != nullptr && s_Procs->OnContactRemoved)
 		{
-			procs->OnContactRemoved(
+			s_Procs->OnContactRemoved(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -7937,7 +7985,7 @@ public:
 
 	void OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs != nullptr && procs->OnCharacterContactAdded)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -7949,7 +7997,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs->OnCharacterContactAdded(
+			s_Procs->OnCharacterContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -7966,7 +8014,7 @@ public:
 
 	void OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs != nullptr && procs->OnCharacterContactPersisted)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -7978,7 +8026,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs->OnCharacterContactPersisted(
+			s_Procs->OnCharacterContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -7995,9 +8043,9 @@ public:
 
 	void OnCharacterContactRemoved(const CharacterVirtual* inCharacter, const CharacterID& inOtherCharacterID, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs != nullptr && procs->OnCharacterContactRemoved)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactRemoved)
 		{
-			procs->OnCharacterContactRemoved(
+			s_Procs->OnCharacterContactRemoved(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_CharacterID)inOtherCharacterID.GetValue(),
@@ -8011,7 +8059,7 @@ public:
 		const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity,
 		Vec3& ioNewCharacterVelocity) override
 	{
-		if (procs != nullptr && procs->OnContactSolve)
+		if (s_Procs != nullptr && s_Procs->OnContactSolve)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
@@ -8022,7 +8070,7 @@ public:
 			FromJolt(inCharacterVelocity, &characterVelocity);
 			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
-			procs->OnContactSolve(
+			s_Procs->OnContactSolve(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8041,7 +8089,7 @@ public:
 
 	void OnCharacterContactSolve(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) override
 	{
-		if (procs != nullptr && procs->OnCharacterContactSolve)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactSolve)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
@@ -8052,7 +8100,7 @@ public:
 			FromJolt(inCharacterVelocity, &characterVelocity);
 			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
-			procs->OnCharacterContactSolve(
+			s_Procs->OnCharacterContactSolve(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -8070,11 +8118,16 @@ public:
 	}
 };
 
-JPH_CharacterContactListener* JPH_CharacterContactListener_Create(const JPH_CharacterContactListener_Procs* procs, void* userData)
+const JPH_CharacterContactListener_Procs* ManagedCharacterContactListener::s_Procs = nullptr;
+
+void JPH_CharacterContactListener_SetProcs(const JPH_CharacterContactListener_Procs* procs)
 {
-	auto impl = new ManagedCharacterContactListener();
-	impl->procs = procs;
-	impl->userData = userData;
+	ManagedCharacterContactListener::s_Procs = procs;
+}
+
+JPH_CharacterContactListener* JPH_CharacterContactListener_Create(void* userData)
+{
+	auto impl = new ManagedCharacterContactListener(userData);
 	return reinterpret_cast<JPH_CharacterContactListener*>(impl);
 }
 
@@ -8090,8 +8143,14 @@ void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener
 class ManagedCharacterVsCharacterCollision final : public JPH::CharacterVsCharacterCollision
 {
 public:
-	const JPH_CharacterVsCharacterCollision_Procs* procs = nullptr;
+	static const JPH_CharacterVsCharacterCollision_Procs* s_Procs;
 	void* userData = nullptr;
+
+	ManagedCharacterVsCharacterCollision(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	void CollideCharacter(const CharacterVirtual* inCharacter,
 		RMat44Arg inCenterOfMassTransform,
@@ -8099,7 +8158,7 @@ public:
 		RVec3Arg inBaseOffset,
 		CollideShapeCollector& ioCollector) const override
 	{
-		if (procs != nullptr && procs->CollideCharacter)
+		if (s_Procs != nullptr && s_Procs->CollideCharacter)
 		{
 			JPH_RMatrix4x4 centerOfMassTransform;
 			JPH_RVec3 baseOffset;
@@ -8108,7 +8167,7 @@ public:
 			FromJolt(inCenterOfMassTransform, &centerOfMassTransform);
 			FromJolt(inBaseOffset, &baseOffset);
 
-			procs->CollideCharacter(
+			s_Procs->CollideCharacter(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				&centerOfMassTransform,
@@ -8125,7 +8184,7 @@ public:
 		RVec3Arg inBaseOffset,
 		CastShapeCollector& ioCollector) const override
 	{
-		if (procs != nullptr && procs->CastCharacter)
+		if (s_Procs != nullptr && s_Procs->CastCharacter)
 		{
 			JPH_RMatrix4x4 centerOfMassTransform;
 			JPH_Vec3 direction;
@@ -8136,7 +8195,7 @@ public:
 			FromJolt(inDirection, &direction);
 			FromJolt(inBaseOffset, &baseOffset);
 
-			procs->CastCharacter(
+			s_Procs->CastCharacter(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				&centerOfMassTransform,
@@ -8148,11 +8207,16 @@ public:
 	}
 };
 
-JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(const JPH_CharacterVsCharacterCollision_Procs* procs, void* userData)
+const JPH_CharacterVsCharacterCollision_Procs* ManagedCharacterVsCharacterCollision::s_Procs = nullptr;
+
+void JPH_CharacterVsCharacterCollision_SetProcs(const JPH_CharacterVsCharacterCollision_Procs* procs)
 {
-	auto impl = new ManagedCharacterVsCharacterCollision();
-	impl->procs = procs;
-	impl->userData = userData;
+	ManagedCharacterVsCharacterCollision::s_Procs = procs;
+}
+
+JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(void* userData)
+{
+	auto impl = new ManagedCharacterVsCharacterCollision(userData);
 	return reinterpret_cast<JPH_CharacterVsCharacterCollision*>(impl);
 }
 
@@ -8263,32 +8327,35 @@ bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace(
 class ManagedBodyDrawFilter final : public JPH::BodyDrawFilter
 {
 public:
-	ManagedBodyDrawFilter() = default;
+	static const JPH_BodyDrawFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&) = delete;
-	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&&) = delete;
-	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&) = delete;
-	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&&) = delete;
+	ManagedBodyDrawFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldDraw([[maybe_unused]] const Body& inBody) const override
 	{
-		if (procs != nullptr && procs->ShouldDraw)
+		if (s_Procs != nullptr && s_Procs->ShouldDraw)
 		{
-			return procs->ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
+			return s_Procs->ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
 		}
 
 		return true;
 	}
-
-	const JPH_BodyDrawFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
+const JPH_BodyDrawFilter_Procs* ManagedBodyDrawFilter::s_Procs = nullptr;
 
-JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(const JPH_BodyDrawFilter_Procs* procs, void* userData)
+void JPH_BodyDrawFilter_SetProcs(const JPH_BodyDrawFilter_Procs* procs)
 {
-	auto filter = new ManagedBodyDrawFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedBodyDrawFilter::s_Procs = procs;
+}
+
+JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(void* userData)
+{
+	auto filter = new ManagedBodyDrawFilter(userData);
 	return reinterpret_cast<JPH_BodyDrawFilter*>(filter);
 }
 
@@ -8304,25 +8371,31 @@ void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter)
 class ManagedDebugRendererSimple final : public DebugRendererSimple
 {
 public:
-	const JPH_DebugRenderer_Procs* procs = nullptr;
+	static const JPH_DebugRenderer_Procs* s_Procs;
 	void* userData = nullptr;
+
+	ManagedDebugRendererSimple(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	void DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor) override
 	{
-		if (procs != nullptr && procs->DrawLine)
+		if (s_Procs != nullptr && s_Procs->DrawLine)
 		{
 			JPH_RVec3 from, to;
 
 			FromJolt(inFrom, &from);
 			FromJolt(inTo, &to);
 
-			procs->DrawLine(userData, &from, &to, inColor.GetUInt32());
+			s_Procs->DrawLine(userData, &from, &to, inColor.GetUInt32());
 		}
 	}
 
 	void DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::Off) override
 	{
-		if (procs != nullptr && procs->DrawTriangle)
+		if (s_Procs != nullptr && s_Procs->DrawTriangle)
 		{
 			JPH_RVec3 v1, v2, v3;
 
@@ -8330,7 +8403,7 @@ public:
 			FromJolt(inV2, &v2);
 			FromJolt(inV3, &v3);
 
-			procs->DrawTriangle(userData, &v1, &v2, &v3, inColor.GetUInt32(), static_cast<JPH_DebugRenderer_CastShadow>(inCastShadow));
+			s_Procs->DrawTriangle(userData, &v1, &v2, &v3, inColor.GetUInt32(), static_cast<JPH_DebugRenderer_CastShadow>(inCastShadow));
 		}
 		else
 		{
@@ -8340,22 +8413,27 @@ public:
 
 	void DrawText3D(RVec3Arg inPosition, const string_view& inString, ColorArg inColor, float inHeight) override
 	{
-		if (procs != nullptr && procs->DrawText3D)
+		if (s_Procs != nullptr && s_Procs->DrawText3D)
 		{
 			JPH_RVec3 position;
 
 			FromJolt(inPosition, &position);
 
-			procs->DrawText3D(userData, &position, inString.data(), inColor.GetUInt32(), inHeight);
+			s_Procs->DrawText3D(userData, &position, inString.data(), inColor.GetUInt32(), inHeight);
 		}
 	}
 };
 
-JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(const JPH_DebugRenderer_Procs* procs, void* userData)
+const JPH_DebugRenderer_Procs* ManagedDebugRendererSimple::s_Procs = nullptr;
+
+void JPH_DebugRenderer_SetProcs(const JPH_DebugRenderer_Procs* procs)
 {
-	auto impl = new ManagedDebugRendererSimple();
-	impl->procs = procs;
-	impl->userData = userData;
+	ManagedDebugRendererSimple::s_Procs = procs;
+}
+
+JPH_DebugRenderer* JPH_DebugRenderer_Create(void* userData)
+{
+	auto impl = new ManagedDebugRendererSimple(userData);
 	return reinterpret_cast<JPH_DebugRenderer*>(impl);
 }
 
@@ -8582,11 +8660,11 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 
 	JPH::CollisionEstimationResult joltResult;
 
-	JPH::EstimateCollisionResponse(*AsBody(body1), *AsBody(body2), 
-		*AsContactManifold(manifold), joltResult, 
+	JPH::EstimateCollisionResponse(*AsBody(body1), *AsBody(body2),
+		*AsContactManifold(manifold), joltResult,
 		combinedFriction,
-		combinedRestitution, 
-		minVelocityForRestitution, 
+		combinedRestitution,
+		minVelocityForRestitution,
 		numIterations);
 
 	FromJolt(joltResult.mLinearVelocity1, &result->linearVelocity1);

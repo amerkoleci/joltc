@@ -2008,7 +2008,8 @@ typedef struct JPH_BroadPhaseLayerFilter_Procs {
 	bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BroadPhaseLayer layer);
 } JPH_BroadPhaseLayerFilter_Procs;
 
-JPH_CAPI JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(const JPH_BroadPhaseLayerFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_BroadPhaseLayerFilter_SetProcs(const JPH_BroadPhaseLayerFilter_Procs* procs);
+JPH_CAPI JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(void* userData);
 JPH_CAPI void JPH_BroadPhaseLayerFilter_Destroy(JPH_BroadPhaseLayerFilter* filter);
 
 /* JPH_ObjectLayerFilter */
@@ -2016,7 +2017,8 @@ typedef struct JPH_ObjectLayerFilter_Procs {
 	bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_ObjectLayer layer);
 } JPH_ObjectLayerFilter_Procs;
 
-JPH_CAPI JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(const JPH_ObjectLayerFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_ObjectLayerFilter_SetProcs(const JPH_ObjectLayerFilter_Procs* procs);
+JPH_CAPI JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(void* userData);
 JPH_CAPI void JPH_ObjectLayerFilter_Destroy(JPH_ObjectLayerFilter* filter);
 
 /* JPH_BodyFilter */
@@ -2025,7 +2027,8 @@ typedef struct JPH_BodyFilter_Procs {
 	bool(JPH_API_CALL* ShouldCollideLocked)(void* userData, const JPH_Body* bodyID);
 } JPH_BodyFilter_Procs;
 
-JPH_CAPI JPH_BodyFilter* JPH_BodyFilter_Create(const JPH_BodyFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_BodyFilter_SetProcs(const JPH_BodyFilter_Procs* procs);
+JPH_CAPI JPH_BodyFilter* JPH_BodyFilter_Create(void* userData);
 JPH_CAPI void JPH_BodyFilter_Destroy(JPH_BodyFilter* filter);
 
 /* JPH_ShapeFilter */
@@ -2034,7 +2037,8 @@ typedef struct JPH_ShapeFilter_Procs {
 	bool(JPH_API_CALL* ShouldCollide2)(void* userData, const JPH_Shape* shape1, const JPH_SubShapeID* subShapeIDOfShape1, const JPH_Shape* shape2, const JPH_SubShapeID* subShapeIDOfShape2);
 } JPH_ShapeFilter_Procs;
 
-JPH_CAPI JPH_ShapeFilter* JPH_ShapeFilter_Create(const JPH_ShapeFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_ShapeFilter_SetProcs(const JPH_ShapeFilter_Procs* procs);
+JPH_CAPI JPH_ShapeFilter* JPH_ShapeFilter_Create(void* userData);
 JPH_CAPI void JPH_ShapeFilter_Destroy(JPH_ShapeFilter* filter);
 JPH_CAPI JPH_BodyID JPH_ShapeFilter_GetBodyID2(JPH_ShapeFilter* filter);
 JPH_CAPI void JPH_ShapeFilter_SetBodyID2(JPH_ShapeFilter* filter, JPH_BodyID id);
@@ -2051,7 +2055,8 @@ typedef struct JPH_SimShapeFilter_Procs {
 		);
 } JPH_SimShapeFilter_Procs;
 
-JPH_CAPI JPH_SimShapeFilter* JPH_SimShapeFilter_Create(const JPH_SimShapeFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_SimShapeFilter_SetProcs(const JPH_SimShapeFilter_Procs* procs);
+JPH_CAPI JPH_SimShapeFilter* JPH_SimShapeFilter_Create(void* userData);
 JPH_CAPI void JPH_SimShapeFilter_Destroy(JPH_SimShapeFilter* filter);
 
 /* Contact listener */
@@ -2079,7 +2084,8 @@ typedef struct JPH_ContactListener_Procs {
 		);
 } JPH_ContactListener_Procs;
 
-JPH_CAPI JPH_ContactListener* JPH_ContactListener_Create(const JPH_ContactListener_Procs* procs, void* userData);
+JPH_CAPI void JPH_ContactListener_SetProcs(const JPH_ContactListener_Procs* procs);
+JPH_CAPI JPH_ContactListener* JPH_ContactListener_Create(void* userData);
 JPH_CAPI void JPH_ContactListener_Destroy(JPH_ContactListener* listener);
 
 /* BodyActivationListener */
@@ -2088,7 +2094,8 @@ typedef struct JPH_BodyActivationListener_Procs {
 	void(JPH_API_CALL* OnBodyDeactivated)(void* userData, JPH_BodyID bodyID, uint64_t bodyUserData);
 } JPH_BodyActivationListener_Procs;
 
-JPH_CAPI JPH_BodyActivationListener* JPH_BodyActivationListener_Create(const JPH_BodyActivationListener_Procs* procs, void* userData);
+JPH_CAPI void JPH_BodyActivationListener_SetProcs(const JPH_BodyActivationListener_Procs* procs);
+JPH_CAPI JPH_BodyActivationListener* JPH_BodyActivationListener_Create(void* userData);
 JPH_CAPI void JPH_BodyActivationListener_Destroy(JPH_BodyActivationListener* listener);
 
 /* JPH_BodyDrawFilter */
@@ -2096,7 +2103,8 @@ typedef struct JPH_BodyDrawFilter_Procs {
 	bool(JPH_API_CALL* ShouldDraw)(void* userData, const JPH_Body* body);
 } JPH_BodyDrawFilter_Procs;
 
-JPH_CAPI JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(const JPH_BodyDrawFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_BodyDrawFilter_SetProcs(const JPH_BodyDrawFilter_Procs* procs);
+JPH_CAPI JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(void* userData);
 JPH_CAPI void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter);
 
 /* ContactManifold */
@@ -2338,7 +2346,8 @@ typedef struct JPH_CharacterContactListener_Procs {
 		);
 } JPH_CharacterContactListener_Procs;
 
-JPH_CAPI JPH_CharacterContactListener* JPH_CharacterContactListener_Create(const JPH_CharacterContactListener_Procs* procs, void* userData);
+JPH_CAPI void JPH_CharacterContactListener_SetProcs(const JPH_CharacterContactListener_Procs* procs);
+JPH_CAPI JPH_CharacterContactListener* JPH_CharacterContactListener_Create(void* userData);
 JPH_CAPI void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener);
 
 /* JPH_CharacterVsCharacterCollision */
@@ -2359,7 +2368,8 @@ typedef struct JPH_CharacterVsCharacterCollision_Procs {
 		);
 } JPH_CharacterVsCharacterCollision_Procs;
 
-JPH_CAPI JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(const JPH_CharacterVsCharacterCollision_Procs* procs, void* userData);
+JPH_CAPI void JPH_CharacterVsCharacterCollision_SetProcs(const JPH_CharacterVsCharacterCollision_Procs* procs);
+JPH_CAPI JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(void* userData);
 JPH_CAPI JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_CreateSimple(void);
 JPH_CAPI void JPH_CharacterVsCharacterCollisionSimple_AddCharacter(JPH_CharacterVsCharacterCollision* characterVsCharacter, JPH_CharacterVirtual* character);
 JPH_CAPI void JPH_CharacterVsCharacterCollisionSimple_RemoveCharacter(JPH_CharacterVsCharacterCollision* characterVsCharacter, JPH_CharacterVirtual* character);
@@ -2396,7 +2406,8 @@ typedef struct JPH_DebugRenderer_Procs {
 	void (JPH_API_CALL* DrawText3D)(void* userData, const JPH_RVec3* position, const char* str, JPH_Color color, float height);
 } JPH_DebugRenderer_Procs;
 
-JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(const JPH_DebugRenderer_Procs* procs, void* userData);
+JPH_CAPI void JPH_DebugRenderer_SetProcs(const JPH_DebugRenderer_Procs* procs);
+JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(void* userData);
 JPH_CAPI void JPH_DebugRenderer_Destroy(JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_DebugRenderer_NextFrame(JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_DebugRenderer_DrawLine(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color);
