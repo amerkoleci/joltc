@@ -8619,7 +8619,7 @@ void JPH_DebugRenderer_DrawSwingPyramidLimits(JPH_DebugRenderer* renderer, const
 		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
 	);
 }
-void JPH_DebugRenderer_DrawPie(JPH_DebugRenderer* renderer, const JPH_Vec3* center, float radius, const JPH_Vec3* normal, const JPH_Vec3* axis, float minAngle, float maxAngle, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+void JPH_DebugRenderer_DrawPie(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, const JPH_Vec3* normal, const JPH_Vec3* axis, float minAngle, float maxAngle, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
 {
 	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawPie(
 		ToJolt(center),
