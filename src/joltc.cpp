@@ -8445,57 +8445,207 @@ void JPH_DebugRenderer_Destroy(JPH_DebugRenderer* renderer)
 
 void JPH_DebugRenderer_NextFrame(JPH_DebugRenderer* renderer)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->NextFrame();
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->NextFrame();
+}
+
+void JPH_DebugRenderer_SetCameraPos(JPH_DebugRenderer* renderer, const JPH_Vec3* position)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->SetCameraPos(ToJolt(position));
 }
 
 void JPH_DebugRenderer_DrawLine(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawLine(ToJolt(from), ToJolt(to), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawLine(ToJolt(from), ToJolt(to), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawWireBox(JPH_DebugRenderer* renderer, const JPH_AABox* box, JPH_Color color)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireBox(ToJolt(box), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireBox(ToJolt(box), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawWireBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, JPH_Color color)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireBox(ToJolt(matrix), ToJolt(box), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireBox(ToJolt(matrix), ToJolt(box), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawMarker(JPH_DebugRenderer* renderer, const JPH_RVec3* position, JPH_Color color, float size)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawMarker(ToJolt(position), JPH::Color(color), size);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawMarker(ToJolt(position), JPH::Color(color), size);
 }
 
 void JPH_DebugRenderer_DrawArrow(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color, float size)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawArrow(ToJolt(from), ToJolt(to), JPH::Color(color), size);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawArrow(ToJolt(from), ToJolt(to), JPH::Color(color), size);
 }
 
 void JPH_DebugRenderer_DrawCoordinateSystem(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float size)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawCoordinateSystem(ToJolt(matrix), size);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawCoordinateSystem(ToJolt(matrix), size);
 }
 
 void JPH_DebugRenderer_DrawPlane(JPH_DebugRenderer* renderer, const JPH_RVec3* point, const JPH_Vec3* normal, JPH_Color color, float size)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawPlane(ToJolt(point), ToJolt(normal), JPH::Color(color), size);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawPlane(ToJolt(point), ToJolt(normal), JPH::Color(color), size);
 }
 
 void JPH_DebugRenderer_DrawWireTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireTriangle(ToJolt(v2), ToJolt(v2), ToJolt(v3), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireTriangle(ToJolt(v2), ToJolt(v2), ToJolt(v3), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawWireSphere(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, JPH_Color color, int level)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireSphere(ToJolt(center), radius, JPH::Color(color), level);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireSphere(ToJolt(center), radius, JPH::Color(color), level);
 }
 
 void JPH_DebugRenderer_DrawWireUnitSphere(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, JPH_Color color, int level)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireUnitSphere(ToJolt(matrix), JPH::Color(color), level);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireUnitSphere(ToJolt(matrix), JPH::Color(color), level);
+}
+
+void JPH_DebugRenderer_DrawTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawTriangle(
+		ToJolt(v1), ToJolt(v2), ToJolt(v3), 
+		JPH::Color(color), 
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow)
+	);
+}
+
+void JPH_DebugRenderer_DrawBox(JPH_DebugRenderer* renderer, const JPH_AABox* box, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawBox(
+		ToJolt(box),
+		JPH::Color(color), 
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow), 
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawBox(
+		ToJolt(matrix),
+		ToJolt(box),
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawSphere(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawSphere(
+		ToJolt(center),
+		radius,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawUnitSphere(JPH_DebugRenderer* renderer, JPH_RMatrix4x4 matrix, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawUnitSphere(
+		ToJolt(&matrix),
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawCapsule(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float halfHeightOfCylinder, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawCapsule(
+		ToJolt(matrix),
+		halfHeightOfCylinder,
+		radius,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawCylinder(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float halfHeight, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawCylinder(
+		ToJolt(matrix),
+		halfHeight,
+		radius,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawOpenCone(JPH_DebugRenderer* renderer, const JPH_Vec3* top, const JPH_Vec3* axis, const JPH_Vec3* perpendicular, float halfAngle, float length, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawOpenCone(
+		ToJolt(top),
+		ToJolt(axis),
+		ToJolt(perpendicular),
+		halfAngle,
+		length,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawSwingConeLimits(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float swingYHalfAngle, float swingZHalfAngle, float edgeLength, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawSwingConeLimits(
+		ToJolt(matrix),
+		swingYHalfAngle,
+		swingZHalfAngle,
+		edgeLength,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawSwingPyramidLimits(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float minSwingYAngle, float maxSwingYAngle, float minSwingZAngle, float maxSwingZAngle, float edgeLength, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawSwingPyramidLimits(
+		ToJolt(matrix),
+		minSwingYAngle,
+		maxSwingYAngle,
+		minSwingZAngle,
+		maxSwingZAngle,
+		edgeLength,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+void JPH_DebugRenderer_DrawPie(JPH_DebugRenderer* renderer, const JPH_Vec3* center, float radius, const JPH_Vec3* normal, const JPH_Vec3* axis, float minAngle, float maxAngle, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawPie(
+		ToJolt(center),
+		radius,
+		ToJolt(normal),
+		ToJolt(axis),
+		minAngle,
+		maxAngle,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawTaperedCylinder(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* inMatrix, float top, float bottom, float topRadius, float bottomRadius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawTaperedCylinder(
+		ToJolt(inMatrix),
+		top,
+		bottom,
+		topRadius,
+		bottomRadius,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
 }
 #endif
 
