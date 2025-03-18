@@ -8448,7 +8448,7 @@ void JPH_DebugRenderer_NextFrame(JPH_DebugRenderer* renderer)
 	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->NextFrame();
 }
 
-void JPH_DebugRenderer_SetCameraPos(JPH_DebugRenderer* renderer, const JPH_Vec3* position)
+void JPH_DebugRenderer_SetCameraPos(JPH_DebugRenderer* renderer, const JPH_RVec3* position)
 {
 	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->SetCameraPos(ToJolt(position));
 }
@@ -8578,7 +8578,7 @@ void JPH_DebugRenderer_DrawCylinder(JPH_DebugRenderer* renderer, const JPH_RMatr
 	);
 }
 
-void JPH_DebugRenderer_DrawOpenCone(JPH_DebugRenderer* renderer, const JPH_Vec3* top, const JPH_Vec3* axis, const JPH_Vec3* perpendicular, float halfAngle, float length, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+void JPH_DebugRenderer_DrawOpenCone(JPH_DebugRenderer* renderer, const JPH_RVec3* top, const JPH_Vec3* axis, const JPH_Vec3* perpendicular, float halfAngle, float length, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
 {
 	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawOpenCone(
 		ToJolt(top),
