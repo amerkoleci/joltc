@@ -72,8 +72,8 @@ option(CPP_EXCEPTIONS_ENABLED "Enable C++ exceptions" OFF)
 # This adds some overhead and Jolt doesn't use RTTI so by default it is off.
 option(CPP_RTTI_ENABLED "Enable C++ RTTI" OFF)
 
-# Number of bits to use in ObjectLayer. Can be 16 or 32.
-option(OBJECT_LAYER_BITS "Number of bits in ObjectLayer" 16)
+# Use 32-bit object layers to support more bits in ObjectLayerPairFilterMask
+option(OBJECT_LAYER_BITS "Number of bits in ObjectLayer" 32)
 
 # Select X86 processor features to use (if everything is off it will be SSE2 compatible)
 option(USE_SSE4_1 "Enable SSE4.1" ON)
