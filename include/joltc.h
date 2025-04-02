@@ -50,7 +50,7 @@
 
 typedef uint32_t JPH_BodyID;
 typedef uint32_t JPH_SubShapeID;
-typedef uint16_t JPH_ObjectLayer;
+typedef uint32_t JPH_ObjectLayer;
 typedef uint8_t  JPH_BroadPhaseLayer;
 typedef uint32_t JPH_CollisionGroupID;
 typedef uint32_t JPH_CollisionSubGroupID;

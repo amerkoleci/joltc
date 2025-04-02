@@ -73,7 +73,7 @@ option(CPP_EXCEPTIONS_ENABLED "Enable C++ exceptions" OFF)
 option(CPP_RTTI_ENABLED "Enable C++ RTTI" OFF)
 
 # Use 32-bit object layers to support more bits in ObjectLayerPairFilterMask
-option(OBJECT_LAYER_BITS "Number of bits in ObjectLayer" 32)
+set(OBJECT_LAYER_BITS 32)
 
 # Select X86 processor features to use (if everything is off it will be SSE2 compatible)
 option(USE_SSE4_1 "Enable SSE4.1" ON)
@@ -136,10 +136,10 @@ if (JPH_MASTER_PROJECT AND NOT CMAKE_BUILD_TYPE)
 endif ()
 
 FetchContent_Declare(
-        JoltPhysics
-        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG v5.3.0
-		SOURCE_SUBDIR "Build"
+    JoltPhysics
+    GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
+    GIT_TAG v5.3.0
+	SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
 
