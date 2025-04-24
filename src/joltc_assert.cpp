@@ -54,6 +54,10 @@ static_assert(sizeof(JPH::CharacterID) == sizeof(JPH_CharacterID));
 static_assert(sizeof(JPH::CollisionGroup::GroupID) == sizeof(JPH_CollisionGroupID));
 static_assert(sizeof(JPH::CollisionGroup::SubGroupID) == sizeof(JPH_CollisionSubGroupID));
 
+static_assert(JPH_INVALID_COLLISION_GROUP_ID == (int)JPH::CollisionGroup::cInvalidGroup);
+static_assert(JPH_INVALID_COLLISION_SUBGROUP_ID == (int)JPH::CollisionGroup::cInvalidSubGroup);
+
+
 // EPhysicsUpdateError
 static_assert(sizeof(JPH_PhysicsUpdateError) == sizeof(JPH::EPhysicsUpdateError));
 static_assert(JPH_PhysicsUpdateError_None == (int)JPH::EPhysicsUpdateError::None);

@@ -67,6 +67,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Collision/PhysicsMaterialSimple.h"
+#include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Body/BodyLockMulti.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
 
@@ -141,6 +142,8 @@ DEF_MAP_DECL(CharacterVirtual, JPH_CharacterVirtual)
 DEF_MAP_DECL(Skeleton, JPH_Skeleton)
 DEF_MAP_DECL(RagdollSettings, JPH_RagdollSettings)
 DEF_MAP_DECL(Ragdoll, JPH_Ragdoll)
+DEF_MAP_DECL(GroupFilter, JPH_GroupFilter)
+DEF_MAP_DECL(GroupFilterTable, JPH_GroupFilterTable)
 
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
@@ -378,6 +381,13 @@ static inline JPH_CollideShapeResult FromJolt(const JPH::CollideShapeResult& jol
 	return result;
 }
 
+static inline void FromJolt(const CollisionGroup& jolt, JPH_CollisionGroup* result)
+{
+	result->groupFilter = ToGroupFilter(jolt.GetGroupFilter());
+	result->groupID = jolt.GetGroupID();
+	result->subGroupID = jolt.GetSubGroupID();
+}
+
 // To Jolt conversion methods
 static inline JPH::Vec3 ToJolt(const JPH_Vec3& vec)
 {
@@ -490,6 +500,17 @@ static inline JPH::MotorSettings ToJolt(const JPH_MotorSettings* settings)
 	result.mMaxTorqueLimit = settings->maxTorqueLimit;
 	return result;
 }
+
+static inline JPH::CollisionGroup ToJolt(const JPH_CollisionGroup* group)
+{
+	JPH::CollisionGroup result(
+		AsGroupFilter(group->groupFilter),
+		static_cast<JPH::CollisionGroup::GroupID>(group->groupID),
+		static_cast<JPH::CollisionGroup::SubGroupID>(group->subGroupID)
+	);
+	return result;
+}
+
 void JPH_MassProperties_DecomposePrincipalMomentsOfInertia(JPH_MassProperties* properties, JPH_Matrix4x4* rotation, JPH_Vec3* diagonal)
 {
 	JPH::Mat44 joltRotation;
@@ -1242,10 +1263,10 @@ public:
 
 	bool ShouldCollide(
 		[[maybe_unused]] const Body& inBody1,
-		[[maybe_unused]] const Shape* inShape1, 
+		[[maybe_unused]] const Shape* inShape1,
 		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1,
-		[[maybe_unused]] const Body& inBody2, 
-		[[maybe_unused]] const Shape* inShape2, 
+		[[maybe_unused]] const Body& inBody2,
+		[[maybe_unused]] const Shape* inShape2,
 		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
 	{
 		if (s_Procs != nullptr && s_Procs->ShouldCollide)
@@ -1809,6 +1830,52 @@ const char* JPH_PhysicsMaterial_GetDebugName(const JPH_PhysicsMaterial* material
 uint32_t JPH_PhysicsMaterial_GetDebugColor(const JPH_PhysicsMaterial* material)
 {
 	return AsPhysicsMaterial(material)->GetDebugColor().GetUInt32();
+}
+
+/* GroupFilter/GroupFilterTable */
+void JPH_GroupFilter_Destroy(JPH_GroupFilter* groupFilter)
+{
+	if (groupFilter)
+	{
+		AsGroupFilter(groupFilter)->Release();
+	}
+}
+
+bool JPH_GroupFilter_CanCollide(JPH_GroupFilter* groupFilter, const JPH_CollisionGroup* group1, const JPH_CollisionGroup* group2)
+{
+	return AsGroupFilter(groupFilter)->CanCollide(ToJolt(group1), ToJolt(group2));
+}
+
+JPH_GroupFilterTable* JPH_GroupFilterTable_Create(uint32_t numSubGroups)
+{
+	auto material = new JPH::GroupFilterTable(numSubGroups);
+	material->AddRef();
+
+	return ToGroupFilterTable(material);
+}
+
+void JPH_GroupFilterTable_DisableCollision(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2)
+{
+	AsGroupFilterTable(table)->DisableCollision(
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup1),
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup2)
+	);
+}
+
+void JPH_GroupFilterTable_EnableCollision(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2)
+{
+	AsGroupFilterTable(table)->EnableCollision(
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup1),
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup2)
+	);
+}
+
+bool JPH_GroupFilterTable_IsCollisionEnabled(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2)
+{
+	return AsGroupFilterTable(table)->IsCollisionEnabled(
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup1),
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup2)
+	);
 }
 
 /* ShapeSettings */
@@ -3169,6 +3236,16 @@ JPH_ObjectLayer JPH_BodyCreationSettings_GetObjectLayer(const JPH_BodyCreationSe
 void JPH_BodyCreationSettings_SetObjectLayer(JPH_BodyCreationSettings* settings, JPH_ObjectLayer value)
 {
 	AsBodyCreationSettings(settings)->mObjectLayer = static_cast<JPH::ObjectLayer>(value);
+}
+
+void JPH_BodyCreationSettings_GetCollissionGroup(const JPH_BodyCreationSettings* settings, JPH_CollisionGroup* result)
+{
+	FromJolt(AsBodyCreationSettings(settings)->mCollisionGroup, result);
+}
+
+void JPH_BodyCreationSettings_SetCollissionGroup(JPH_BodyCreationSettings* settings, const JPH_CollisionGroup* value)
+{
+	AsBodyCreationSettings(settings)->mCollisionGroup = ToJolt(value);
 }
 
 JPH_MotionType JPH_BodyCreationSettings_GetMotionType(const JPH_BodyCreationSettings* settings)
@@ -5185,6 +5262,16 @@ void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interfa
 	AsBodyInterface(interface)->SetPositionRotationAndVelocity(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), ToJolt(linearVelocity), ToJolt(angularVelocity));
 }
 
+void JPH_BodyInterface_GetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result)
+{
+	FromJolt(AsBodyInterface(interface)->GetCollisionGroup(JPH::BodyID(bodyId)), result);
+}
+
+void JPH_BodyInterface_SetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group)
+{
+	AsBodyInterface(interface)->SetCollisionGroup(JPH::BodyID(bodyId), ToJolt(group));
+}
+
 const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId)
 {
 	const JPH::Shape* shape = AsBodyInterface(interface)->GetShape(JPH::BodyID(bodyId)).GetPtr();
@@ -6588,6 +6675,16 @@ JPH_BroadPhaseLayer JPH_Body_GetBroadPhaseLayer(const JPH_Body* body)
 JPH_ObjectLayer JPH_Body_GetObjectLayer(const JPH_Body* body)
 {
 	return static_cast<JPH_ObjectLayer>(AsBody(body)->GetObjectLayer());
+}
+
+void JPH_Body_GetCollissionGroup(const JPH_Body* body, JPH_CollisionGroup* result)
+{
+	FromJolt(AsBody(body)->GetCollisionGroup(), result);
+}
+
+void JPH_Body_SetCollissionGroup(JPH_Body* body, const JPH_CollisionGroup* value)
+{
+	AsBody(body)->SetCollisionGroup(ToJolt(value));
 }
 
 bool JPH_Body_GetAllowSleeping(JPH_Body* body)
@@ -8506,8 +8603,8 @@ void JPH_DebugRenderer_DrawWireUnitSphere(JPH_DebugRenderer* renderer, const JPH
 void JPH_DebugRenderer_DrawTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow)
 {
 	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawTriangle(
-		ToJolt(v1), ToJolt(v2), ToJolt(v3), 
-		JPH::Color(color), 
+		ToJolt(v1), ToJolt(v2), ToJolt(v3),
+		JPH::Color(color),
 		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow)
 	);
 }
@@ -8516,8 +8613,8 @@ void JPH_DebugRenderer_DrawBox(JPH_DebugRenderer* renderer, const JPH_AABox* box
 {
 	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawBox(
 		ToJolt(box),
-		JPH::Color(color), 
-		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow), 
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
 		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
 	);
 }
