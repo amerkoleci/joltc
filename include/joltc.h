@@ -13,7 +13,7 @@
 #       define _JPH_EXPORT
 #       pragma warning "Unknown dynamic link import/export semantics."
 #   endif
-#elif defined(VIMAGE_SHARED_LIBRARY_INCLUDE)
+#elif defined(JPH_SHARED_LIBRARY_INCLUDE)
 #   if defined(_MSC_VER)
 #       define _JPH_EXPORT __declspec(dllimport)
 #   else
@@ -46,7 +46,9 @@
 #define JPH_DEFAULT_CONVEX_RADIUS (0.05f) // float cDefaultConvexRadius = 0.05f
 #define JPH_CAPSULE_PROJECTION_SLOP (0.02f) // float cCapsuleProjectionSlop = 0.02f
 #define JPH_MAX_PHYSICS_JOBS (2048) // int cMaxPhysicsJobs = 2048
-#define JPH_MAX_PHYSICS_BARRIERS (2048) // int cMaxPhysicsBarriers = 8
+#define JPH_MAX_PHYSICS_BARRIERS (8) // int cMaxPhysicsBarriers = 8
+#define JPH_INVALID_COLLISION_GROUP_ID (~0U)
+#define JPH_INVALID_COLLISION_SUBGROUP_ID (~0U)
 
 typedef uint32_t JPH_BodyID;
 typedef uint32_t JPH_SubShapeID;
@@ -56,6 +58,86 @@ typedef uint32_t JPH_CollisionGroupID;
 typedef uint32_t JPH_CollisionSubGroupID;
 typedef uint32_t JPH_CharacterID;
 
+/* Forward declarations */
+typedef struct JPH_BroadPhaseLayerInterface			JPH_BroadPhaseLayerInterface;
+typedef struct JPH_ObjectVsBroadPhaseLayerFilter	JPH_ObjectVsBroadPhaseLayerFilter;
+typedef struct JPH_ObjectLayerPairFilter			JPH_ObjectLayerPairFilter;
+
+typedef struct JPH_BroadPhaseLayerFilter            JPH_BroadPhaseLayerFilter;
+typedef struct JPH_ObjectLayerFilter                JPH_ObjectLayerFilter;
+typedef struct JPH_BodyFilter                       JPH_BodyFilter;
+typedef struct JPH_ShapeFilter                      JPH_ShapeFilter;
+
+typedef struct JPH_SimShapeFilter					JPH_SimShapeFilter;
+
+typedef struct JPH_PhysicsSystem                    JPH_PhysicsSystem;
+
+typedef struct JPH_PhysicsMaterial					JPH_PhysicsMaterial;
+
+/* ShapeSettings */
+typedef struct JPH_ShapeSettings                    JPH_ShapeSettings;
+typedef struct JPH_ConvexShapeSettings			    JPH_ConvexShapeSettings;
+typedef struct JPH_SphereShapeSettings              JPH_SphereShapeSettings;
+typedef struct JPH_BoxShapeSettings                 JPH_BoxShapeSettings;
+typedef struct JPH_PlaneShapeSettings               JPH_PlaneShapeSettings;
+typedef struct JPH_TriangleShapeSettings            JPH_TriangleShapeSettings;
+typedef struct JPH_CapsuleShapeSettings             JPH_CapsuleShapeSettings;
+typedef struct JPH_TaperedCapsuleShapeSettings      JPH_TaperedCapsuleShapeSettings;
+typedef struct JPH_CylinderShapeSettings            JPH_CylinderShapeSettings;
+typedef struct JPH_TaperedCylinderShapeSettings     JPH_TaperedCylinderShapeSettings;
+typedef struct JPH_ConvexHullShapeSettings          JPH_ConvexHullShapeSettings;
+typedef struct JPH_CompoundShapeSettings            JPH_CompoundShapeSettings;
+typedef struct JPH_StaticCompoundShapeSettings      JPH_StaticCompoundShapeSettings;
+typedef struct JPH_MutableCompoundShapeSettings     JPH_MutableCompoundShapeSettings;
+typedef struct JPH_MeshShapeSettings                JPH_MeshShapeSettings;
+typedef struct JPH_HeightFieldShapeSettings         JPH_HeightFieldShapeSettings;
+typedef struct JPH_RotatedTranslatedShapeSettings   JPH_RotatedTranslatedShapeSettings;
+typedef struct JPH_ScaledShapeSettings              JPH_ScaledShapeSettings;
+typedef struct JPH_OffsetCenterOfMassShapeSettings  JPH_OffsetCenterOfMassShapeSettings;
+typedef struct JPH_EmptyShapeSettings               JPH_EmptyShapeSettings;
+
+/* Shape */
+typedef struct JPH_Shape                            JPH_Shape;
+typedef struct JPH_ConvexShape                      JPH_ConvexShape;
+typedef struct JPH_SphereShape                      JPH_SphereShape;
+typedef struct JPH_BoxShape                         JPH_BoxShape;
+typedef struct JPH_PlaneShape                       JPH_PlaneShape;
+typedef struct JPH_CapsuleShape                     JPH_CapsuleShape;
+typedef struct JPH_CylinderShape                    JPH_CylinderShape;
+typedef struct JPH_TaperedCylinderShape             JPH_TaperedCylinderShape;
+typedef struct JPH_TriangleShape				    JPH_TriangleShape;
+typedef struct JPH_TaperedCapsuleShape			    JPH_TaperedCapsuleShape;
+typedef struct JPH_ConvexHullShape                  JPH_ConvexHullShape;
+typedef struct JPH_CompoundShape                    JPH_CompoundShape;
+typedef struct JPH_StaticCompoundShape              JPH_StaticCompoundShape;
+typedef struct JPH_MutableCompoundShape             JPH_MutableCompoundShape;
+typedef struct JPH_MeshShape                        JPH_MeshShape;
+typedef struct JPH_HeightFieldShape                 JPH_HeightFieldShape;
+typedef struct JPH_DecoratedShape                   JPH_DecoratedShape;
+typedef struct JPH_RotatedTranslatedShape           JPH_RotatedTranslatedShape;
+typedef struct JPH_ScaledShape                      JPH_ScaledShape;
+typedef struct JPH_OffsetCenterOfMassShape          JPH_OffsetCenterOfMassShape;
+typedef struct JPH_EmptyShape                       JPH_EmptyShape;
+
+typedef struct JPH_BodyCreationSettings             JPH_BodyCreationSettings;
+typedef struct JPH_SoftBodyCreationSettings         JPH_SoftBodyCreationSettings;
+typedef struct JPH_BodyInterface                    JPH_BodyInterface;
+typedef struct JPH_BodyLockInterface                JPH_BodyLockInterface;
+typedef struct JPH_BroadPhaseQuery                  JPH_BroadPhaseQuery;
+typedef struct JPH_NarrowPhaseQuery                 JPH_NarrowPhaseQuery;
+typedef struct JPH_MotionProperties                 JPH_MotionProperties;
+typedef struct JPH_MassProperties                   JPH_MassProperties;
+typedef struct JPH_Body                             JPH_Body;
+
+typedef struct JPH_CollideShapeResult               JPH_CollideShapeResult;
+typedef struct JPH_ContactListener                  JPH_ContactListener;
+typedef struct JPH_ContactManifold                  JPH_ContactManifold;
+typedef struct JPH_ContactSettings                  JPH_ContactSettings;
+
+typedef struct JPH_GroupFilter						JPH_GroupFilter;
+typedef struct JPH_GroupFilterTable					JPH_GroupFilterTable;  /* Inherics JPH_GroupFilter */
+
+/* Enums */
 typedef enum JPH_PhysicsUpdateError {
 	JPH_PhysicsUpdateError_None = 0,
 	JPH_PhysicsUpdateError_ManifoldCacheFull = 1 << 0,
@@ -452,7 +534,6 @@ typedef struct JPH_CollideShapeSettings {
 	JPH_BackFaceMode			backFaceMode/* = JPH_BackFaceMode_IgnoreBackFaces*/;
 } JPH_CollideShapeSettings;
 
-
 /* ShapeCastSettings */
 typedef struct JPH_ShapeCastSettings {
 	JPH_CollideSettingsBase     base;    /* Inherics JPH_CollideSettingsBase */
@@ -573,6 +654,12 @@ typedef struct JPH_SupportingFace {
     JPH_Vec3 vertices[32];
 } JPH_SupportingFace;
 
+typedef struct JPH_CollisionGroup {
+	const JPH_GroupFilter*	groupFilter;
+	JPH_CollisionGroupID	groupID;
+	JPH_CollisionSubGroupID	subGroupID;
+} JPH_CollisionGroup;
+
 typedef void JPH_CastRayResultCallback(void* context, const JPH_RayCastResult* result);
 typedef void JPH_RayCastBodyResultCallback(void* context, const JPH_BroadPhaseCastResult* result);
 typedef void JPH_CollideShapeBodyResultCallback(void* context, const JPH_BodyID result);
@@ -586,81 +673,6 @@ typedef float JPH_CollideShapeBodyCollectorCallback(void* context, const JPH_Bod
 typedef float JPH_CollidePointCollectorCallback(void* context, const JPH_CollidePointResult* result);
 typedef float JPH_CollideShapeCollectorCallback(void* context, const JPH_CollideShapeResult* result);
 typedef float JPH_CastShapeCollectorCallback(void* context, const JPH_ShapeCastResult* result);
-
-typedef struct JPH_BroadPhaseLayerInterface			JPH_BroadPhaseLayerInterface;
-typedef struct JPH_ObjectVsBroadPhaseLayerFilter	JPH_ObjectVsBroadPhaseLayerFilter;
-typedef struct JPH_ObjectLayerPairFilter			JPH_ObjectLayerPairFilter;
-
-typedef struct JPH_BroadPhaseLayerFilter            JPH_BroadPhaseLayerFilter;
-typedef struct JPH_ObjectLayerFilter                JPH_ObjectLayerFilter;
-typedef struct JPH_BodyFilter                       JPH_BodyFilter;
-typedef struct JPH_ShapeFilter                      JPH_ShapeFilter;
-
-typedef struct JPH_SimShapeFilter					JPH_SimShapeFilter;
-
-typedef struct JPH_PhysicsSystem                    JPH_PhysicsSystem;
-
-typedef struct JPH_PhysicsMaterial					JPH_PhysicsMaterial;
-
-/* ShapeSettings */
-typedef struct JPH_ShapeSettings                    JPH_ShapeSettings;
-typedef struct JPH_ConvexShapeSettings			    JPH_ConvexShapeSettings;
-typedef struct JPH_SphereShapeSettings              JPH_SphereShapeSettings;
-typedef struct JPH_BoxShapeSettings                 JPH_BoxShapeSettings;
-typedef struct JPH_PlaneShapeSettings               JPH_PlaneShapeSettings;
-typedef struct JPH_TriangleShapeSettings            JPH_TriangleShapeSettings;
-typedef struct JPH_CapsuleShapeSettings             JPH_CapsuleShapeSettings;
-typedef struct JPH_TaperedCapsuleShapeSettings      JPH_TaperedCapsuleShapeSettings;
-typedef struct JPH_CylinderShapeSettings            JPH_CylinderShapeSettings;
-typedef struct JPH_TaperedCylinderShapeSettings     JPH_TaperedCylinderShapeSettings;
-typedef struct JPH_ConvexHullShapeSettings          JPH_ConvexHullShapeSettings;
-typedef struct JPH_CompoundShapeSettings            JPH_CompoundShapeSettings;
-typedef struct JPH_StaticCompoundShapeSettings      JPH_StaticCompoundShapeSettings;
-typedef struct JPH_MutableCompoundShapeSettings     JPH_MutableCompoundShapeSettings;
-typedef struct JPH_MeshShapeSettings                JPH_MeshShapeSettings;
-typedef struct JPH_HeightFieldShapeSettings         JPH_HeightFieldShapeSettings;
-typedef struct JPH_RotatedTranslatedShapeSettings   JPH_RotatedTranslatedShapeSettings;
-typedef struct JPH_ScaledShapeSettings              JPH_ScaledShapeSettings;
-typedef struct JPH_OffsetCenterOfMassShapeSettings  JPH_OffsetCenterOfMassShapeSettings;
-typedef struct JPH_EmptyShapeSettings               JPH_EmptyShapeSettings;
-
-/* Shape */
-typedef struct JPH_Shape                            JPH_Shape;
-typedef struct JPH_ConvexShape                      JPH_ConvexShape;
-typedef struct JPH_SphereShape                      JPH_SphereShape;
-typedef struct JPH_BoxShape                         JPH_BoxShape;
-typedef struct JPH_PlaneShape                       JPH_PlaneShape;
-typedef struct JPH_CapsuleShape                     JPH_CapsuleShape;
-typedef struct JPH_CylinderShape                    JPH_CylinderShape;
-typedef struct JPH_TaperedCylinderShape             JPH_TaperedCylinderShape;
-typedef struct JPH_TriangleShape				    JPH_TriangleShape;
-typedef struct JPH_TaperedCapsuleShape			    JPH_TaperedCapsuleShape;
-typedef struct JPH_ConvexHullShape                  JPH_ConvexHullShape;
-typedef struct JPH_CompoundShape                    JPH_CompoundShape;
-typedef struct JPH_StaticCompoundShape              JPH_StaticCompoundShape;
-typedef struct JPH_MutableCompoundShape             JPH_MutableCompoundShape;
-typedef struct JPH_MeshShape                        JPH_MeshShape;
-typedef struct JPH_HeightFieldShape                 JPH_HeightFieldShape;
-typedef struct JPH_DecoratedShape                   JPH_DecoratedShape;
-typedef struct JPH_RotatedTranslatedShape           JPH_RotatedTranslatedShape;
-typedef struct JPH_ScaledShape                      JPH_ScaledShape;
-typedef struct JPH_OffsetCenterOfMassShape          JPH_OffsetCenterOfMassShape;
-typedef struct JPH_EmptyShape                       JPH_EmptyShape;
-
-typedef struct JPH_BodyCreationSettings             JPH_BodyCreationSettings;
-typedef struct JPH_SoftBodyCreationSettings         JPH_SoftBodyCreationSettings;
-typedef struct JPH_BodyInterface                    JPH_BodyInterface;
-typedef struct JPH_BodyLockInterface                JPH_BodyLockInterface;
-typedef struct JPH_BroadPhaseQuery                  JPH_BroadPhaseQuery;
-typedef struct JPH_NarrowPhaseQuery                 JPH_NarrowPhaseQuery;
-typedef struct JPH_MotionProperties                 JPH_MotionProperties;
-typedef struct JPH_MassProperties                   JPH_MassProperties;
-typedef struct JPH_Body                             JPH_Body;
-
-typedef struct JPH_CollideShapeResult               JPH_CollideShapeResult;
-typedef struct JPH_ContactListener                  JPH_ContactListener;
-typedef struct JPH_ContactManifold                  JPH_ContactManifold;
-typedef struct JPH_ContactSettings                  JPH_ContactSettings;
 
 typedef struct JPH_CollisionEstimationResultImpulse {
 	float	contactImpulse;
@@ -1176,6 +1188,15 @@ JPH_CAPI void JPH_PhysicsMaterial_Destroy(JPH_PhysicsMaterial* material);
 JPH_CAPI const char* JPH_PhysicsMaterial_GetDebugName(const JPH_PhysicsMaterial* material);
 JPH_CAPI uint32_t JPH_PhysicsMaterial_GetDebugColor(const JPH_PhysicsMaterial* material);
 
+/* GroupFilter/GroupFilterTable */
+JPH_CAPI void JPH_GroupFilter_Destroy(JPH_GroupFilter* groupFilter);
+JPH_CAPI bool JPH_GroupFilter_CanCollide(JPH_GroupFilter* groupFilter, const JPH_CollisionGroup* group1, const JPH_CollisionGroup* group2);
+
+JPH_CAPI JPH_GroupFilterTable* JPH_GroupFilterTable_Create(uint32_t numSubGroups/* = 0*/);
+JPH_CAPI void JPH_GroupFilterTable_DisableCollision(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2);
+JPH_CAPI void JPH_GroupFilterTable_EnableCollision(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2);
+JPH_CAPI bool JPH_GroupFilterTable_IsCollisionEnabled(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2);
+
 /* ShapeSettings */
 JPH_CAPI void JPH_ShapeSettings_Destroy(JPH_ShapeSettings* settings);
 JPH_CAPI uint64_t JPH_ShapeSettings_GetUserData(const JPH_ShapeSettings* settings);
@@ -1400,6 +1421,9 @@ JPH_CAPI void JPH_BodyCreationSettings_SetUserData(JPH_BodyCreationSettings* set
 
 JPH_CAPI JPH_ObjectLayer JPH_BodyCreationSettings_GetObjectLayer(const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyCreationSettings_SetObjectLayer(JPH_BodyCreationSettings* settings, JPH_ObjectLayer value);
+
+JPH_CAPI void JPH_BodyCreationSettings_GetCollissionGroup(const JPH_BodyCreationSettings* settings, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_BodyCreationSettings_SetCollissionGroup(JPH_BodyCreationSettings* settings, const JPH_CollisionGroup* value);
 
 JPH_CAPI JPH_MotionType JPH_BodyCreationSettings_GetMotionType(const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyCreationSettings_SetMotionType(JPH_BodyCreationSettings* settings, JPH_MotionType value);
@@ -1704,6 +1728,9 @@ JPH_CAPI void JPH_BodyInterface_SetPositionAndRotationWhenChanged(JPH_BodyInterf
 JPH_CAPI void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation);
 JPH_CAPI void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
 
+JPH_CAPI void JPH_BodyInterface_GetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_BodyInterface_SetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group);
+
 JPH_CAPI const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 JPH_CAPI void JPH_BodyInterface_SetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_Shape* shape, bool updateMassProperties, JPH_Activation activationMode);
 JPH_CAPI void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* previousCenterOfMass, bool updateMassProperties, JPH_Activation activationMode);
@@ -1970,6 +1997,9 @@ JPH_CAPI void JPH_Body_SetMotionType(JPH_Body* body, JPH_MotionType motionType);
 
 JPH_CAPI JPH_BroadPhaseLayer JPH_Body_GetBroadPhaseLayer(const JPH_Body* body);
 JPH_CAPI JPH_ObjectLayer JPH_Body_GetObjectLayer(const JPH_Body* body);
+
+JPH_CAPI void JPH_Body_GetCollissionGroup(const JPH_Body* body, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_Body_SetCollissionGroup(JPH_Body* body, const JPH_CollisionGroup* value);
 
 JPH_CAPI bool JPH_Body_GetAllowSleeping(JPH_Body* body);
 JPH_CAPI void JPH_Body_SetAllowSleeping(JPH_Body* body, bool allowSleeping);
