@@ -1623,6 +1623,32 @@ JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaPosition(const JPH_SixDOFConstr
 JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaRotation(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaMotorTranslation(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaMotorRotation(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetTranslationLimitsMin(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetTranslationLimitsMax(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetRotationLimitsMin(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetRotationLimitsMax(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI bool JPH_SixDOFConstraint_IsFixedAxis(const JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI bool JPH_SixDOFConstraint_IsFreeAxis(const JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_GetLimitsSpringSettings(JPH_SixDOFConstraint* constraint, JPH_SpringSettings* result, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_SetLimitsSpringSettings(JPH_SixDOFConstraint* constraint, JPH_SpringSettings* settings, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_SetMaxFriction(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, float inFriction);
+JPH_CAPI float JPH_SixDOFConstraint_GetMaxFriction(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_GetRotationInConstraintSpace(JPH_SixDOFConstraint* constraint, JPH_Quat* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetMotorSettings(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, JPH_MotorSettings* settings);
+JPH_CAPI void JPH_SixDOFConstraint_SetMotorState(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, JPH_MotorState state);
+JPH_CAPI JPH_MotorState JPH_SixDOFConstraint_GetMotorState(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inVelocity);
+JPH_CAPI void JPH_SixDOFConstraint_GetTargetVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetAngularVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inAngularVelocity);
+JPH_CAPI void JPH_SixDOFConstraint_GetTargetAngularVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetPositionCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inPosition);
+JPH_CAPI void JPH_SixDOFConstraint_GetTargetPositionCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetOrientationCS(JPH_SixDOFConstraint* constraint, JPH_Quat* inOrientation);
+JPH_CAPI void JPH_SixDOFConstraint_GetTargetOrientationCS(JPH_SixDOFConstraint* constraint, JPH_Quat* result);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetOrientationBS(JPH_SixDOFConstraint* constraint, JPH_Quat* inOrientation);
+
+
+
 
 /* JPH_GearConstraint */
 JPH_CAPI void JPH_GearConstraintSettings_Init(JPH_GearConstraintSettings* settings);
