@@ -4683,6 +4683,123 @@ void JPH_SixDOFConstraint_GetTotalLambdaMotorRotation(const JPH_SixDOFConstraint
 	FromJolt(AsSixDOFConstraint(constraint)->GetTotalLambdaMotorRotation(), result);
 }
 
+void JPH_SixDOFConstraint_GetTranslationLimitsMin(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTranslationLimitsMin(), result);
+}
+
+void JPH_SixDOFConstraint_GetTranslationLimitsMax(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTranslationLimitsMax(), result);
+}
+
+void JPH_SixDOFConstraint_GetRotationLimitsMin(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetRotationLimitsMin(), result);
+}
+
+void JPH_SixDOFConstraint_GetRotationLimitsMax(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetRotationLimitsMax(), result);
+}
+
+bool JPH_SixDOFConstraint_IsFixedAxis(const JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis)
+{
+	return AsSixDOFConstraint(constraint)->IsFixedAxis(static_cast<JPH::SixDOFConstraint::EAxis>(axis));
+}
+
+bool JPH_SixDOFConstraint_IsFreeAxis(const JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis)
+{
+	return AsSixDOFConstraint(constraint)->IsFreeAxis(static_cast<JPH::SixDOFConstraint::EAxis>(axis));
+}
+
+void JPH_SixDOFConstraint_GetLimitsSpringSettings(JPH_SixDOFConstraint* constraint, JPH_SpringSettings* result, JPH_SixDOFConstraintAxis axis)
+{
+	auto joltConstraint = reinterpret_cast<JPH::SixDOFConstraint*>(constraint);
+	FromJolt(joltConstraint->GetLimitsSpringSettings(static_cast<JPH::SixDOFConstraint::EAxis>(axis)), result);
+}
+
+void JPH_SixDOFConstraint_SetLimitsSpringSettings(JPH_SixDOFConstraint* constraint, JPH_SpringSettings* settings, JPH_SixDOFConstraintAxis axis)
+{
+	auto joltConstraint = reinterpret_cast<JPH::SixDOFConstraint*>(constraint);
+	joltConstraint->SetLimitsSpringSettings(static_cast<JPH::SixDOFConstraint::EAxis>(axis), ToJolt(settings));
+}
+
+void JPH_SixDOFConstraint_SetMaxFriction(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, float inFriction)
+{
+	AsSixDOFConstraint(constraint)->SetMaxFriction(static_cast<JPH::SixDOFConstraint::EAxis>(axis), inFriction);
+}
+
+float JPH_SixDOFConstraint_GetMaxFriction(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis)
+{
+	return AsSixDOFConstraint(constraint)->GetMaxFriction(static_cast<JPH::SixDOFConstraint::EAxis>(axis));
+}
+
+void JPH_SixDOFConstraint_GetRotationInConstraintSpace(JPH_SixDOFConstraint* constraint, JPH_Quat* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetRotationInConstraintSpace(), result);
+}
+
+void JPH_SixDOFConstraint_GetMotorSettings(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, JPH_MotorSettings* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetMotorSettings(static_cast<JPH::SixDOFConstraint::EAxis>(axis)), result);
+}
+
+void JPH_SixDOFConstraint_SetMotorState(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, JPH_MotorState state)
+{
+	AsSixDOFConstraint(constraint)->SetMotorState(static_cast<JPH::SixDOFConstraint::EAxis>(axis), static_cast<JPH::EMotorState>(state));
+}
+
+JPH_MotorState JPH_SixDOFConstraint_GetMotorState(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis)
+{
+	return static_cast<JPH_MotorState>(AsSixDOFConstraint(constraint)->GetMotorState(static_cast<JPH::SixDOFConstraint::EAxis>(axis)));
+}
+
+void JPH_SixDOFConstraint_SetTargetVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inVelocity)
+{
+	AsSixDOFConstraint(constraint)->SetTargetVelocityCS(ToJolt(inVelocity));
+}
+
+void JPH_SixDOFConstraint_GetTargetVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTargetVelocityCS(), result);
+}
+
+void JPH_SixDOFConstraint_SetTargetAngularVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inAngularVelocity)
+{
+	AsSixDOFConstraint(constraint)->SetTargetAngularVelocityCS(ToJolt(inAngularVelocity));
+}
+
+void JPH_SixDOFConstraint_GetTargetAngularVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTargetAngularVelocityCS(), result);
+}
+
+void JPH_SixDOFConstraint_SetTargetPositionCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inPosition)
+{
+	AsSixDOFConstraint(constraint)->SetTargetPositionCS(ToJolt(inPosition));
+}
+
+void JPH_SixDOFConstraint_GetTargetPositionCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTargetPositionCS(), result);
+}
+
+void JPH_SixDOFConstraint_SetTargetOrientationCS(JPH_SixDOFConstraint* constraint, JPH_Quat* inOrientation)
+{
+	AsSixDOFConstraint(constraint)->SetTargetOrientationCS(ToJolt(inOrientation));
+}
+
+void JPH_SixDOFConstraint_GetTargetOrientationCS(JPH_SixDOFConstraint* constraint, JPH_Quat* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTargetOrientationCS(), result);
+}
+
+void JPH_SixDOFConstraint_SetTargetOrientationBS(JPH_SixDOFConstraint* constraint, JPH_Quat* inOrientation)
+{
+	AsSixDOFConstraint(constraint)->SetTargetOrientationBS(ToJolt(inOrientation));
+}
+
 /* JPH_GearConstraint */
 void JPH_GearConstraintSettings_FromJolt(JPH_GearConstraintSettings* settings, const GearConstraintSettings& joltSettings)
 {
