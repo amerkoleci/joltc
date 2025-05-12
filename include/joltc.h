@@ -137,6 +137,19 @@ typedef struct JPH_ContactSettings                  JPH_ContactSettings;
 typedef struct JPH_GroupFilter						JPH_GroupFilter;
 typedef struct JPH_GroupFilterTable					JPH_GroupFilterTable;  /* Inherics JPH_GroupFilter */
 
+/* Vehicle and Related */
+typedef struct JPH_Wheel							JPH_Wheel;
+typedef struct JPH_WheelSettings					JPH_WheelSettings;
+typedef struct JPH_VehicleController				JPH_VehicleController;
+typedef struct JPH_VehicleControllerSettings		JPH_VehicleControllerSettings;
+typedef struct JPH_VehicleConstraint				JPH_VehicleConstraint;
+typedef struct JPH_VehicleConstraintSettings		JPH_VehicleConstraintSettings;
+typedef struct JPH_AntiRollBars						JPH_AntiRollBars;
+typedef struct JPH_CollisionTester					JPH_CollisionTester;
+typedef struct JPH_CollisionTesterRay				JPH_CollisionTesterRay;
+typedef struct JPH_CollisionTesterCastSphere		JPH_CollisionTesterCastSphere;
+typedef struct JPH_CollisionTesterCastCylinder		JPH_CollisionTesterCastCylinder;
+
 /* Enums */
 typedef enum JPH_PhysicsUpdateError {
 	JPH_PhysicsUpdateError_None = 0,
@@ -2533,5 +2546,27 @@ JPH_CAPI void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
 
 /* JPH_EstimateCollisionResponse */
 JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);
+
+/* Wheel */
+JPH_CAPI JPH_WheelSettings* JPH_WheelSettings_Create(
+	const JPH_Vec3*				position,
+	const JPH_Vec3*				suspensionForcePoint,
+	const JPH_Vec3*				suspensionDirection,
+	const JPH_Vec3*				steeringAxis,
+	const JPH_Vec3*				wheelUp,
+	const JPH_Vec3*				wheelForward,
+	float						suspensionMinLength,
+	float						suspensionMaxLength,
+	float						suspensionPreloadLength,
+	const JPH_SpringSettings*	suspensionSpring,
+	float						radius,
+	float						width,
+	bool						enableSuspensionForcePoint);
+JPH_CAPI void JPH_WheelSettings_Destroy(JPH_WheelSettings* settings);
+
+JPH_CAPI JPH_Wheel* JPH_Wheel_Create(const JPH_WheelSettings* settings);
+JPH_CAPI void JPH_Wheel_Destroy(JPH_Wheel* wheel);
+JPH_CAPI bool JPH_Wheel_HasContact(const JPH_Wheel* wheel);
+JPH_CAPI bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel);
 
 #endif /* JOLT_C_H_ */

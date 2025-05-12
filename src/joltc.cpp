@@ -70,6 +70,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Body/BodyLockMulti.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
+#include "Jolt/Physics/Vehicle/Wheel.h"
 
 #include <iostream>
 #include <cstdarg>
@@ -9049,6 +9050,80 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 			result->impulses[i].frictionImpulse2 = joltResult.mImpulses[i].mFrictionImpulse2;
 		}
 	}
+}
+
+/* Wheel */
+JPH_WheelSettings* JPH_WheelSettings_Create(
+	const JPH_Vec3*				position,
+	const JPH_Vec3*				suspensionForcePoint,
+	const JPH_Vec3*				suspensionDirection,
+	const JPH_Vec3*				steeringAxis,
+	const JPH_Vec3*				wheelUp,
+	const JPH_Vec3*				wheelForward,
+	float						suspensionMinLength,
+	float						suspensionMaxLength,
+	float						suspensionPreloadLength,
+	const JPH_SpringSettings*	suspensionSpring,
+	float						radius,
+	float						width,
+	bool						enableSuspensionForcePoint)
+{
+	auto settings = new JPH::WheelSettings();
+	settings->mPosition = ToJolt(position);
+	settings->mSuspensionForcePoint = ToJolt(suspensionForcePoint);
+	settings->mSuspensionDirection = ToJolt(suspensionDirection);
+	settings->mSteeringAxis = ToJolt(steeringAxis);
+	settings->mWheelUp = ToJolt(wheelUp);
+	settings->mWheelForward = ToJolt(wheelForward);
+	settings->mSuspensionMinLength = suspensionMinLength;
+	settings->mSuspensionMaxLength = suspensionMaxLength;
+	settings->mSuspensionPreloadLength = suspensionPreloadLength;
+	settings->mSuspensionSpring = ToJolt(suspensionSpring);
+	settings->mRadius = radius;
+	settings->mWidth = width;
+	settings->mEnableSuspensionForcePoint = enableSuspensionForcePoint;
+	settings->AddRef();
+
+	return reinterpret_cast<JPH_WheelSettings*>(settings);
+}
+
+void JPH_WheelSettings_Destroy(JPH_WheelSettings* settings)
+{
+    if (settings)
+    {
+		delete reinterpret_cast<JPH::WheelSettings*>(settings);
+    }
+}
+
+JPH_Wheel* JPH_Wheel_Create(const JPH_WheelSettings* settings)
+{
+	const JPH::WheelSettings* joltSettings = reinterpret_cast<const JPH::WheelSettings*>(settings);
+    auto wheel = new JPH::Wheel(*joltSettings);
+	//wheel->AddRef(); NOTE: BGE: this is apparently not needed.
+
+	return reinterpret_cast<JPH_Wheel*>(wheel);
+}
+
+void JPH_Wheel_Destroy(JPH_Wheel* wheel)
+{
+	if (wheel)
+	{
+		delete reinterpret_cast<JPH::Wheel*>(wheel);
+	}
+}
+
+bool JPH_Wheel_HasContact(const JPH_Wheel* wheel)
+{
+	auto joltShape = reinterpret_cast<const JPH::Wheel*>(wheel);
+	auto hasContact = joltShape->HasContact();
+	return hasContact;
+}
+
+bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel)
+{
+    auto joltShape = reinterpret_cast<const JPH::Wheel*>(wheel);
+    auto hasHitHardPart = joltShape->HasHitHardPoint();
+    return hasHitHardPart;
 }
 
 JPH_SUPPRESS_WARNING_POP
