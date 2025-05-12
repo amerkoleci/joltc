@@ -138,12 +138,14 @@ typedef struct JPH_GroupFilter						JPH_GroupFilter;
 typedef struct JPH_GroupFilterTable					JPH_GroupFilterTable;  /* Inherics JPH_GroupFilter */
 
 /* Vehicle and Related */
-typedef struct JPH_Wheel							JPH_Wheel;
-typedef struct JPH_WheelSettings					JPH_WheelSettings;
-typedef struct JPH_VehicleController				JPH_VehicleController;
-typedef struct JPH_VehicleControllerSettings		JPH_VehicleControllerSettings;
-typedef struct JPH_VehicleConstraint				JPH_VehicleConstraint;
+typedef struct JPH_WheelWV							JPH_WheelWV;
+typedef struct JPH_WheelSettingsWV					JPH_WheelSettingsWV;
+typedef struct JPH_VehicleEngineSettings			JPH_VehicleEngineSettings;
+typedef struct JPH_VehicleTransmissionSettings		JPH_VehicleTransmissionSettings;
+//typedef struct JPH_VehicleDifferentialSettings	JPH_VehicleDifferentialSettings;	// NOTE: BGE: just using default values for now.
 typedef struct JPH_VehicleConstraintSettings		JPH_VehicleConstraintSettings;
+typedef struct JPH_WheeledVehicleController			JPH_WheeledVehicleController;
+typedef struct JPH_WheeledVehicleControllerSettings	JPH_WheeledVehicleControllerSettings;
 typedef struct JPH_AntiRollBars						JPH_AntiRollBars;
 typedef struct JPH_CollisionTester					JPH_CollisionTester;
 typedef struct JPH_CollisionTesterRay				JPH_CollisionTesterRay;
@@ -436,6 +438,13 @@ typedef enum JPH_Mesh_Shape_BuildQuality {
 	_JPH_Mesh_Shape_BuildQuality_Count,
 	_JPH_Mesh_Shape_BuildQuality_Force32 = 0x7FFFFFFF
 } JPH_Mesh_Shape_BuildQuality;
+
+typedef enum JPH_TransmissionMode {
+    JPH_TransmissionMode_Auto = 0,
+    JPH_TransmissionMode_Manual = 1,
+    _JPH_TransmissionMode_Count,
+    _JPH_TransmissionMode_Force32 = 0x7FFFFFFF
+} JPH_TransmissionMode;;
 
 typedef struct JPH_Vec3 {
 	float x;
@@ -2547,8 +2556,8 @@ JPH_CAPI void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
 /* JPH_EstimateCollisionResponse */
 JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);
 
-/* Wheel */
-JPH_CAPI JPH_WheelSettings* JPH_WheelSettings_Create(
+/* WheelWV */
+JPH_CAPI JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
 	const JPH_Vec3*				position,
 	const JPH_Vec3*				suspensionForcePoint,
 	const JPH_Vec3*				suspensionDirection,
@@ -2561,12 +2570,63 @@ JPH_CAPI JPH_WheelSettings* JPH_WheelSettings_Create(
 	const JPH_SpringSettings*	suspensionSpring,
 	float						radius,
 	float						width,
-	bool						enableSuspensionForcePoint);
-JPH_CAPI void JPH_WheelSettings_Destroy(JPH_WheelSettings* settings);
+	bool						enableSuspensionForcePoint,
+	float						inertia,
+	float						angularDamping,
+	float						maxSteerAngle,
+	//LinearCurve				longitudinalFriction,	// NOTE: BGE: just using default values for now.
+	//LinearCurve				lateralFriction,		// NOTE: BGE: just using default values for now.
+	float						maxBrakeTorque,
+	float						maxHandBrakeTorque);
+JPH_CAPI void JPH_WheelSettingsWV_Destroy(JPH_WheelSettingsWV* settings);
 
-JPH_CAPI JPH_Wheel* JPH_Wheel_Create(const JPH_WheelSettings* settings);
-JPH_CAPI void JPH_Wheel_Destroy(JPH_Wheel* wheel);
-JPH_CAPI bool JPH_Wheel_HasContact(const JPH_Wheel* wheel);
-JPH_CAPI bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel);
+JPH_CAPI JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelWV_Destroy(JPH_WheelWV* wheel);
+JPH_CAPI bool JPH_WheelWV_HasContact(const JPH_WheelWV* wheel);
+JPH_CAPI bool JPH_WheelWV_HasHitHardPoint(const JPH_WheelWV* wheel);
+
+/* VehicleEngine */
+JPH_CAPI JPH_VehicleEngineSettings* JPH_JPH_VehicleEngineSettings_Create(
+	float			maxTorque,
+	float			minRPM,
+	float			maxRPM,
+	//LinearCurve	normalizedTorque,	// NOTE: BGE: just using default values for now.
+	float			inertia,
+	float			angularDamping);
+JPH_CAPI void JPH_VehicleEngineSettings_Destroy(JPH_VehicleEngineSettings* settings);
+
+/* VehicleTransmission */
+JPH_CAPI JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(
+	JPH_TransmissionMode	mode,
+	//Array<float>			gearRatios,			// NOTE: BGE: just using default values for now.
+	//Array<float>			reverseGearRatios,	// NOTE: BGE: just using default values for now.
+	float					switchTime,
+	float					clutchReleaseTime,
+	float					switchLatency,
+	float					shiftUpRPM,
+	float					shiftDownRPM,
+	float					clutchStrength);
+JPH_CAPI void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings);
+
+/* VehicleConstraint */
+JPH_CAPI JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
+	JPH_Vec3									up,
+	JPH_Vec3									forward,
+	float										maxPitchRollAngle,
+	//Array<Ref<WheelSettings>>					wheels,				// NOTE: BGE: just using default values for now.
+	//VehicleAntiRollBars						antiRollBars,		// NOTE: BGE: just using default values for now.
+	const JPH_WheeledVehicleControllerSettings* settings);			// NOTE: BGE: making this too specific of a pointer type for now.
+JPH_CAPI void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings);
+
+/* WheeledVehicleController */
+JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
+	const JPH_VehicleEngineSettings*		engine,
+	const JPH_VehicleTransmissionSettings*	transmission,
+	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
+	float									differentialLimitedSlipRatio);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings);
+
+JPH_CAPI JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings);
+JPH_CAPI void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* vehicle);
 
 #endif /* JOLT_C_H_ */

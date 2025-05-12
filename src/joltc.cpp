@@ -70,7 +70,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Body/BodyLockMulti.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
-#include "Jolt/Physics/Vehicle/Wheel.h"
+#include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 
 #include <iostream>
 #include <cstdarg>
@@ -145,6 +145,7 @@ DEF_MAP_DECL(RagdollSettings, JPH_RagdollSettings)
 DEF_MAP_DECL(Ragdoll, JPH_Ragdoll)
 DEF_MAP_DECL(GroupFilter, JPH_GroupFilter)
 DEF_MAP_DECL(GroupFilterTable, JPH_GroupFilterTable)
+DEF_MAP_DECL(WheeledVehicleController, JPH_WheeledVehicleController)
 
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
@@ -9052,8 +9053,8 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 	}
 }
 
-/* Wheel */
-JPH_WheelSettings* JPH_WheelSettings_Create(
+/* WheelWV */
+JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
 	const JPH_Vec3*				position,
 	const JPH_Vec3*				suspensionForcePoint,
 	const JPH_Vec3*				suspensionDirection,
@@ -9066,9 +9067,16 @@ JPH_WheelSettings* JPH_WheelSettings_Create(
 	const JPH_SpringSettings*	suspensionSpring,
 	float						radius,
 	float						width,
-	bool						enableSuspensionForcePoint)
+	bool						enableSuspensionForcePoint,
+	float						inertia,
+	float						angularDamping,
+	float						maxSteerAngle,
+	//LinearCurve				longitudinalFriction,	// NOTE: BGE: just using default values for now.
+	//LinearCurve				lateralFriction,		// NOTE: BGE: just using default values for now.
+	float						maxBrakeTorque,
+	float						maxHandBrakeTorque)
 {
-	auto settings = new JPH::WheelSettings();
+	auto settings = new JPH::WheelSettingsWV();
 	settings->mPosition = ToJolt(position);
 	settings->mSuspensionForcePoint = ToJolt(suspensionForcePoint);
 	settings->mSuspensionDirection = ToJolt(suspensionDirection);
@@ -9082,48 +9090,174 @@ JPH_WheelSettings* JPH_WheelSettings_Create(
 	settings->mRadius = radius;
 	settings->mWidth = width;
 	settings->mEnableSuspensionForcePoint = enableSuspensionForcePoint;
+	settings->mInertia = inertia;
+	settings->mAngularDamping = angularDamping;
+	settings->mMaxSteerAngle = maxSteerAngle;
+	//settings->mLongitudinalFriction = ToJolt(mLongitudinalFriction);	// NOTE: BGE: just using default values for now.
+	//settings->mLateralFriction = ToJolt(mLateralFriction);			// NOTE: BGE: just using default values for now.
+	settings->mMaxBrakeTorque = maxBrakeTorque;
+	settings->mMaxHandBrakeTorque = maxHandBrakeTorque;
 	settings->AddRef();
-
-	return reinterpret_cast<JPH_WheelSettings*>(settings);
+	return reinterpret_cast<JPH_WheelSettingsWV*>(settings);
 }
 
-void JPH_WheelSettings_Destroy(JPH_WheelSettings* settings)
+void JPH_WheelSettingsWV_Destroy(JPH_WheelSettingsWV* settings)
 {
     if (settings)
     {
-		delete reinterpret_cast<JPH::WheelSettings*>(settings);
+		delete reinterpret_cast<JPH::WheelSettingsWV*>(settings);
     }
 }
 
-JPH_Wheel* JPH_Wheel_Create(const JPH_WheelSettings* settings)
+JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings)
 {
-	const JPH::WheelSettings* joltSettings = reinterpret_cast<const JPH::WheelSettings*>(settings);
-    auto wheel = new JPH::Wheel(*joltSettings);
-	//wheel->AddRef(); NOTE: BGE: this is apparently not needed.
-
-	return reinterpret_cast<JPH_Wheel*>(wheel);
+	const JPH::WheelSettingsWV* joltSettings = reinterpret_cast<const JPH::WheelSettingsWV*>(settings);
+    auto wheel = new JPH::WheelWV(*joltSettings);
+	return reinterpret_cast<JPH_WheelWV*>(wheel);
 }
 
-void JPH_Wheel_Destroy(JPH_Wheel* wheel)
+void JPH_WheelWV_Destroy(JPH_WheelWV* wheel)
 {
 	if (wheel)
 	{
-		delete reinterpret_cast<JPH::Wheel*>(wheel);
+		delete reinterpret_cast<JPH::WheelWV*>(wheel);
 	}
 }
 
-bool JPH_Wheel_HasContact(const JPH_Wheel* wheel)
+bool JPH_WheelWV_HasContact(const JPH_WheelWV* wheel)
 {
-	auto joltShape = reinterpret_cast<const JPH::Wheel*>(wheel);
+	auto joltShape = reinterpret_cast<const JPH::WheelWV*>(wheel);
 	auto hasContact = joltShape->HasContact();
 	return hasContact;
 }
 
-bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel)
+bool JPH_WheelWV_HasHitHardPoint(const JPH_WheelWV* wheel)
 {
-    auto joltShape = reinterpret_cast<const JPH::Wheel*>(wheel);
+    auto joltShape = reinterpret_cast<const JPH::WheelWV*>(wheel);
     auto hasHitHardPart = joltShape->HasHitHardPoint();
     return hasHitHardPart;
+}
+
+JPH_VehicleEngineSettings* JPH_JPH_VehicleEngineSettings_Create(
+	float			maxTorque,
+	float			minRPM,
+	float			maxRPM,
+	//LinearCurve	normalizedTorque, // NOTE: BGE: just using default values for now.
+	float			inertia,
+	float			angularDamping)
+{
+    auto settings = new JPH::VehicleEngineSettings();
+    settings->mMaxTorque = maxTorque;
+    settings->mMinRPM = minRPM;
+    settings->mMaxRPM = maxRPM;
+    //settings->mNormalizedTorque = ToJolt(normalizedTorque); // NOTE: BGE: just using default values for now.
+    settings->mInertia = inertia;
+    settings->mAngularDamping = angularDamping;
+    return reinterpret_cast<JPH_VehicleEngineSettings*>(settings);
+}
+
+void JPH_VehicleEngineSettings_Destroy(JPH_VehicleEngineSettings* settings)
+{
+    if (settings)
+    {
+        delete reinterpret_cast<JPH::VehicleEngineSettings*>(settings);
+    }
+}
+
+JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(
+	JPH_TransmissionMode	mode,
+	//Array<float>			gearRatios,			// NOTE: BGE: just using default values for now.
+	//Array<float>			reverseGearRatios,	// NOTE: BGE: just using default values for now.
+	float					switchTime,
+	float					clutchReleaseTime,
+	float					switchLatency,
+	float					shiftUpRPM,
+	float					shiftDownRPM,
+	float					clutchStrength)
+{
+    auto settings = new JPH::VehicleTransmissionSettings();
+    settings->mMode = static_cast<JPH::ETransmissionMode>(mode);
+    //settings->mGearRatios = ToJolt(gearRatios);				// NOTE: BGE: just using default values for now.
+    //settings->mReverseGearRatios = ToJolt(reverseGearRatios);	// NOTE: BGE: just using default values for now.
+    settings->mSwitchTime = switchTime;
+    settings->mClutchReleaseTime = clutchReleaseTime;
+    settings->mSwitchLatency = switchLatency;
+    settings->mShiftUpRPM = shiftUpRPM;
+    settings->mShiftDownRPM = shiftDownRPM;
+    settings->mClutchStrength = clutchStrength;
+    return reinterpret_cast<JPH_VehicleTransmissionSettings*>(settings);
+}
+
+JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
+	JPH_Vec3								up,
+	JPH_Vec3								forward,
+	float									maxPitchRollAngle,
+	//Array<Ref<WheelSettings>>				wheels,				// NOTE: BGE: just using default values for now.
+	//VehicleAntiRollBars					antiRollBars,		// NOTE: BGE: just using default values for now.
+	JPH_WheeledVehicleControllerSettings*	settings)			// NOTE: BGE: making this too specific of a pointer type for now.
+{
+    auto vehicleConstraintSettings = new JPH::VehicleConstraintSettings();
+    vehicleConstraintSettings->mUp = ToJolt(up);
+    vehicleConstraintSettings->mForward = ToJolt(forward);
+    vehicleConstraintSettings->mMaxPitchRollAngle = maxPitchRollAngle;
+    //vehicleConstraintSettings->mWheels = ToJolt(wheels);				// NOTE: BGE: just using default values for now.
+    //vehicleConstraintSettings->mAntiRollBars = ToJolt(antiRollBars);	// NOTE: BGE: just using default values for now.
+    vehicleConstraintSettings->mController = Ref<JPH::VehicleControllerSettings>(reinterpret_cast<JPH::VehicleControllerSettings*>(settings));
+    return reinterpret_cast<JPH_VehicleConstraintSettings*>(vehicleConstraintSettings);
+}
+
+void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings)
+{
+    if (settings)
+    {
+        delete reinterpret_cast<JPH::VehicleConstraintSettings*>(settings);
+    }
+}
+
+void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings)
+{
+    if (settings)
+    {
+        delete reinterpret_cast<JPH::VehicleTransmissionSettings*>(settings);
+    }
+}
+
+JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
+	const JPH_VehicleEngineSettings*		engine,
+	const JPH_VehicleTransmissionSettings*	transmission,
+	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
+	float									differentialLimitedSlipRatio)
+{
+	auto settings = new JPH::WheeledVehicleControllerSettings();
+	settings->mEngine = *reinterpret_cast<const JPH::VehicleEngineSettings*>(engine);
+	settings->mTransmission = *reinterpret_cast<const JPH::VehicleTransmissionSettings*>(transmission);
+	//settings->mDifferentials = ToJolt(differentials); // NOTE: BGE: just using default values for now.
+	settings->mDifferentialLimitedSlipRatio = differentialLimitedSlipRatio;
+	return reinterpret_cast<JPH_WheeledVehicleControllerSettings*>(settings);
+}
+
+void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings)
+{
+    if (settings)
+    {
+        delete reinterpret_cast<JPH::WheeledVehicleControllerSettings*>(settings);
+    }
+}
+
+JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings)
+{
+	auto vehicleConstraint = new JPH::VehicleConstraint(*AsBody(body), *reinterpret_cast<const JPH::VehicleConstraintSettings*>(constraintSettings));
+    vehicleConstraint->AddRef();
+    auto controller = new JPH::WheeledVehicleController(*reinterpret_cast<const JPH::WheeledVehicleControllerSettings*>(controllerSettings), *vehicleConstraint);
+    return reinterpret_cast<JPH_WheeledVehicleController*>(controller);
+}
+
+void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* controller)
+{
+    if (controller)
+    {
+		AsWheeledVehicleController(controller)->GetConstraint().Release();
+    }
 }
 
 JPH_SUPPRESS_WARNING_POP
