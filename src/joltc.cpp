@@ -9256,7 +9256,8 @@ void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* controll
 {
     if (controller)
     {
-		AsWheeledVehicleController(controller)->GetConstraint().Release();
+        AsWheeledVehicleController(controller)->GetConstraint().Release();
+        delete reinterpret_cast<JPH::WheeledVehicleController*>(controller);
     }
 }
 
