@@ -9175,17 +9175,25 @@ JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(
 	float					shiftDownRPM,
 	float					clutchStrength)
 {
-    auto settings = new JPH::VehicleTransmissionSettings();
-    settings->mMode = static_cast<JPH::ETransmissionMode>(mode);
-    //settings->mGearRatios = ToJolt(gearRatios);				// NOTE: BGE: just using default values for now.
-    //settings->mReverseGearRatios = ToJolt(reverseGearRatios);	// NOTE: BGE: just using default values for now.
-    settings->mSwitchTime = switchTime;
-    settings->mClutchReleaseTime = clutchReleaseTime;
-    settings->mSwitchLatency = switchLatency;
-    settings->mShiftUpRPM = shiftUpRPM;
-    settings->mShiftDownRPM = shiftDownRPM;
-    settings->mClutchStrength = clutchStrength;
-    return reinterpret_cast<JPH_VehicleTransmissionSettings*>(settings);
+	auto settings = new JPH::VehicleTransmissionSettings();
+	settings->mMode = static_cast<JPH::ETransmissionMode>(mode);
+	//settings->mGearRatios = ToJolt(gearRatios);				// NOTE: BGE: just using default values for now.
+	//settings->mReverseGearRatios = ToJolt(reverseGearRatios);	// NOTE: BGE: just using default values for now.
+	settings->mSwitchTime = switchTime;
+	settings->mClutchReleaseTime = clutchReleaseTime;
+	settings->mSwitchLatency = switchLatency;
+	settings->mShiftUpRPM = shiftUpRPM;
+	settings->mShiftDownRPM = shiftDownRPM;
+	settings->mClutchStrength = clutchStrength;
+	return reinterpret_cast<JPH_VehicleTransmissionSettings*>(settings);
+}
+
+void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings)
+{
+	if (settings)
+	{
+		delete reinterpret_cast<JPH::VehicleTransmissionSettings*>(settings);
+	}
 }
 
 JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
@@ -9211,14 +9219,6 @@ void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settin
     if (settings)
     {
         delete reinterpret_cast<JPH::VehicleConstraintSettings*>(settings);
-    }
-}
-
-void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings)
-{
-    if (settings)
-    {
-        delete reinterpret_cast<JPH::VehicleTransmissionSettings*>(settings);
     }
 }
 
