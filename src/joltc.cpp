@@ -9197,12 +9197,12 @@ void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* se
 }
 
 JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
-	JPH_Vec3								up,
-	JPH_Vec3								forward,
-	float									maxPitchRollAngle,
-	//Array<Ref<WheelSettings>>				wheels,				// NOTE: BGE: just using default values for now.
-	//VehicleAntiRollBars					antiRollBars,		// NOTE: BGE: just using default values for now.
-	JPH_WheeledVehicleControllerSettings*	settings)			// NOTE: BGE: making this too specific of a pointer type for now.
+	JPH_Vec3						up,
+	JPH_Vec3						forward,
+	float							maxPitchRollAngle,
+	//Array<Ref<WheelSettings>>		wheels,				// NOTE: BGE: just using default values for now.
+	//VehicleAntiRollBars			antiRollBars,		// NOTE: BGE: just using default values for now.
+	JPH_VehicleControllerSettings*	settings)
 {
     auto vehicleConstraintSettings = new JPH::VehicleConstraintSettings();
     vehicleConstraintSettings->mUp = ToJolt(up);

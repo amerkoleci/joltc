@@ -138,19 +138,16 @@ typedef struct JPH_GroupFilter						JPH_GroupFilter;
 typedef struct JPH_GroupFilterTable					JPH_GroupFilterTable;  /* Inherics JPH_GroupFilter */
 
 /* Vehicle and Related */
-typedef struct JPH_WheelWV							JPH_WheelWV;
 typedef struct JPH_WheelSettingsWV					JPH_WheelSettingsWV;
+typedef struct JPH_WheelWV							JPH_WheelWV;
 typedef struct JPH_VehicleEngineSettings			JPH_VehicleEngineSettings;
 typedef struct JPH_VehicleTransmissionSettings		JPH_VehicleTransmissionSettings;
-//typedef struct JPH_VehicleDifferentialSettings	JPH_VehicleDifferentialSettings;	// NOTE: BGE: just using default values for now.
+//typedef struct JPH_VehicleDifferentialSettings	JPH_VehicleDifferentialSettings; // NOTE: BGE: just using default values for now.
 typedef struct JPH_VehicleConstraintSettings		JPH_VehicleConstraintSettings;
-typedef struct JPH_WheeledVehicleController			JPH_WheeledVehicleController;
+typedef struct JPH_VehicleControllerSettings		JPH_VehicleControllerSettings;
 typedef struct JPH_WheeledVehicleControllerSettings	JPH_WheeledVehicleControllerSettings;
-typedef struct JPH_AntiRollBars						JPH_AntiRollBars;
-typedef struct JPH_CollisionTester					JPH_CollisionTester;
-typedef struct JPH_CollisionTesterRay				JPH_CollisionTesterRay;
-typedef struct JPH_CollisionTesterCastSphere		JPH_CollisionTesterCastSphere;
-typedef struct JPH_CollisionTesterCastCylinder		JPH_CollisionTesterCastCylinder;
+typedef struct JPH_WheeledVehicleController			JPH_WheeledVehicleController;
+//typedef struct JPH_AntiRollBars					JPH_AntiRollBars; // NOTE: BGE: just using default values for now.
 
 /* Enums */
 typedef enum JPH_PhysicsUpdateError {
@@ -2610,12 +2607,12 @@ JPH_CAPI void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSet
 
 /* VehicleConstraint */
 JPH_CAPI JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
-	JPH_Vec3									up,
-	JPH_Vec3									forward,
-	float										maxPitchRollAngle,
-	//Array<Ref<WheelSettings>>					wheels,				// NOTE: BGE: just using default values for now.
-	//VehicleAntiRollBars						antiRollBars,		// NOTE: BGE: just using default values for now.
-	const JPH_WheeledVehicleControllerSettings* settings);			// NOTE: BGE: making this too specific of a pointer type for now.
+	JPH_Vec3								up,
+	JPH_Vec3								forward,
+	float									maxPitchRollAngle,
+	//Array<Ref<WheelSettings>>				wheels,				// NOTE: BGE: just using default values for now.
+	//VehicleAntiRollBars					antiRollBars,		// NOTE: BGE: just using default values for now.
+	const JPH_VehicleControllerSettings*	settings);
 JPH_CAPI void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings);
 
 /* WheeledVehicleController */
