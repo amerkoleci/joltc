@@ -2625,5 +2625,6 @@ JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleCon
 
 JPH_CAPI JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings);
 JPH_CAPI void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* vehicle, float forward, float right, float brake, float handBrake);
 
 #endif /* JOLT_C_H_ */

@@ -70,6 +70,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Body/BodyLockMulti.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
+#include "Jolt/Physics/Vehicle/VehicleController.h"
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 
 #include <iostream>
@@ -9259,6 +9260,12 @@ void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* controll
         AsWheeledVehicleController(controller)->GetConstraint().Release();
         delete reinterpret_cast<JPH::WheeledVehicleController*>(controller);
     }
+}
+
+void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* controller, float forward, float right, float brake, float handBrake)
+{
+    auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+	joltController->SetDriverInput(forward, right, brake, handBrake);
 }
 
 JPH_SUPPRESS_WARNING_POP
