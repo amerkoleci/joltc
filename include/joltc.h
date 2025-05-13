@@ -148,6 +148,7 @@ typedef struct JPH_VehicleControllerSettings		JPH_VehicleControllerSettings;
 typedef struct JPH_WheeledVehicleControllerSettings	JPH_WheeledVehicleControllerSettings;
 typedef struct JPH_WheeledVehicleController			JPH_WheeledVehicleController;
 //typedef struct JPH_AntiRollBars					JPH_AntiRollBars; // NOTE: BGE: just using default values for now.
+typedef struct JPH_PhysicsStepListener				JPH_PhysicsStepListener;
 
 /* Enums */
 typedef enum JPH_PhysicsUpdateError {
@@ -2607,8 +2608,8 @@ JPH_CAPI void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSet
 
 /* VehicleConstraint */
 JPH_CAPI JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
-	JPH_Vec3								up,
-	JPH_Vec3								forward,
+	const JPH_Vec3*							up,
+	const JPH_Vec3*							forward,
 	float									maxPitchRollAngle,
 	//Array<Ref<WheelSettings>>				wheels,				// NOTE: BGE: just using default values for now.
 	//VehicleAntiRollBars					antiRollBars,		// NOTE: BGE: just using default values for now.
@@ -2626,5 +2627,10 @@ JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleCon
 JPH_CAPI JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings);
 JPH_CAPI void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* vehicle);
 JPH_CAPI void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* vehicle, float forward, float right, float brake, float handBrake);
+
+/* JPH_PhysicsSystem Addendum */
+
+JPH_CAPI void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener);
+JPH_CAPI void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener);
 
 #endif /* JOLT_C_H_ */

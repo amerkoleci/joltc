@@ -9077,6 +9077,14 @@ JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
 	float						maxBrakeTorque,
 	float						maxHandBrakeTorque)
 {
+	JPH_ASSERT(position);
+    JPH_ASSERT(suspensionForcePoint);
+    JPH_ASSERT(suspensionDirection);
+    JPH_ASSERT(steeringAxis);
+    JPH_ASSERT(wheelUp);
+    JPH_ASSERT(wheelForward);
+    JPH_ASSERT(suspensionSpring);
+
 	auto settings = new JPH::WheelSettingsWV();
 	settings->mPosition = ToJolt(position);
 	settings->mSuspensionForcePoint = ToJolt(suspensionForcePoint);
@@ -9112,6 +9120,8 @@ void JPH_WheelSettingsWV_Destroy(JPH_WheelSettingsWV* settings)
 
 JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings)
 {
+    JPH_ASSERT(settings);
+	
 	const JPH::WheelSettingsWV* joltSettings = reinterpret_cast<const JPH::WheelSettingsWV*>(settings);
     auto wheel = new JPH::WheelWV(*joltSettings);
 	return reinterpret_cast<JPH_WheelWV*>(wheel);
@@ -9127,6 +9137,8 @@ void JPH_WheelWV_Destroy(JPH_WheelWV* wheel)
 
 bool JPH_WheelWV_HasContact(const JPH_WheelWV* wheel)
 {
+    JPH_ASSERT(wheel);
+
 	auto joltShape = reinterpret_cast<const JPH::WheelWV*>(wheel);
 	auto hasContact = joltShape->HasContact();
 	return hasContact;
@@ -9134,7 +9146,9 @@ bool JPH_WheelWV_HasContact(const JPH_WheelWV* wheel)
 
 bool JPH_WheelWV_HasHitHardPoint(const JPH_WheelWV* wheel)
 {
-    auto joltShape = reinterpret_cast<const JPH::WheelWV*>(wheel);
+	JPH_ASSERT(wheel);
+	
+	auto joltShape = reinterpret_cast<const JPH::WheelWV*>(wheel);
     auto hasHitHardPart = joltShape->HasHitHardPoint();
     return hasHitHardPart;
 }
@@ -9198,13 +9212,17 @@ void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* se
 }
 
 JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
-	JPH_Vec3						up,
-	JPH_Vec3						forward,
+	const JPH_Vec3*					up,
+	const JPH_Vec3*					forward,
 	float							maxPitchRollAngle,
 	//Array<Ref<WheelSettings>>		wheels,				// NOTE: BGE: just using default values for now.
 	//VehicleAntiRollBars			antiRollBars,		// NOTE: BGE: just using default values for now.
 	JPH_VehicleControllerSettings*	settings)
 {
+    JPH_ASSERT(up);
+    JPH_ASSERT(forward);
+    JPH_ASSERT(settings);
+
     auto vehicleConstraintSettings = new JPH::VehicleConstraintSettings();
     vehicleConstraintSettings->mUp = ToJolt(up);
     vehicleConstraintSettings->mForward = ToJolt(forward);
@@ -9229,6 +9247,9 @@ JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Creat
 	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
 	float									differentialLimitedSlipRatio)
 {
+    JPH_ASSERT(engine);
+    JPH_ASSERT(transmission);
+
 	auto settings = new JPH::WheeledVehicleControllerSettings();
 	settings->mEngine = *reinterpret_cast<const JPH::VehicleEngineSettings*>(engine);
 	settings->mTransmission = *reinterpret_cast<const JPH::VehicleTransmissionSettings*>(transmission);
@@ -9247,6 +9268,10 @@ void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSe
 
 JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings)
 {
+    JPH_ASSERT(body);
+    JPH_ASSERT(controllerSettings);
+    JPH_ASSERT(constraintSettings);
+
 	auto vehicleConstraint = new JPH::VehicleConstraint(*AsBody(body), *reinterpret_cast<const JPH::VehicleConstraintSettings*>(constraintSettings));
     vehicleConstraint->AddRef();
     auto controller = new JPH::WheeledVehicleController(*reinterpret_cast<const JPH::WheeledVehicleControllerSettings*>(controllerSettings), *vehicleConstraint);
@@ -9264,8 +9289,26 @@ void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* controll
 
 void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* controller, float forward, float right, float brake, float handBrake)
 {
+    JPH_ASSERT(controller);
+
     auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
 	joltController->SetDriverInput(forward, right, brake, handBrake);
+}
+
+void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
+{
+    JPH_ASSERT(system);
+    JPH_ASSERT(listener);
+
+    system->physicsSystem->AddStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
+}
+
+void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
+{
+    JPH_ASSERT(system);
+    JPH_ASSERT(listener);
+
+	system->physicsSystem->RemoveStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
 }
 
 JPH_SUPPRESS_WARNING_POP
