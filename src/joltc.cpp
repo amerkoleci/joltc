@@ -9227,6 +9227,61 @@ void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* se
 	}
 }
 
+JPH_VehicleCollisionTesterRay* JPH_VehicleCollisionTesterRay_Create(JPH_ObjectLayer layer, const JPH_Vec3* up, float maxSlopeAngle)
+{
+    JPH_ASSERT(up);
+
+	auto tester = new JPH::VehicleCollisionTesterRay(static_cast<JPH::ObjectLayer>(layer), ToJolt(up), maxSlopeAngle);
+    tester->AddRef();
+
+    return reinterpret_cast<JPH_VehicleCollisionTesterRay*>(tester);
+}
+
+void JPH_VehicleCollisionTesterRay_Destroy(JPH_VehicleCollisionTesterRay* tester)
+{
+    if (tester)
+    {
+		auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterRay*>(tester);
+        joltTester->Release();
+    }
+}
+
+JPH_VehicleCollisionTesterCastSphere* JPH_VehicleCollisionTesterCastSphere_Create(JPH_ObjectLayer layer, float radius, const JPH_Vec3* up, float maxSlopeAngle)
+{
+    JPH_ASSERT(up);
+
+    auto tester = new JPH::VehicleCollisionTesterCastSphere(static_cast<JPH::ObjectLayer>(layer), radius, ToJolt(up), maxSlopeAngle);
+    tester->AddRef();
+
+    return reinterpret_cast<JPH_VehicleCollisionTesterCastSphere*>(tester);
+}
+
+void JPH_VehicleCollisionTesterCastSphere_Destroy(JPH_VehicleCollisionTesterCastSphere* tester)
+{
+    if (tester)
+    {
+        auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterCastSphere*>(tester);
+        joltTester->Release();
+    }
+}
+
+JPH_VehicleCollisionTesterCastCylinder* JPH_VehicleCollisionTesterCastCylinder_Create(JPH_ObjectLayer layer, float convexRadiusFraction)
+{
+    auto tester = new JPH::VehicleCollisionTesterCastCylinder(static_cast<JPH::ObjectLayer>(layer), convexRadiusFraction);
+    tester->AddRef();
+
+    return reinterpret_cast<JPH_VehicleCollisionTesterCastCylinder*>(tester);
+}
+
+void JPH_VehicleCollisionTesterCastCylinder_Destroy(JPH_VehicleCollisionTesterCastCylinder* tester)
+{
+    if (tester)
+    {
+        auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterCastCylinder*>(tester);
+        joltTester->Release();
+    }
+}
+
 JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
 	const JPH_Vec3*					up,
 	const JPH_Vec3*					forward,
@@ -9262,6 +9317,16 @@ void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settin
 	{
         delete reinterpret_cast<JPH::VehicleConstraintSettings*>(settings);
     }
+}
+
+void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester)
+{
+    JPH_ASSERT(constraint);
+    JPH_ASSERT(tester);
+ 
+	auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
+    auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTester*>(tester);
+    joltConstraint->SetVehicleCollisionTester(joltTester);
 }
 
 JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
