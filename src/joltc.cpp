@@ -5083,6 +5083,22 @@ void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH_Constrai
 	system->physicsSystem->RemoveConstraints(joltConstraints.data(), (int)count);
 }
 
+void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
+{
+	JPH_ASSERT(system);
+	JPH_ASSERT(listener);
+
+	system->physicsSystem->AddStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
+}
+
+void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
+{
+	JPH_ASSERT(system);
+	JPH_ASSERT(listener);
+
+	system->physicsSystem->RemoveStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
+}
+
 void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count)
 {
 	JPH_ASSERT(system);
@@ -9215,8 +9231,10 @@ JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
 	const JPH_Vec3*					up,
 	const JPH_Vec3*					forward,
 	float							maxPitchRollAngle,
-	//Array<Ref<WheelSettings>>		wheels,				// NOTE: BGE: just using default values for now.
+	JPH_WheelSettingsWV**			wheels,				// NOTE: BGE: just using an overly-specific pointer type for now.
+	int								wheelsCount,
 	//VehicleAntiRollBars			antiRollBars,		// NOTE: BGE: just using default values for now.
+	//int							antiRollBarsCount,	// NOTE: BGE: just using default values for now.
 	JPH_VehicleControllerSettings*	settings)
 {
     JPH_ASSERT(up);
@@ -9227,16 +9245,21 @@ JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
     vehicleConstraintSettings->mUp = ToJolt(up);
     vehicleConstraintSettings->mForward = ToJolt(forward);
     vehicleConstraintSettings->mMaxPitchRollAngle = maxPitchRollAngle;
-    //vehicleConstraintSettings->mWheels = ToJolt(wheels);				// NOTE: BGE: just using default values for now.
-    //vehicleConstraintSettings->mAntiRollBars = ToJolt(antiRollBars);	// NOTE: BGE: just using default values for now.
+	for (int i = 0; i < wheelsCount; ++i)
+	{
+        auto wheelSettings = reinterpret_cast<JPH::WheelSettingsWV*>(wheels[i]);
+		auto wheelSettingsRef = StaticCast<JPH::WheelSettings>(JPH::Ref<JPH::WheelSettingsWV>(wheelSettings));
+		vehicleConstraintSettings->mWheels.push_back(wheelSettingsRef);
+	}
+    //vehicleConstraintSettings->mAntiRollBars = ToJolt(antiRollBars); // NOTE: BGE: just using default values for now.
     vehicleConstraintSettings->mController = Ref<JPH::VehicleControllerSettings>(reinterpret_cast<JPH::VehicleControllerSettings*>(settings));
     return reinterpret_cast<JPH_VehicleConstraintSettings*>(vehicleConstraintSettings);
 }
 
 void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings)
 {
-    if (settings)
-    {
+	if (settings)
+	{
         delete reinterpret_cast<JPH::VehicleConstraintSettings*>(settings);
     }
 }
@@ -9287,28 +9310,21 @@ void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* controll
     }
 }
 
+JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleController* controller)
+{
+    JPH_ASSERT(controller);
+
+    auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+    auto constraint = &joltController->GetConstraint();
+    return reinterpret_cast<JPH_Constraint*>(constraint);
+}
+
 void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* controller, float forward, float right, float brake, float handBrake)
 {
     JPH_ASSERT(controller);
 
     auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
 	joltController->SetDriverInput(forward, right, brake, handBrake);
-}
-
-void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
-{
-    JPH_ASSERT(system);
-    JPH_ASSERT(listener);
-
-    system->physicsSystem->AddStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
-}
-
-void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
-{
-    JPH_ASSERT(system);
-    JPH_ASSERT(listener);
-
-	system->physicsSystem->RemoveStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
 }
 
 JPH_SUPPRESS_WARNING_POP
