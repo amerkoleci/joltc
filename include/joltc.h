@@ -2592,7 +2592,7 @@ JPH_CAPI bool JPH_WheelWV_HasContact(const JPH_WheelWV* wheel);
 JPH_CAPI bool JPH_WheelWV_HasHitHardPoint(const JPH_WheelWV* wheel);
 
 /* VehicleEngine */
-JPH_CAPI JPH_VehicleEngineSettings* JPH_JPH_VehicleEngineSettings_Create(
+JPH_CAPI JPH_VehicleEngineSettings* JPH_VehicleEngineSettings_Create(
 	float			maxTorque,
 	float			minRPM,
 	float			maxRPM,
@@ -2624,17 +2624,17 @@ JPH_CAPI void JPH_VehicleCollisionTesterCastCylinder_Destroy(JPH_VehicleCollisio
 
 /* VehicleConstraint */
 JPH_CAPI JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
-	const JPH_Vec3*							up,
-	const JPH_Vec3*							forward,
-	float									maxPitchRollAngle,
-	JPH_WheelSettingsWV**					wheels,				// NOTE: BGE: just using an overly-specific pointer type for now.
-	int										wheelsCount,
-	//VehicleAntiRollBars					antiRollBars,		// NOTE: BGE: just using default values for now.
-	//int									antiRollBarsCount,	// NOTE: BGE: just using default values for now.
-	const JPH_VehicleControllerSettings*	settings);
+	const JPH_Vec3*					up,
+	const JPH_Vec3*					forward,
+	float							maxPitchRollAngle,
+	JPH_WheelSettingsWV**			wheels,				// NOTE: BGE: just using an overly-specific pointer type for now.
+	int								wheelsCount,
+	//VehicleAntiRollBars			antiRollBars,		// NOTE: BGE: just using default values for now.
+	//int							antiRollBarsCount,	// NOTE: BGE: just using default values for now.
+	JPH_VehicleControllerSettings*	settings);
 JPH_CAPI void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings);
 
-JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, JPH_VehicleCollisionTester* tester);
+JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
 
 /* WheeledVehicleController */
 JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
@@ -2647,6 +2647,13 @@ JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleCon
 JPH_CAPI JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings);
 JPH_CAPI void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* vehicle);
 JPH_CAPI JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleController* vehicle);
-JPH_CAPI void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* vehicle, float forward, float right, float brake, float handBrake);
+JPH_CAPI void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* vehicle, float forward);
+JPH_CAPI float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* vehicle, float rightRatio);
+JPH_CAPI float JPH_WheeledVehicleController_GetRightInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetBrakeInput(JPH_WheeledVehicleController* vehicle, float brakeInput);
+JPH_CAPI float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* vehicle, float handBrakeInput);
+JPH_CAPI float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* vehicle);
 
 #endif /* JOLT_C_H_ */

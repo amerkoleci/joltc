@@ -9169,7 +9169,7 @@ bool JPH_WheelWV_HasHitHardPoint(const JPH_WheelWV* wheel)
     return hasHitHardPart;
 }
 
-JPH_VehicleEngineSettings* JPH_JPH_VehicleEngineSettings_Create(
+JPH_VehicleEngineSettings* JPH_VehicleEngineSettings_Create(
 	float			maxTorque,
 	float			minRPM,
 	float			maxRPM,
@@ -9294,6 +9294,7 @@ JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
 {
     JPH_ASSERT(up);
     JPH_ASSERT(forward);
+    JPH_ASSERT(wheels);
     JPH_ASSERT(settings);
 
     auto vehicleConstraintSettings = new JPH::VehicleConstraintSettings();
@@ -9303,6 +9304,7 @@ JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
 	for (int i = 0; i < wheelsCount; ++i)
 	{
         auto wheelSettings = reinterpret_cast<JPH::WheelSettingsWV*>(wheels[i]);
+        JPH_ASSERT(wheelSettings);
 		auto wheelSettingsRef = StaticCast<JPH::WheelSettings>(JPH::Ref<JPH::WheelSettingsWV>(wheelSettings));
 		vehicleConstraintSettings->mWheels.push_back(wheelSettingsRef);
 	}
@@ -9384,12 +9386,68 @@ JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleCon
     return reinterpret_cast<JPH_Constraint*>(constraint);
 }
 
-void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* controller, float forward, float right, float brake, float handBrake)
+void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* controller, float forward)
 {
     JPH_ASSERT(controller);
 
     auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
-	joltController->SetDriverInput(forward, right, brake, handBrake);
+	joltController->SetForwardInput(forward);
+}
+
+float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* controller)
+{
+    JPH_ASSERT(controller);
+
+    auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
+	return joltController->GetForwardInput();
+}
+
+void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* controller, float right)
+{
+    JPH_ASSERT(controller);
+
+    auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+    joltController->SetRightInput(right);
+}
+
+float JPH_WheeledVehicleController_GetRightInput(const JPH_WheeledVehicleController* controller)
+{
+    JPH_ASSERT(controller);
+
+    auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
+    return joltController->GetRightInput();
+}
+
+void JPH_WheeledVehicleController_SetBrakeInput(JPH_WheeledVehicleController* controller, float brake)
+{
+    JPH_ASSERT(controller);
+
+    auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+    joltController->SetBrakeInput(brake);
+}
+
+float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehicleController* controller)
+{
+    JPH_ASSERT(controller);
+
+    auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
+    return joltController->GetBrakeInput();
+}
+
+void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* controller, float handBrake)
+{
+    JPH_ASSERT(controller);
+
+    auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+    joltController->SetHandBrakeInput(handBrake);
+}
+
+float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* controller)
+{
+    JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
+    return joltController->GetHandBrakeInput();
 }
 
 JPH_SUPPRESS_WARNING_POP
