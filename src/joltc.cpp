@@ -9123,6 +9123,7 @@ JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
 	settings->mMaxBrakeTorque = maxBrakeTorque;
 	settings->mMaxHandBrakeTorque = maxHandBrakeTorque;
 	settings->AddRef();
+
 	return reinterpret_cast<JPH_WheelSettingsWV*>(settings);
 }
 
@@ -9130,7 +9131,8 @@ void JPH_WheelSettingsWV_Destroy(JPH_WheelSettingsWV* settings)
 {
     if (settings)
     {
-		delete reinterpret_cast<JPH::WheelSettingsWV*>(settings);
+        auto joltSettings = reinterpret_cast<JPH::WheelSettingsWV*>(settings);
+		joltSettings->Release();
     }
 }
 
@@ -9310,6 +9312,8 @@ JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
 	}
     //vehicleConstraintSettings->mAntiRollBars = ToJolt(antiRollBars); // NOTE: BGE: just using default values for now.
     vehicleConstraintSettings->mController = Ref<JPH::VehicleControllerSettings>(reinterpret_cast<JPH::VehicleControllerSettings*>(settings));
+    vehicleConstraintSettings->AddRef();
+
     return reinterpret_cast<JPH_VehicleConstraintSettings*>(vehicleConstraintSettings);
 }
 
@@ -9317,7 +9321,8 @@ void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settin
 {
 	if (settings)
 	{
-        delete reinterpret_cast<JPH::VehicleConstraintSettings*>(settings);
+        auto joltSettings = reinterpret_cast<JPH::VehicleConstraintSettings*>(settings);
+        joltSettings->Release();
     }
 }
 
@@ -9347,6 +9352,8 @@ JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Creat
 	settings->mDifferentials[0].mLeftWheel = 0;
 	settings->mDifferentials[0].mRightWheel = 1;
 	settings->mDifferentialLimitedSlipRatio = differentialLimitedSlipRatio;
+	settings->AddRef();
+
 	return reinterpret_cast<JPH_WheeledVehicleControllerSettings*>(settings);
 }
 
@@ -9354,7 +9361,8 @@ void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSe
 {
     if (settings)
     {
-        delete reinterpret_cast<JPH::WheeledVehicleControllerSettings*>(settings);
+        auto joltSettings = reinterpret_cast<JPH::WheeledVehicleControllerSettings*>(settings);
+        joltSettings->Release();
     }
 }
 
