@@ -9326,6 +9326,15 @@ void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settin
     }
 }
 
+JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
+{
+	JPH_ASSERT(constraint);
+
+	auto joltContraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
+	auto joltListener = static_cast<JPH::PhysicsStepListener*>(joltContraint);
+	return reinterpret_cast<JPH_PhysicsStepListener*>(joltListener);
+}
+
 void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester)
 {
     JPH_ASSERT(constraint);
@@ -9355,15 +9364,6 @@ JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Creat
 	settings->AddRef();
 
 	return reinterpret_cast<JPH_WheeledVehicleControllerSettings*>(settings);
-}
-
-JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
-{
-	JPH_ASSERT(constraint);
-
-	auto joltContraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
-	auto joltListener = static_cast<JPH::PhysicsStepListener*>(joltContraint);
-	return reinterpret_cast<JPH_PhysicsStepListener*>(joltListener);
 }
 
 void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings)
