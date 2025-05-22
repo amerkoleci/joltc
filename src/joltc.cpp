@@ -9343,7 +9343,9 @@ JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Creat
 	auto settings = new JPH::WheeledVehicleControllerSettings();
 	settings->mEngine = *reinterpret_cast<const JPH::VehicleEngineSettings*>(engine);
 	settings->mTransmission = *reinterpret_cast<const JPH::VehicleTransmissionSettings*>(transmission);
-	//settings->mDifferentials = ToJolt(differentials); // NOTE: BGE: just using default values for now.
+	settings->mDifferentials.resize(1); // NOTE: BGE: just using default values for now.
+	settings->mDifferentials[0].mLeftWheel = 0;
+	settings->mDifferentials[0].mRightWheel = 1;
 	settings->mDifferentialLimitedSlipRatio = differentialLimitedSlipRatio;
 	return reinterpret_cast<JPH_WheeledVehicleControllerSettings*>(settings);
 }
