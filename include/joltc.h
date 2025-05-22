@@ -2643,6 +2643,7 @@ JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSetti
 	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
 	float									differentialLimitedSlipRatio);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings);
+JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint);
 
 JPH_CAPI JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings);
 JPH_CAPI void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* vehicle);
