@@ -2634,7 +2634,10 @@ JPH_CAPI JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
 	JPH_VehicleControllerSettings*	settings);
 JPH_CAPI void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings);
 
+JPH_CAPI JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* constraintSettings);
+JPH_CAPI void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint);
 JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint);
+JPH_CAPI JPH_WheeledVehicleController* JPH_VehicleConstraint_GetWheeledVehicleController(JPH_VehicleConstraint* constraint);
 JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
 
 /* WheeledVehicleController */
@@ -2645,8 +2648,6 @@ JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSetti
 	float									differentialLimitedSlipRatio);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings);
 
-JPH_CAPI JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings);
-JPH_CAPI void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* vehicle);
 JPH_CAPI JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleController* vehicle);
 JPH_CAPI void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* vehicle, float forward);
 JPH_CAPI float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* vehicle);

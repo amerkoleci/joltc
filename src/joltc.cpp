@@ -9326,6 +9326,26 @@ void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settin
     }
 }
 
+JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* constraintSettings)
+{
+	JPH_ASSERT(body);
+	JPH_ASSERT(constraintSettings);
+
+	auto vehicleConstraint = new JPH::VehicleConstraint(*AsBody(body), *reinterpret_cast<const JPH::VehicleConstraintSettings*>(constraintSettings));
+	vehicleConstraint->AddRef();
+
+    return reinterpret_cast<JPH_VehicleConstraint*>(vehicleConstraint);
+}
+
+void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint)
+{
+	if (constraint)
+	{
+		auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
+		joltConstraint->Release();
+	}
+}
+
 JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
 {
 	JPH_ASSERT(constraint);
@@ -9333,6 +9353,15 @@ JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JP
 	auto joltContraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
 	auto joltListener = static_cast<JPH::PhysicsStepListener*>(joltContraint);
 	return reinterpret_cast<JPH_PhysicsStepListener*>(joltListener);
+}
+
+JPH_CAPI JPH_WheeledVehicleController* JPH_VehicleConstraint_GetWheeledVehicleController(JPH_VehicleConstraint* constraint)
+{
+	JPH_ASSERT(constraint);
+
+	auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
+    auto controller = StaticCast<WheeledVehicleController>(joltConstraint->GetController()); // NOTE: BGE: this should really be a DynamicCast.
+	return reinterpret_cast<JPH_WheeledVehicleController*>(controller);
 }
 
 void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester)
@@ -9357,9 +9386,12 @@ JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Creat
 	auto settings = new JPH::WheeledVehicleControllerSettings();
 	settings->mEngine = *reinterpret_cast<const JPH::VehicleEngineSettings*>(engine);
 	settings->mTransmission = *reinterpret_cast<const JPH::VehicleTransmissionSettings*>(transmission);
-	settings->mDifferentials.resize(1); // NOTE: BGE: just using default values for now.
+	settings->mDifferentials.resize(2); // NOTE: BGE: just using default values for now.
 	settings->mDifferentials[0].mLeftWheel = 0;
 	settings->mDifferentials[0].mRightWheel = 1;
+	settings->mDifferentials[1].mLeftWheel = 2;
+	settings->mDifferentials[1].mRightWheel = 3;
+	settings->mDifferentials[0].mEngineTorqueRatio = settings->mDifferentials[1].mEngineTorqueRatio = 0.5f;
 	settings->mDifferentialLimitedSlipRatio = differentialLimitedSlipRatio;
 	settings->AddRef();
 
@@ -9372,27 +9404,6 @@ void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSe
     {
         auto joltSettings = reinterpret_cast<JPH::WheeledVehicleControllerSettings*>(settings);
         joltSettings->Release();
-    }
-}
-
-JPH_WheeledVehicleController* JPH_WheeledVehicleController_Create(JPH_Body* body, const JPH_WheeledVehicleControllerSettings* controllerSettings, const JPH_VehicleConstraintSettings* constraintSettings)
-{
-    JPH_ASSERT(body);
-    JPH_ASSERT(controllerSettings);
-    JPH_ASSERT(constraintSettings);
-
-	auto vehicleConstraint = new JPH::VehicleConstraint(*AsBody(body), *reinterpret_cast<const JPH::VehicleConstraintSettings*>(constraintSettings));
-    vehicleConstraint->AddRef();
-    auto controller = new JPH::WheeledVehicleController(*reinterpret_cast<const JPH::WheeledVehicleControllerSettings*>(controllerSettings), *vehicleConstraint);
-    return reinterpret_cast<JPH_WheeledVehicleController*>(controller);
-}
-
-void JPH_WheeledVehicleController_Destroy(JPH_WheeledVehicleController* controller)
-{
-    if (controller)
-    {
-        AsWheeledVehicleController(controller)->GetConstraint().Release();
-        delete reinterpret_cast<JPH::WheeledVehicleController*>(controller);
     }
 }
 
