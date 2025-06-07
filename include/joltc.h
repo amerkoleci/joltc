@@ -59,83 +59,101 @@ typedef uint32_t JPH_CollisionSubGroupID;
 typedef uint32_t JPH_CharacterID;
 
 /* Forward declarations */
-typedef struct JPH_BroadPhaseLayerInterface			JPH_BroadPhaseLayerInterface;
-typedef struct JPH_ObjectVsBroadPhaseLayerFilter	JPH_ObjectVsBroadPhaseLayerFilter;
-typedef struct JPH_ObjectLayerPairFilter			JPH_ObjectLayerPairFilter;
+typedef struct JPH_BroadPhaseLayerInterface				JPH_BroadPhaseLayerInterface;
+typedef struct JPH_ObjectVsBroadPhaseLayerFilter		JPH_ObjectVsBroadPhaseLayerFilter;
+typedef struct JPH_ObjectLayerPairFilter				JPH_ObjectLayerPairFilter;
 
-typedef struct JPH_BroadPhaseLayerFilter            JPH_BroadPhaseLayerFilter;
-typedef struct JPH_ObjectLayerFilter                JPH_ObjectLayerFilter;
-typedef struct JPH_BodyFilter                       JPH_BodyFilter;
-typedef struct JPH_ShapeFilter                      JPH_ShapeFilter;
+typedef struct JPH_BroadPhaseLayerFilter				JPH_BroadPhaseLayerFilter;
+typedef struct JPH_ObjectLayerFilter					JPH_ObjectLayerFilter;
+typedef struct JPH_BodyFilter							JPH_BodyFilter;
+typedef struct JPH_ShapeFilter							JPH_ShapeFilter;
 
-typedef struct JPH_SimShapeFilter					JPH_SimShapeFilter;
+typedef struct JPH_SimShapeFilter						JPH_SimShapeFilter;
 
-typedef struct JPH_PhysicsSystem                    JPH_PhysicsSystem;
+typedef struct JPH_PhysicsSystem						JPH_PhysicsSystem;
 
-typedef struct JPH_PhysicsMaterial					JPH_PhysicsMaterial;
+typedef struct JPH_PhysicsMaterial						JPH_PhysicsMaterial;
 
 /* ShapeSettings */
-typedef struct JPH_ShapeSettings                    JPH_ShapeSettings;
-typedef struct JPH_ConvexShapeSettings			    JPH_ConvexShapeSettings;
-typedef struct JPH_SphereShapeSettings              JPH_SphereShapeSettings;
-typedef struct JPH_BoxShapeSettings                 JPH_BoxShapeSettings;
-typedef struct JPH_PlaneShapeSettings               JPH_PlaneShapeSettings;
-typedef struct JPH_TriangleShapeSettings            JPH_TriangleShapeSettings;
-typedef struct JPH_CapsuleShapeSettings             JPH_CapsuleShapeSettings;
-typedef struct JPH_TaperedCapsuleShapeSettings      JPH_TaperedCapsuleShapeSettings;
-typedef struct JPH_CylinderShapeSettings            JPH_CylinderShapeSettings;
-typedef struct JPH_TaperedCylinderShapeSettings     JPH_TaperedCylinderShapeSettings;
-typedef struct JPH_ConvexHullShapeSettings          JPH_ConvexHullShapeSettings;
-typedef struct JPH_CompoundShapeSettings            JPH_CompoundShapeSettings;
-typedef struct JPH_StaticCompoundShapeSettings      JPH_StaticCompoundShapeSettings;
-typedef struct JPH_MutableCompoundShapeSettings     JPH_MutableCompoundShapeSettings;
-typedef struct JPH_MeshShapeSettings                JPH_MeshShapeSettings;
-typedef struct JPH_HeightFieldShapeSettings         JPH_HeightFieldShapeSettings;
-typedef struct JPH_RotatedTranslatedShapeSettings   JPH_RotatedTranslatedShapeSettings;
-typedef struct JPH_ScaledShapeSettings              JPH_ScaledShapeSettings;
-typedef struct JPH_OffsetCenterOfMassShapeSettings  JPH_OffsetCenterOfMassShapeSettings;
-typedef struct JPH_EmptyShapeSettings               JPH_EmptyShapeSettings;
+typedef struct JPH_ShapeSettings						JPH_ShapeSettings;
+typedef struct JPH_ConvexShapeSettings					JPH_ConvexShapeSettings;
+typedef struct JPH_SphereShapeSettings					JPH_SphereShapeSettings;
+typedef struct JPH_BoxShapeSettings						JPH_BoxShapeSettings;
+typedef struct JPH_PlaneShapeSettings					JPH_PlaneShapeSettings;
+typedef struct JPH_TriangleShapeSettings				JPH_TriangleShapeSettings;
+typedef struct JPH_CapsuleShapeSettings					JPH_CapsuleShapeSettings;
+typedef struct JPH_TaperedCapsuleShapeSettings			JPH_TaperedCapsuleShapeSettings;
+typedef struct JPH_CylinderShapeSettings				JPH_CylinderShapeSettings;
+typedef struct JPH_TaperedCylinderShapeSettings			JPH_TaperedCylinderShapeSettings;
+typedef struct JPH_ConvexHullShapeSettings				JPH_ConvexHullShapeSettings;
+typedef struct JPH_CompoundShapeSettings				JPH_CompoundShapeSettings;
+typedef struct JPH_StaticCompoundShapeSettings			JPH_StaticCompoundShapeSettings;
+typedef struct JPH_MutableCompoundShapeSettings			JPH_MutableCompoundShapeSettings;
+typedef struct JPH_MeshShapeSettings					JPH_MeshShapeSettings;
+typedef struct JPH_HeightFieldShapeSettings				JPH_HeightFieldShapeSettings;
+typedef struct JPH_RotatedTranslatedShapeSettings		JPH_RotatedTranslatedShapeSettings;
+typedef struct JPH_ScaledShapeSettings					JPH_ScaledShapeSettings;
+typedef struct JPH_OffsetCenterOfMassShapeSettings		JPH_OffsetCenterOfMassShapeSettings;
+typedef struct JPH_EmptyShapeSettings					JPH_EmptyShapeSettings;
 
 /* Shape */
-typedef struct JPH_Shape                            JPH_Shape;
-typedef struct JPH_ConvexShape                      JPH_ConvexShape;
-typedef struct JPH_SphereShape                      JPH_SphereShape;
-typedef struct JPH_BoxShape                         JPH_BoxShape;
-typedef struct JPH_PlaneShape                       JPH_PlaneShape;
-typedef struct JPH_CapsuleShape                     JPH_CapsuleShape;
-typedef struct JPH_CylinderShape                    JPH_CylinderShape;
-typedef struct JPH_TaperedCylinderShape             JPH_TaperedCylinderShape;
-typedef struct JPH_TriangleShape				    JPH_TriangleShape;
-typedef struct JPH_TaperedCapsuleShape			    JPH_TaperedCapsuleShape;
-typedef struct JPH_ConvexHullShape                  JPH_ConvexHullShape;
-typedef struct JPH_CompoundShape                    JPH_CompoundShape;
-typedef struct JPH_StaticCompoundShape              JPH_StaticCompoundShape;
-typedef struct JPH_MutableCompoundShape             JPH_MutableCompoundShape;
-typedef struct JPH_MeshShape                        JPH_MeshShape;
-typedef struct JPH_HeightFieldShape                 JPH_HeightFieldShape;
-typedef struct JPH_DecoratedShape                   JPH_DecoratedShape;
-typedef struct JPH_RotatedTranslatedShape           JPH_RotatedTranslatedShape;
-typedef struct JPH_ScaledShape                      JPH_ScaledShape;
-typedef struct JPH_OffsetCenterOfMassShape          JPH_OffsetCenterOfMassShape;
-typedef struct JPH_EmptyShape                       JPH_EmptyShape;
+typedef struct JPH_Shape								JPH_Shape;
+typedef struct JPH_ConvexShape							JPH_ConvexShape;
+typedef struct JPH_SphereShape							JPH_SphereShape;
+typedef struct JPH_BoxShape								JPH_BoxShape;
+typedef struct JPH_PlaneShape							JPH_PlaneShape;
+typedef struct JPH_CapsuleShape							JPH_CapsuleShape;
+typedef struct JPH_CylinderShape						JPH_CylinderShape;
+typedef struct JPH_TaperedCylinderShape					JPH_TaperedCylinderShape;
+typedef struct JPH_TriangleShape						JPH_TriangleShape;
+typedef struct JPH_TaperedCapsuleShape					JPH_TaperedCapsuleShape;
+typedef struct JPH_ConvexHullShape						JPH_ConvexHullShape;
+typedef struct JPH_CompoundShape						JPH_CompoundShape;
+typedef struct JPH_StaticCompoundShape					JPH_StaticCompoundShape;
+typedef struct JPH_MutableCompoundShape					JPH_MutableCompoundShape;
+typedef struct JPH_MeshShape							JPH_MeshShape;
+typedef struct JPH_HeightFieldShape						JPH_HeightFieldShape;
+typedef struct JPH_DecoratedShape						JPH_DecoratedShape;
+typedef struct JPH_RotatedTranslatedShape				JPH_RotatedTranslatedShape;
+typedef struct JPH_ScaledShape							JPH_ScaledShape;
+typedef struct JPH_OffsetCenterOfMassShape				JPH_OffsetCenterOfMassShape;
+typedef struct JPH_EmptyShape							JPH_EmptyShape;
 
-typedef struct JPH_BodyCreationSettings             JPH_BodyCreationSettings;
-typedef struct JPH_SoftBodyCreationSettings         JPH_SoftBodyCreationSettings;
-typedef struct JPH_BodyInterface                    JPH_BodyInterface;
-typedef struct JPH_BodyLockInterface                JPH_BodyLockInterface;
-typedef struct JPH_BroadPhaseQuery                  JPH_BroadPhaseQuery;
-typedef struct JPH_NarrowPhaseQuery                 JPH_NarrowPhaseQuery;
-typedef struct JPH_MotionProperties                 JPH_MotionProperties;
-typedef struct JPH_MassProperties                   JPH_MassProperties;
-typedef struct JPH_Body                             JPH_Body;
+typedef struct JPH_BodyCreationSettings					JPH_BodyCreationSettings;
+typedef struct JPH_SoftBodyCreationSettings				JPH_SoftBodyCreationSettings;
+typedef struct JPH_BodyInterface						JPH_BodyInterface;
+typedef struct JPH_BodyLockInterface					JPH_BodyLockInterface;
+typedef struct JPH_BroadPhaseQuery						JPH_BroadPhaseQuery;
+typedef struct JPH_NarrowPhaseQuery						JPH_NarrowPhaseQuery;
+typedef struct JPH_MotionProperties						JPH_MotionProperties;
+typedef struct JPH_MassProperties						JPH_MassProperties;
+typedef struct JPH_Body									JPH_Body;
 
-typedef struct JPH_CollideShapeResult               JPH_CollideShapeResult;
-typedef struct JPH_ContactListener                  JPH_ContactListener;
-typedef struct JPH_ContactManifold                  JPH_ContactManifold;
-typedef struct JPH_ContactSettings                  JPH_ContactSettings;
+typedef struct JPH_CollideShapeResult					JPH_CollideShapeResult;
+typedef struct JPH_ContactListener						JPH_ContactListener;
+typedef struct JPH_ContactManifold						JPH_ContactManifold;
+typedef struct JPH_ContactSettings						JPH_ContactSettings;
 
-typedef struct JPH_GroupFilter						JPH_GroupFilter;
-typedef struct JPH_GroupFilterTable					JPH_GroupFilterTable;  /* Inherics JPH_GroupFilter */
+typedef struct JPH_GroupFilter							JPH_GroupFilter;
+typedef struct JPH_GroupFilterTable						JPH_GroupFilterTable;  /* Inherics JPH_GroupFilter */
+
+/* Vehicle and Related */
+typedef struct JPH_WheelSettingsWV						JPH_WheelSettingsWV;
+typedef struct JPH_WheelWV								JPH_WheelWV;
+//typedef struct JPH_AntiRollBars						JPH_AntiRollBars; // NOTE: BGE: just using default values for now.
+typedef struct JPH_VehicleEngineSettings				JPH_VehicleEngineSettings;
+typedef struct JPH_VehicleTransmissionSettings			JPH_VehicleTransmissionSettings;
+//typedef struct JPH_VehicleDifferentialSettings		JPH_VehicleDifferentialSettings; // NOTE: BGE: just using default values for now.
+typedef struct JPH_VehicleCollisionTester				JPH_VehicleCollisionTester;
+typedef struct JPH_VehicleCollisionTesterRay			JPH_VehicleCollisionTesterRay;
+typedef struct JPH_VehicleCollisionTesterCastSphere		JPH_VehicleCollisionTesterCastSphere;
+typedef struct JPH_VehicleCollisionTesterCastCylinder	JPH_VehicleCollisionTesterCastCylinder;
+typedef struct JPH_VehicleConstraintSettings			JPH_VehicleConstraintSettings;
+typedef struct JPH_VehicleConstraint					JPH_VehicleConstraint;
+typedef struct JPH_VehicleControllerSettings			JPH_VehicleControllerSettings;
+typedef struct JPH_WheeledVehicleControllerSettings		JPH_WheeledVehicleControllerSettings;
+typedef struct JPH_WheeledVehicleController				JPH_WheeledVehicleController;
+typedef struct JPH_PhysicsStepListener					JPH_PhysicsStepListener;
 
 /* Enums */
 typedef enum JPH_PhysicsUpdateError {
@@ -423,6 +441,13 @@ typedef enum JPH_Mesh_Shape_BuildQuality {
 	_JPH_Mesh_Shape_BuildQuality_Count,
 	_JPH_Mesh_Shape_BuildQuality_Force32 = 0x7FFFFFFF
 } JPH_Mesh_Shape_BuildQuality;
+
+typedef enum JPH_TransmissionMode {
+    JPH_TransmissionMode_Auto = 0,
+    JPH_TransmissionMode_Manual = 1,
+    _JPH_TransmissionMode_Count,
+    _JPH_TransmissionMode_Force32 = 0x7FFFFFFF
+} JPH_TransmissionMode;;
 
 typedef struct JPH_Vec3 {
 	float x;
@@ -1093,6 +1118,9 @@ JPH_CAPI void JPH_PhysicsSystem_RemoveConstraint(JPH_PhysicsSystem* system, JPH_
 
 JPH_CAPI void JPH_PhysicsSystem_AddConstraints(JPH_PhysicsSystem* system, JPH_Constraint** constraints, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH_Constraint** constraints, uint32_t count);
+
+JPH_CAPI void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener);
+JPH_CAPI void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener);
 
 JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
@@ -2533,5 +2561,101 @@ JPH_CAPI void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
 
 /* JPH_EstimateCollisionResponse */
 JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);
+
+/* WheelWV */
+JPH_CAPI JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
+	const JPH_Vec3*				position,
+	const JPH_Vec3*				suspensionForcePoint,
+	const JPH_Vec3*				suspensionDirection,
+	const JPH_Vec3*				steeringAxis,
+	const JPH_Vec3*				wheelUp,
+	const JPH_Vec3*				wheelForward,
+	float						suspensionMinLength,
+	float						suspensionMaxLength,
+	float						suspensionPreloadLength,
+	const JPH_SpringSettings*	suspensionSpring,
+	float						radius,
+	float						width,
+	bool						enableSuspensionForcePoint,
+	float						inertia,
+	float						angularDamping,
+	float						maxSteerAngle,
+	//LinearCurve				longitudinalFriction,	// NOTE: BGE: just using default values for now.
+	//LinearCurve				lateralFriction,		// NOTE: BGE: just using default values for now.
+	float						maxBrakeTorque,
+	float						maxHandBrakeTorque);
+JPH_CAPI void JPH_WheelSettingsWV_Destroy(JPH_WheelSettingsWV* settings);
+
+JPH_CAPI JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelWV_Destroy(JPH_WheelWV* wheel);
+JPH_CAPI bool JPH_WheelWV_HasContact(const JPH_WheelWV* wheel);
+JPH_CAPI bool JPH_WheelWV_HasHitHardPoint(const JPH_WheelWV* wheel);
+
+/* VehicleEngine */
+JPH_CAPI JPH_VehicleEngineSettings* JPH_VehicleEngineSettings_Create(
+	float			maxTorque,
+	float			minRPM,
+	float			maxRPM,
+	//LinearCurve	normalizedTorque,	// NOTE: BGE: just using default values for now.
+	float			inertia,
+	float			angularDamping);
+JPH_CAPI void JPH_VehicleEngineSettings_Destroy(JPH_VehicleEngineSettings* settings);
+
+/* VehicleTransmission */
+JPH_CAPI JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(
+	JPH_TransmissionMode	mode,
+	//Array<float>			gearRatios,			// NOTE: BGE: just using default values for now.
+	//Array<float>			reverseGearRatios,	// NOTE: BGE: just using default values for now.
+	float					switchTime,
+	float					clutchReleaseTime,
+	float					switchLatency,
+	float					shiftUpRPM,
+	float					shiftDownRPM,
+	float					clutchStrength);
+JPH_CAPI void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings);
+
+/* VehicleColliionTester */
+JPH_CAPI JPH_VehicleCollisionTesterRay* JPH_VehicleCollisionTesterRay_Create(JPH_ObjectLayer layer, const JPH_Vec3* up, float maxSlopeAngle);
+JPH_CAPI void JPH_VehicleCollisionTesterRay_Destroy(JPH_VehicleCollisionTesterRay* tester);
+JPH_CAPI JPH_VehicleCollisionTesterCastSphere* JPH_VehicleCollisionTesterCastSphere_Create(JPH_ObjectLayer layer, float radius, const JPH_Vec3* up, float maxSlopeAngle);
+JPH_CAPI void JPH_VehicleCollisionTesterCastSphere_Destroy(JPH_VehicleCollisionTesterCastSphere* tester);
+JPH_CAPI JPH_VehicleCollisionTesterCastCylinder* JPH_VehicleCollisionTesterCastCylinder_Create(JPH_ObjectLayer layer, float convexRadiusFraction);
+JPH_CAPI void JPH_VehicleCollisionTesterCastCylinder_Destroy(JPH_VehicleCollisionTesterCastCylinder* tester);
+
+/* VehicleConstraint */
+JPH_CAPI JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
+	const JPH_Vec3*					up,
+	const JPH_Vec3*					forward,
+	float							maxPitchRollAngle,
+	JPH_WheelSettingsWV**			wheels,				// NOTE: BGE: just using an overly-specific pointer type for now.
+	int								wheelsCount,
+	//VehicleAntiRollBars			antiRollBars,		// NOTE: BGE: just using default values for now.
+	//int							antiRollBarsCount,	// NOTE: BGE: just using default values for now.
+	JPH_VehicleControllerSettings*	settings);
+JPH_CAPI void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings);
+
+JPH_CAPI JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* constraintSettings);
+JPH_CAPI void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint);
+JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint);
+JPH_CAPI JPH_WheeledVehicleController* JPH_VehicleConstraint_GetWheeledVehicleController(JPH_VehicleConstraint* constraint);
+JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
+
+/* WheeledVehicleController */
+JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
+	const JPH_VehicleEngineSettings*		engine,
+	const JPH_VehicleTransmissionSettings*	transmission,
+	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
+	float									differentialLimitedSlipRatio);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings);
+
+JPH_CAPI JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* vehicle, float forward);
+JPH_CAPI float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* vehicle, float rightRatio);
+JPH_CAPI float JPH_WheeledVehicleController_GetRightInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetBrakeInput(JPH_WheeledVehicleController* vehicle, float brakeInput);
+JPH_CAPI float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* vehicle, float handBrakeInput);
+JPH_CAPI float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* vehicle);
 
 #endif /* JOLT_C_H_ */
