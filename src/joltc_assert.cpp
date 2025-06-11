@@ -30,6 +30,7 @@ __pragma(warning(push, 0))
 #include "Jolt/Physics/Character/CharacterBase.h"
 #include "Jolt/Physics/Character/CharacterID.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
+#include "Jolt/Physics/Vehicle/VehicleTransmission.h"
 
 #ifdef JPH_DEBUG_RENDERER
 #include <Jolt/Renderer/DebugRendererSimple.h>
@@ -239,5 +240,10 @@ static_assert(JPH_DebugRenderer_DrawMode_Wireframe == (int)JPH::DebugRenderer::E
 // MeshShapeSettings::EBuildQuality
 static_assert(JPH_Mesh_Shape_BuildQuality_FavorRuntimePerformance == (int)JPH::MeshShapeSettings::EBuildQuality::FavorRuntimePerformance);
 static_assert(JPH_Mesh_Shape_BuildQuality_FavorBuildSpeed == (int)JPH::MeshShapeSettings::EBuildQuality::FavorBuildSpeed);
+
+// MeshShapeSettings::EBuildQuality
+static_assert(JPH_TransmissionMode_Auto == (int)JPH::ETransmissionMode::Auto);
+static_assert(JPH_TransmissionMode_Manual == (int)JPH::ETransmissionMode::Manual);
+
 
 #endif
