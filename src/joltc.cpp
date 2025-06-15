@@ -322,7 +322,7 @@ static inline void FromJolt(const MotorSettings& jolt, JPH_MotorSettings* result
 	FromJolt(jolt.mSpringSettings, &result->springSettings);
 	result->minForceLimit = jolt.mMinForceLimit;
 	result->maxForceLimit = jolt.mMaxForceLimit;
-	result->minTorqueLimit = jolt.mMixTorqueLimit;
+	result->minTorqueLimit = jolt.mMinTorqueLimit;
 	result->maxTorqueLimit = jolt.mMaxTorqueLimit;
 }
 
