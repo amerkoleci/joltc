@@ -322,7 +322,7 @@ static inline void FromJolt(const MotorSettings& jolt, JPH_MotorSettings* result
 	FromJolt(jolt.mSpringSettings, &result->springSettings);
 	result->minForceLimit = jolt.mMinForceLimit;
 	result->maxForceLimit = jolt.mMaxForceLimit;
-	result->minTorqueLimit = jolt.mMixTorqueLimit;
+	result->minTorqueLimit = jolt.mMinTorqueLimit;
 	result->maxTorqueLimit = jolt.mMaxTorqueLimit;
 }
 
@@ -880,7 +880,7 @@ struct JPH_PhysicsSystem final
 	JPH::ObjectVsBroadPhaseLayerFilter* objectVsBroadPhaseLayerFilter = nullptr;
 	JPH::PhysicsSystem* physicsSystem = nullptr;
 };
-static std::unordered_map<JPH::PhysicsSystem*, JPH_PhysicsSystem*> s_PhysicsSystems;
+static JPH::UnorderedMap<JPH::PhysicsSystem*, JPH_PhysicsSystem*> s_PhysicsSystems;
 
 JPH_PhysicsSystem* JPH_PhysicsSystem_Create(const JPH_PhysicsSystemSettings* settings)
 {
@@ -1213,7 +1213,11 @@ public:
 		return true;
 	}
 
-	bool ShouldCollide([[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const
+	bool ShouldCollide(
+		[[maybe_unused]] const Shape* inShape1, 
+		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1, 
+		[[maybe_unused]] const Shape* inShape2, 
+		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
 	{
 		if (s_Procs != nullptr && s_Procs->ShouldCollide2)
 		{
