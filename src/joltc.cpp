@@ -7433,9 +7433,13 @@ void JPH_CharacterBaseSettings_Init(const CharacterBaseSettings& joltSettings, J
 	FromJolt(joltSettings.mSupportingVolume, &settings->supportingVolume);
 	settings->maxSlopeAngle = joltSettings.mMaxSlopeAngle;
 	settings->enhancedInternalEdgeRemoval = joltSettings.mEnhancedInternalEdgeRemoval;
-	if (joltSettings.mShape)
-	{
+	if (joltSettings.mShape) {
 		settings->shape = reinterpret_cast<const JPH_Shape*>(joltSettings.mShape.GetPtr());
+	} else {
+		JPH_Vec3 vec = {0.0f, 0.0f, 0.0f};
+		JPH_EmptyShapeSettings* empty_shape_settings = JPH_EmptyShapeSettings_Create(&vec);
+		JPH_EmptyShape* shape = JPH_EmptyShapeSettings_CreateShape(empty_shape_settings);
+		settings->shape = reinterpret_cast<const JPH_Shape*>(shape);
 	}
 }
 
@@ -9230,7 +9234,7 @@ void JPH_WheelSettingsWV_Init(JPH_WheelSettingsWV* settings)
 void JPH_WheelSettingsWV_ToJolt(WheelSettingsWV* joltSettings, const JPH_WheelSettingsWV& settings)
 {
 	JPH_ASSERT(joltSettings);
-	JPH_ASSERT(settings);
+	//JPH_ASSERT(settings);
 
 	// Base settings
 	JPH_WheelSettings_ToJolt(joltSettings, &settings.base);
