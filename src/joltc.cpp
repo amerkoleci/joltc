@@ -9230,7 +9230,6 @@ void JPH_WheelSettingsWV_Init(JPH_WheelSettingsWV* settings)
 void JPH_WheelSettingsWV_ToJolt(WheelSettingsWV* joltSettings, const JPH_WheelSettingsWV& settings)
 {
 	JPH_ASSERT(joltSettings);
-	JPH_ASSERT(settings);
 
 	// Base settings
 	JPH_WheelSettings_ToJolt(joltSettings, &settings.base);
