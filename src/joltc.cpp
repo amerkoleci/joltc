@@ -72,6 +72,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
 #include "Jolt/Physics/Vehicle/VehicleController.h"
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
+#include "Jolt/Physics/Vehicle/MotorcycleController.h"
 
 #include <iostream>
 #include <cstdarg>
@@ -148,6 +149,8 @@ DEF_MAP_DECL(GroupFilter, JPH_GroupFilter)
 DEF_MAP_DECL(GroupFilterTable, JPH_GroupFilterTable)
 
 // Vehicle
+DEF_MAP_DECL(WheelSettings, JPH_WheelSettings)
+DEF_MAP_DECL(WheelSettingsWV, JPH_WheelSettingsWV)
 DEF_MAP_DECL(Wheel, JPH_Wheel)
 DEF_MAP_DECL(WheelWV, JPH_WheelWV)
 
@@ -156,6 +159,10 @@ DEF_MAP_DECL(VehicleController, JPH_VehicleController)
 
 DEF_MAP_DECL(WheeledVehicleControllerSettings, JPH_WheeledVehicleControllerSettings)
 DEF_MAP_DECL(WheeledVehicleController, JPH_WheeledVehicleController)
+
+DEF_MAP_DECL(MotorcycleControllerSettings, JPH_MotorcycleControllerSettings)
+DEF_MAP_DECL(MotorcycleController, JPH_MotorcycleController)
+
 DEF_MAP_DECL(VehicleConstraint, JPH_VehicleConstraint)
 
 // Callback for traces, connect this to your own trace function if you have one
@@ -1214,9 +1221,9 @@ public:
 	}
 
 	bool ShouldCollide(
-		[[maybe_unused]] const Shape* inShape1, 
-		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1, 
-		[[maybe_unused]] const Shape* inShape2, 
+		[[maybe_unused]] const Shape* inShape1,
+		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1,
+		[[maybe_unused]] const Shape* inShape2,
 		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
 	{
 		if (s_Procs != nullptr && s_Procs->ShouldCollide2)
@@ -7435,7 +7442,14 @@ void JPH_CharacterBaseSettings_Init(const CharacterBaseSettings& joltSettings, J
 	settings->enhancedInternalEdgeRemoval = joltSettings.mEnhancedInternalEdgeRemoval;
 	if (joltSettings.mShape)
 	{
-		settings->shape = reinterpret_cast<const JPH_Shape*>(joltSettings.mShape.GetPtr());
+		settings->shape = ToShape(joltSettings.mShape.GetPtr());
+	}
+	else
+	{
+		JPH_Vec3 vec = { 0.0f, 0.0f, 0.0f };
+		JPH_EmptyShapeSettings* empty_shape_settings = JPH_EmptyShapeSettings_Create(&vec);
+		JPH_EmptyShape* shape = JPH_EmptyShapeSettings_CreateShape(empty_shape_settings);
+		settings->shape = reinterpret_cast<const JPH_Shape*>(shape);
 	}
 }
 
@@ -9136,59 +9150,157 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 }
 
 /* Wheel */
-void JPH_WheelSettings_Init(const WheelSettings& joltSettings, JPH_WheelSettings* settings)
+JPH_WheelSettings* JPH_WheelSettings_Create(void)
 {
-	// Copy defaults from jolt 
-	FromJolt(joltSettings.mPosition, &settings->position);
-	FromJolt(joltSettings.mSuspensionForcePoint, &settings->suspensionForcePoint);
-	FromJolt(joltSettings.mSuspensionDirection, &settings->suspensionDirection);
-	FromJolt(joltSettings.mSteeringAxis, &settings->steeringAxis);
-	FromJolt(joltSettings.mWheelUp, &settings->wheelUp);
-	FromJolt(joltSettings.mWheelForward, &settings->wheelForward);
+	auto settings = new JPH::WheelSettings();
+	settings->AddRef();
 
-	settings->suspensionMinLength = joltSettings.mSuspensionMinLength;
-	settings->suspensionMaxLength = joltSettings.mSuspensionMaxLength;
-	settings->suspensionPreloadLength = joltSettings.mSuspensionPreloadLength;
-	FromJolt(joltSettings.mSuspensionSpring, &settings->suspensionSpring);
-	settings->radius = joltSettings.mRadius;
-	settings->width = joltSettings.mWidth;
-	settings->enableSuspensionForcePoint = joltSettings.mEnableSuspensionForcePoint;
+	return ToWheelSettings(settings);
 }
 
-void JPH_WheelSettings_ToJolt(WheelSettings* joltSettings, const JPH_WheelSettings* settings)
+void JPH_WheelSettings_Destroy(JPH_WheelSettings* settings)
 {
-	JPH_ASSERT(joltSettings);
-	JPH_ASSERT(settings);
-
-	joltSettings->mPosition = ToJolt(settings->position);
-	joltSettings->mSuspensionForcePoint = ToJolt(settings->suspensionForcePoint);
-	joltSettings->mSuspensionDirection = ToJolt(settings->suspensionDirection);
-	joltSettings->mSteeringAxis = ToJolt(settings->steeringAxis);
-	joltSettings->mWheelUp = ToJolt(settings->wheelUp);
-	joltSettings->mWheelForward = ToJolt(settings->wheelForward);
-	joltSettings->mSuspensionMinLength = settings->suspensionMinLength;
-	joltSettings->mSuspensionMaxLength = settings->suspensionMaxLength;
-	joltSettings->mSuspensionPreloadLength = settings->suspensionPreloadLength;
-	joltSettings->mSuspensionSpring = ToJolt(&settings->suspensionSpring);
-	joltSettings->mRadius = settings->radius;
-	joltSettings->mWidth = settings->width;
-	joltSettings->mEnableSuspensionForcePoint = settings->enableSuspensionForcePoint;
+	if (settings)
+	{
+		AsWheelSettings(settings)->Release();
+	}
 }
 
-void JPH_WheelSettings_Init(JPH_WheelSettings* settings)
+void JPH_WheelSettings_GetPosition(const JPH_WheelSettings* settings, JPH_Vec3* result)
 {
-	JPH::WheelSettings joltSettings;
-	JPH_WheelSettings_Init(joltSettings, settings);
+	FromJolt(AsWheelSettings(settings)->mPosition, result);
+}
+
+void JPH_WheelSettings_SetPosition(JPH_WheelSettings* settings, const JPH_Vec3* value)
+{
+	AsWheelSettings(settings)->mPosition = ToJolt(value);
+}
+
+void JPH_WheelSettings_GetSuspensionForcePoint(const JPH_WheelSettings* settings, JPH_Vec3* result)
+{
+	FromJolt(AsWheelSettings(settings)->mSuspensionForcePoint, result);
+}
+
+void JPH_WheelSettings_SetSuspensionForcePoint(JPH_WheelSettings* settings, const JPH_Vec3* value)
+{
+	AsWheelSettings(settings)->mSuspensionForcePoint = ToJolt(value);
+}
+
+void JPH_WheelSettings_GetSuspensionDirection(const JPH_WheelSettings* settings, JPH_Vec3* result)
+{
+	FromJolt(AsWheelSettings(settings)->mSuspensionDirection, result);
+}
+
+void JPH_WheelSettings_SetSuspensionDirection(JPH_WheelSettings* settings, const JPH_Vec3* value)
+{
+	AsWheelSettings(settings)->mSuspensionDirection = ToJolt(value);
+}
+
+void JPH_WheelSettings_GetSteeringAxis(const JPH_WheelSettings* settings, JPH_Vec3* result)
+{
+	FromJolt(AsWheelSettings(settings)->mSteeringAxis, result);
+}
+
+void JPH_WheelSettings_SetSteeringAxis(JPH_WheelSettings* settings, const JPH_Vec3* value)
+{
+	AsWheelSettings(settings)->mSteeringAxis = ToJolt(value);
+}
+
+void JPH_WheelSettings_GetWheelUp(const JPH_WheelSettings* settings, JPH_Vec3* result)
+{
+	FromJolt(AsWheelSettings(settings)->mWheelUp, result);
+}
+
+void JPH_WheelSettings_SetWheelUp(JPH_WheelSettings* settings, const JPH_Vec3* value)
+{
+	AsWheelSettings(settings)->mWheelUp = ToJolt(value);
+}
+
+void JPH_WheelSettings_GetWheelForward(const JPH_WheelSettings* settings, JPH_Vec3* result)
+{
+	FromJolt(AsWheelSettings(settings)->mWheelForward, result);
+}
+
+void JPH_WheelSettings_SetWheelForward(JPH_WheelSettings* settings, const JPH_Vec3* value)
+{
+	AsWheelSettings(settings)->mWheelForward = ToJolt(value);
+}
+
+float JPH_WheelSettings_GetSuspensionMinLength(const JPH_WheelSettings* settings)
+{
+	return AsWheelSettings(settings)->mSuspensionMinLength;
+}
+
+void JPH_WheelSettings_SetSuspensionMinLength(JPH_WheelSettings* settings, float value)
+{
+	AsWheelSettings(settings)->mSuspensionMinLength = value;
+}
+
+float JPH_WheelSettings_GetSuspensionMaxLength(const JPH_WheelSettings* settings)
+{
+	return AsWheelSettings(settings)->mSuspensionMaxLength;
+}
+
+void JPH_WheelSettings_SetSuspensionMaxLength(JPH_WheelSettings* settings, float value)
+{
+	AsWheelSettings(settings)->mSuspensionMaxLength = value;
+}
+
+float JPH_WheelSettings_GetSuspensionPreloadLength(const JPH_WheelSettings* settings)
+{
+	return AsWheelSettings(settings)->mSuspensionPreloadLength;
+}
+
+void JPH_WheelSettings_SetSuspensionPreloadLength(JPH_WheelSettings* settings, float value)
+{
+	AsWheelSettings(settings)->mSuspensionPreloadLength = value;
+}
+
+void JPH_WheelSettings_GetSuspensionSpring(const JPH_WheelSettings* settings, JPH_SpringSettings* result)
+{
+	FromJolt(AsWheelSettings(settings)->mSuspensionSpring, result);
+}
+
+void JPH_WheelSettings_SetSuspensionSpring(JPH_WheelSettings* settings, JPH_SpringSettings* springSettings)
+{
+	AsWheelSettings(settings)->mSuspensionSpring = ToJolt(springSettings);
+}
+
+float JPH_WheelSettings_GetRadius(const JPH_WheelSettings* settings)
+{
+	return AsWheelSettings(settings)->mRadius;
+}
+
+void JPH_WheelSettings_SetRadius(JPH_WheelSettings* settings, float value)
+{
+	AsWheelSettings(settings)->mRadius = value;
+}
+
+float JPH_WheelSettings_GetWidth(const JPH_WheelSettings* settings)
+{
+	return AsWheelSettings(settings)->mWidth;
+}
+
+void JPH_WheelSettings_SetWidth(JPH_WheelSettings* settings, float value)
+{
+	AsWheelSettings(settings)->mWidth = value;
+}
+
+bool JPH_WheelSettings_GetEnableSuspensionForcePoint(const JPH_WheelSettings* settings)
+{
+	return AsWheelSettings(settings)->mEnableSuspensionForcePoint;
+}
+
+void JPH_WheelSettings_SetEnableSuspensionForcePoint(JPH_WheelSettings* settings, bool value)
+{
+	AsWheelSettings(settings)->mEnableSuspensionForcePoint = value;
 }
 
 JPH_Wheel* JPH_Wheel_Create(const JPH_WheelSettings* settings)
 {
 	JPH_ASSERT(settings);
 
-	WheelSettings joltSettings;
-	JPH_WheelSettings_ToJolt(&joltSettings, settings);
-
-	auto wheel = new JPH::Wheel(joltSettings);
+	auto wheel = new JPH::Wheel(*AsWheelSettings(settings));
 	return ToWheel(wheel);
 }
 
@@ -9200,6 +9312,15 @@ void JPH_Wheel_Destroy(JPH_Wheel* wheel)
 	}
 }
 
+float JPH_Wheel_GetAngularVelocity(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetAngularVelocity();
+}
+
+void JPH_Wheel_SetAngularVelocity(JPH_Wheel* wheel, float value)
+{
+	AsWheel(wheel)->SetAngularVelocity(value);
+}
 
 bool JPH_Wheel_HasContact(const JPH_Wheel* wheel)
 {
@@ -9212,62 +9333,84 @@ bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel)
 }
 
 /* WheelWV */
-void JPH_WheelSettingsWV_Init(JPH_WheelSettingsWV* settings)
+JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(void)
 {
-	JPH_ASSERT(settings);
+	auto settings = new JPH::WheelSettingsWV();
+	settings->AddRef();
 
-	// Copy defaults from jolt 
-	JPH::WheelSettingsWV joltSettings;
-	JPH_WheelSettings_Init(joltSettings, &settings->base);
-	settings->inertia = joltSettings.mInertia;
-	settings->angularDamping = joltSettings.mAngularDamping;
-	settings->maxSteerAngle = joltSettings.mMaxSteerAngle;
-	//settings->longitudinalFriction = ToJolt(joltSettings.mLongitudinalFriction); 
-	settings->maxBrakeTorque = joltSettings.mMaxBrakeTorque;
-	settings->maxHandBrakeTorque = joltSettings.mMaxHandBrakeTorque;
+	return ToWheelSettingsWV(settings);
 }
 
-void JPH_WheelSettingsWV_ToJolt(WheelSettingsWV* joltSettings, const JPH_WheelSettingsWV& settings)
+float JPH_WheelSettingsWV_GetInertia(const JPH_WheelSettingsWV* settings)
 {
-	JPH_ASSERT(joltSettings);
-	JPH_ASSERT(settings);
-
-	// Base settings
-	JPH_WheelSettings_ToJolt(joltSettings, &settings.base);
-
-	joltSettings->mInertia = settings.inertia;
-	joltSettings->mAngularDamping = settings.angularDamping;
-	joltSettings->mMaxSteerAngle = settings.maxSteerAngle;
-	//joltSettings->mLongitudinalFriction = ToJolt(&settings->longitudinalFriction);
-	joltSettings->mMaxBrakeTorque = settings.maxBrakeTorque;
-	joltSettings->mMaxHandBrakeTorque = settings.maxHandBrakeTorque;
+	return AsWheelSettingsWV(settings)->mInertia;
 }
 
-void JPH_WheelSettingsVW_ToJolt(WheelSettingsWV* joltSettings, const JPH_WheelSettingsWV* settings)
+void JPH_WheelSettingsWV_SetInertia(JPH_WheelSettingsWV* settings, float value)
 {
-	JPH_ASSERT(joltSettings);
-	JPH_ASSERT(settings);
+	AsWheelSettingsWV(settings)->mInertia = value;
+}
 
-	JPH_WheelSettings_ToJolt(joltSettings, &settings->base);
-	joltSettings->mInertia = settings->inertia;
-	joltSettings->mAngularDamping = settings->angularDamping;
-	joltSettings->mMaxSteerAngle = settings->maxSteerAngle;
-	//joltSettings->mLongitudinalFriction = ToJolt(&settings->longitudinalFriction);
-	joltSettings->mMaxBrakeTorque = settings->maxBrakeTorque;
-	joltSettings->mMaxHandBrakeTorque = settings->maxHandBrakeTorque;
+float JPH_WheelSettingsWV_GetAngularDamping(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mAngularDamping;
+}
+
+void JPH_WheelSettingsWV_SetAngularDamping(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mAngularDamping = value;
+}
+
+float JPH_WheelSettingsWV_GetMaxSteerAngle(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mMaxSteerAngle;
+}
+
+void JPH_WheelSettingsWV_SetMaxSteerAngle(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mMaxSteerAngle = value;
+}
+
+float JPH_WheelSettingsWV_GetMaxBrakeTorque(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mMaxBrakeTorque;
+}
+
+void JPH_WheelSettingsWV_SetMaxBrakeTorque(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mMaxBrakeTorque = value;
+}
+
+float JPH_WheelSettingsWV_GetMaxHandBrakeTorque(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mMaxHandBrakeTorque;
+}
+
+void JPH_WheelSettingsWV_SetMaxHandBrakeTorque(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mMaxHandBrakeTorque = value;
 }
 
 JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings)
 {
 	JPH_ASSERT(settings);
 
-	WheelSettingsWV joltSettings;
-	JPH_WheelSettingsVW_ToJolt(&joltSettings, settings);
-
-	auto wheel = new JPH::WheelWV(joltSettings);
+	auto wheel = new JPH::WheelWV(*AsWheelSettingsWV(settings));
 	return ToWheelWV(wheel);
 }
 
+/* VehicleAntiRollBar */
+JPH_CAPI void JPH_VehicleAntiRollBar_Init(JPH_VehicleAntiRollBar* antiRollBar)
+{
+	JPH_ASSERT(antiRollBar);
+
+	JPH::VehicleAntiRollBar joltAntiRollBar{};
+	antiRollBar->leftWheel = joltAntiRollBar.mLeftWheel;
+	antiRollBar->rightWheel = joltAntiRollBar.mRightWheel;
+	antiRollBar->stiffness = joltAntiRollBar.mStiffness;
+}
+
+/* VehicleEngine */
 void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings)
 {
 	JPH_ASSERT(settings);
@@ -9419,9 +9562,25 @@ void JPH_VehicleConstraintSettings_ToJolt(VehicleConstraintSettings* joltSetting
 	joltSettings->mWheels.resize(settings->wheelsCount);
 	for (uint32_t i = 0; i < settings->wheelsCount; ++i)
 	{
-		JPH::WheelSettingsWV* wheelSettings = new JPH::WheelSettingsWV;
-		JPH_WheelSettingsWV_ToJolt(wheelSettings, settings->wheels[i]);
-		joltSettings->mWheels[i] = wheelSettings;
+		joltSettings->mWheels[i] = AsWheelSettings(settings->wheels[i]);
+	}
+
+	if (settings->antiRollBarsCount > 0)
+	{
+		joltSettings->mAntiRollBars.reserve(settings->antiRollBarsCount);
+		for (uint32_t i = 0; i < settings->antiRollBarsCount; ++i)
+		{
+			JPH::VehicleAntiRollBar joltAntiRollBar{};
+			joltAntiRollBar.mLeftWheel = settings->antiRollBars[i]->leftWheel;
+			joltAntiRollBar.mRightWheel = settings->antiRollBars[i]->rightWheel;
+			joltAntiRollBar.mStiffness = settings->antiRollBars[i]->stiffness;
+			joltSettings->mAntiRollBars.push_back(joltAntiRollBar);
+		}
+	}
+
+	if (settings->controller)
+	{
+		joltSettings->mController = AsVehicleControllerSettings(settings->controller);
 	}
 }
 
@@ -9443,8 +9602,7 @@ void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint)
 {
 	if (constraint)
 	{
-		auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
-		joltConstraint->Release();
+		AsVehicleConstraint(constraint)->Release();
 	}
 }
 
@@ -9471,9 +9629,8 @@ void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* cons
 	JPH_ASSERT(constraint);
 	JPH_ASSERT(tester);
 
-	auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
 	auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTester*>(tester);
-	joltConstraint->SetVehicleCollisionTester(joltTester);
+	AsVehicleConstraint(constraint)->SetVehicleCollisionTester(joltTester);
 }
 
 JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(

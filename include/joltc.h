@@ -135,7 +135,7 @@ typedef struct JPH_ContactManifold						JPH_ContactManifold;
 typedef struct JPH_ContactSettings						JPH_ContactSettings;
 
 typedef struct JPH_GroupFilter							JPH_GroupFilter;
-typedef struct JPH_GroupFilterTable						JPH_GroupFilterTable;  /* Inherics JPH_GroupFilter */
+typedef struct JPH_GroupFilterTable						JPH_GroupFilterTable;  /* Inherits JPH_GroupFilter */
 
 /* Enums */
 typedef enum JPH_PhysicsUpdateError {
@@ -534,7 +534,7 @@ typedef struct JPH_CollideSettingsBase {
 
 /* CollideShapeSettings */
 typedef struct JPH_CollideShapeSettings {
-	JPH_CollideSettingsBase     base;    /* Inherics JPH_CollideSettingsBase */
+	JPH_CollideSettingsBase     base;    /* Inherits JPH_CollideSettingsBase */
 	/// When > 0 contacts in the vicinity of the query shape can be found. All nearest contacts that are not further away than this distance will be found (unit: meter)
 	float						maxSeparationDistance/* = 0.0f*/;
 
@@ -544,7 +544,7 @@ typedef struct JPH_CollideShapeSettings {
 
 /* ShapeCastSettings */
 typedef struct JPH_ShapeCastSettings {
-	JPH_CollideSettingsBase     base;    /* Inherics JPH_CollideSettingsBase */
+	JPH_CollideSettingsBase     base;    /* Inherits JPH_CollideSettingsBase */
 
 	/// How backfacing triangles should be treated (should we report moving from back to front for triangle based shapes, e.g. for MeshShape/HeightFieldShape?)
 	JPH_BackFaceMode			backFaceModeTriangles/* = JPH_BackFaceMode_IgnoreBackFaces*/;
@@ -723,8 +723,8 @@ typedef struct JPH_GearConstraint				    JPH_GearConstraint;
 
 /* Character, CharacterVirtual */
 typedef struct JPH_CharacterBase					JPH_CharacterBase;
-typedef struct JPH_Character						JPH_Character;  /* Inherics JPH_CharacterBase */
-typedef struct JPH_CharacterVirtual                 JPH_CharacterVirtual;  /* Inherics JPH_CharacterBase */
+typedef struct JPH_Character						JPH_Character;  /* Inherits JPH_CharacterBase */
+typedef struct JPH_CharacterVirtual                 JPH_CharacterVirtual;  /* Inherits JPH_CharacterBase */
 typedef struct JPH_CharacterContactListener			JPH_CharacterContactListener;
 typedef struct JPH_CharacterVsCharacterCollision	JPH_CharacterVsCharacterCollision;
 
@@ -743,7 +743,7 @@ typedef struct JPH_ConstraintSettings {
 } JPH_ConstraintSettings;
 
 typedef struct JPH_FixedConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	bool						autoDetectPoint;
@@ -756,7 +756,7 @@ typedef struct JPH_FixedConstraintSettings {
 } JPH_FixedConstraintSettings;
 
 typedef struct JPH_DistanceConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	JPH_RVec3					point1;
@@ -767,7 +767,7 @@ typedef struct JPH_DistanceConstraintSettings {
 } JPH_DistanceConstraintSettings;
 
 typedef struct JPH_PointConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	JPH_RVec3					point1;
@@ -775,7 +775,7 @@ typedef struct JPH_PointConstraintSettings {
 } JPH_PointConstraintSettings;
 
 typedef struct JPH_HingeConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	JPH_RVec3					point1;
@@ -792,7 +792,7 @@ typedef struct JPH_HingeConstraintSettings {
 } JPH_HingeConstraintSettings;
 
 typedef struct JPH_SliderConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	bool						autoDetectPoint;
@@ -810,7 +810,7 @@ typedef struct JPH_SliderConstraintSettings {
 } JPH_SliderConstraintSettings;
 
 typedef struct JPH_ConeConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	JPH_RVec3					point1;
@@ -821,7 +821,7 @@ typedef struct JPH_ConeConstraintSettings {
 } JPH_ConeConstraintSettings;
 
 typedef struct JPH_SwingTwistConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	JPH_RVec3					position1;
@@ -841,7 +841,7 @@ typedef struct JPH_SwingTwistConstraintSettings {
 } JPH_SwingTwistConstraintSettings;
 
 typedef struct JPH_SixDOFConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	JPH_RVec3					position1;
@@ -860,7 +860,7 @@ typedef struct JPH_SixDOFConstraintSettings {
 } JPH_SixDOFConstraintSettings;
 
 typedef struct JPH_GearConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings		base;    /* Inherits JPH_ConstraintSettings */
 
 	JPH_ConstraintSpace			space;
 	JPH_Vec3					hingeAxis1;
@@ -902,7 +902,7 @@ typedef struct JPH_CharacterBaseSettings {
 
 /* Character */
 typedef struct JPH_CharacterSettings {
-	JPH_CharacterBaseSettings       base;    /* Inherics JPH_CharacterBaseSettings */
+	JPH_CharacterBaseSettings       base;    /* Inherits JPH_CharacterBaseSettings */
 	JPH_ObjectLayer					layer;
 	float							mass;
 	float							friction;
@@ -912,7 +912,7 @@ typedef struct JPH_CharacterSettings {
 
 /* CharacterVirtual */
 typedef struct JPH_CharacterVirtualSettings {
-	JPH_CharacterBaseSettings           base;    /* Inherics JPH_CharacterBaseSettings */
+	JPH_CharacterBaseSettings           base;    /* Inherits JPH_CharacterBaseSettings */
 	JPH_CharacterID						ID;
 	float								mass;
 	float								maxStrength;
@@ -2560,65 +2560,46 @@ JPH_CAPI void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
 JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);
 
 /* Vehicle */
-typedef struct JPH_Wheel								JPH_Wheel;
-typedef struct JPH_WheelWV								JPH_WheelWV;
+typedef struct JPH_WheelSettings						JPH_WheelSettings;
+typedef struct JPH_WheelSettingsWV						JPH_WheelSettingsWV;	/* Inherits JPH_WheelSettings */
 
-//typedef struct JPH_AntiRollBars						JPH_AntiRollBars; // NOTE: BGE: just using default values for now.
+typedef struct JPH_Wheel								JPH_Wheel;
+typedef struct JPH_WheelWV								JPH_WheelWV;			/* Inherits JPH_Wheel */
 
 
 typedef struct JPH_VehicleTransmissionSettings			JPH_VehicleTransmissionSettings;
 //typedef struct JPH_VehicleDifferentialSettings		JPH_VehicleDifferentialSettings; // NOTE: BGE: just using default values for now.
 typedef struct JPH_VehicleCollisionTester				JPH_VehicleCollisionTester;
-typedef struct JPH_VehicleCollisionTesterRay			JPH_VehicleCollisionTesterRay;
-typedef struct JPH_VehicleCollisionTesterCastSphere		JPH_VehicleCollisionTesterCastSphere;
-typedef struct JPH_VehicleCollisionTesterCastCylinder	JPH_VehicleCollisionTesterCastCylinder;
-typedef struct JPH_VehicleConstraint					JPH_VehicleConstraint;
+typedef struct JPH_VehicleCollisionTesterRay			JPH_VehicleCollisionTesterRay;			/* Inherits JPH_VehicleCollisionTester */
+typedef struct JPH_VehicleCollisionTesterCastSphere		JPH_VehicleCollisionTesterCastSphere;	/* Inherits JPH_VehicleCollisionTester */
+typedef struct JPH_VehicleCollisionTesterCastCylinder	JPH_VehicleCollisionTesterCastCylinder;	/* Inherits JPH_VehicleCollisionTester */
+typedef struct JPH_VehicleConstraint					JPH_VehicleConstraint;					/* Inherits JPH_Constraint */
 
 typedef struct JPH_VehicleControllerSettings			JPH_VehicleControllerSettings;
-typedef struct JPH_WheeledVehicleControllerSettings		JPH_WheeledVehicleControllerSettings;
+typedef struct JPH_WheeledVehicleControllerSettings		JPH_WheeledVehicleControllerSettings;	/* Inherits JPH_VehicleControllerSettings */
+typedef struct JPH_MotorcycleControllerSettings			JPH_MotorcycleControllerSettings;		/* Inherits JPH_VehicleControllerSettings */
 
 typedef struct JPH_VehicleController					JPH_VehicleController;
-typedef struct JPH_WheeledVehicleController				JPH_WheeledVehicleController; /* Inherics JPH_VehicleController */
+typedef struct JPH_WheeledVehicleController				JPH_WheeledVehicleController; /* Inherits JPH_VehicleController */
+typedef struct JPH_MotorcycleController					JPH_MotorcycleController; /* Inherits JPH_VehicleController */
 
-typedef struct JPH_WheelSettings {
-	JPH_Vec3				position;
-	JPH_Vec3				suspensionForcePoint;
-	JPH_Vec3				suspensionDirection;
-	JPH_Vec3				steeringAxis;
-	JPH_Vec3				wheelUp;
-	JPH_Vec3				wheelForward;
-	float					suspensionMinLength;
-	float					suspensionMaxLength;
-	float					suspensionPreloadLength;
-	JPH_SpringSettings		suspensionSpring;
-	float					radius;
-	float					width;
-	bool					enableSuspensionForcePoint;
-} JPH_WheelSettings;
-
-typedef struct JPH_WheelSettingsWV {
-	JPH_WheelSettings			base;    /* Inherics JPH_CharacterBaseSettings */
-
-	float						inertia;
-	float						angularDamping;
-	float						maxSteerAngle;
-	//LinearCurve				longitudinalFriction;
-	//LinearCurve				lateralFriction;
-	float						maxBrakeTorque;
-	float						maxHandBrakeTorque;
-} JPH_WheelSettingsWV;
+typedef struct JPH_VehicleAntiRollBar {
+	int						leftWheel;
+	int						rightWheel;
+	float					stiffness;
+} JPH_VehicleAntiRollBar;
 
 typedef struct JPH_VehicleConstraintSettings {
-	JPH_ConstraintSettings		base;    /* Inherics JPH_ConstraintSettings */
+	JPH_ConstraintSettings			base;    /* Inherits JPH_ConstraintSettings */
 
-	JPH_Vec3					up;
-	JPH_Vec3					forward;
-	float						maxPitchRollAngle;
-	uint32_t					wheelsCount;
-	const JPH_WheelSettingsWV*	wheels;				/* TODO: Should be JPH_WheelSettings */
-	//uint32_t					antiRollBarsCount;	// NOTE: BGE: just using default values for now.
-	//VehicleAntiRollBars		antiRollBars;		// NOTE: BGE: just using default values for now.
-	JPH_VehicleControllerSettings* controller;
+	JPH_Vec3						up;
+	JPH_Vec3						forward;
+	float							maxPitchRollAngle;
+	uint32_t						wheelsCount;
+	JPH_WheelSettings**				wheels;
+	uint32_t						antiRollBarsCount;
+	const JPH_VehicleAntiRollBar**	antiRollBars;
+	JPH_VehicleControllerSettings*	controller;
 } JPH_VehicleConstraintSettings;
 
 typedef struct JPH_VehicleEngineSettings {
@@ -2630,8 +2611,6 @@ typedef struct JPH_VehicleEngineSettings {
 	float					angularDamping;
 } JPH_VehicleEngineSettings;
 
-JPH_CAPI void JPH_WheelSettings_Init(JPH_WheelSettings* settings);
-JPH_CAPI void JPH_WheelSettingsWV_Init(JPH_WheelSettingsWV* settings);
 JPH_CAPI void JPH_VehicleConstraintSettings_Init(JPH_VehicleConstraintSettings* settings);
 
 JPH_CAPI JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* settings);
@@ -2641,13 +2620,63 @@ JPH_CAPI JPH_WheeledVehicleController* JPH_VehicleConstraint_GetWheeledVehicleCo
 JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
 
 /* Wheel */
+JPH_CAPI JPH_WheelSettings* JPH_WheelSettings_Create(void);
+JPH_CAPI void JPH_WheelSettings_Destroy(JPH_WheelSettings* settings);
+JPH_CAPI void JPH_WheelSettings_GetPosition(const JPH_WheelSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_WheelSettings_SetPosition(JPH_WheelSettings* settings, const JPH_Vec3* value);
+JPH_CAPI void JPH_WheelSettings_GetSuspensionForcePoint(const JPH_WheelSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_WheelSettings_SetSuspensionForcePoint(JPH_WheelSettings* settings, const JPH_Vec3* value);
+JPH_CAPI void JPH_WheelSettings_GetSuspensionDirection(const JPH_WheelSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_WheelSettings_SetSuspensionDirection(JPH_WheelSettings* settings, const JPH_Vec3* value);
+JPH_CAPI void JPH_WheelSettings_GetSteeringAxis(const JPH_WheelSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_WheelSettings_SetSteeringAxis(JPH_WheelSettings* settings, const JPH_Vec3* value);
+JPH_CAPI void JPH_WheelSettings_GetWheelUp(const JPH_WheelSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_WheelSettings_SetWheelUp(JPH_WheelSettings* settings, const JPH_Vec3* value);
+JPH_CAPI void JPH_WheelSettings_GetWheelForward(const JPH_WheelSettings* settings, JPH_Vec3* result);
+JPH_CAPI void JPH_WheelSettings_SetWheelForward(JPH_WheelSettings* settings, const JPH_Vec3* value);
+JPH_CAPI float JPH_WheelSettings_GetSuspensionMinLength(const JPH_WheelSettings* settings);
+JPH_CAPI void JPH_WheelSettings_SetSuspensionMinLength(JPH_WheelSettings* settings, float value);
+JPH_CAPI float JPH_WheelSettings_GetSuspensionMaxLength(const JPH_WheelSettings* settings);
+JPH_CAPI void JPH_WheelSettings_SetSuspensionMaxLength(JPH_WheelSettings* settings, float value);
+JPH_CAPI float JPH_WheelSettings_GetSuspensionPreloadLength(const JPH_WheelSettings* settings);
+JPH_CAPI void JPH_WheelSettings_SetSuspensionPreloadLength(JPH_WheelSettings* settings, float value);
+JPH_CAPI void JPH_WheelSettings_GetSuspensionSpring(const JPH_WheelSettings* settings, JPH_SpringSettings* result);
+JPH_CAPI void JPH_WheelSettings_SetSuspensionSpring(JPH_WheelSettings* settings, JPH_SpringSettings* springSettings);
+JPH_CAPI float JPH_WheelSettings_GetRadius(const JPH_WheelSettings* settings);
+JPH_CAPI void JPH_WheelSettings_SetRadius(JPH_WheelSettings* settings, float value);
+JPH_CAPI float JPH_WheelSettings_GetWidth(const JPH_WheelSettings* settings);
+JPH_CAPI void JPH_WheelSettings_SetWidth(JPH_WheelSettings* settings, float value);
+JPH_CAPI bool JPH_WheelSettings_GetEnableSuspensionForcePoint(const JPH_WheelSettings* settings);
+JPH_CAPI void JPH_WheelSettings_SetEnableSuspensionForcePoint(JPH_WheelSettings* settings, bool value);
+
 JPH_CAPI JPH_Wheel* JPH_Wheel_Create(const JPH_WheelSettings* settings);
 JPH_CAPI void JPH_Wheel_Destroy(JPH_Wheel* wheel);
+JPH_CAPI float JPH_Wheel_GetAngularVelocity(const JPH_Wheel* wheel);
+JPH_CAPI void JPH_Wheel_SetAngularVelocity(JPH_Wheel* wheel, float value);
 JPH_CAPI bool JPH_Wheel_HasContact(const JPH_Wheel* wheel);
 JPH_CAPI bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel);
 
 /* WheelWV */
+JPH_CAPI JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(void);
+JPH_CAPI float JPH_WheelSettingsWV_GetInertia(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelSettingsWV_SetInertia(JPH_WheelSettingsWV* settings, float value);
+JPH_CAPI float JPH_WheelSettingsWV_GetAngularDamping(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelSettingsWV_SetAngularDamping(JPH_WheelSettingsWV* settings, float value);
+JPH_CAPI float JPH_WheelSettingsWV_GetMaxSteerAngle(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelSettingsWV_SetMaxSteerAngle(JPH_WheelSettingsWV* settings, float value);
+//JPH_CAPI JPH_LinearCurve* JPH_WheelSettingsWV_GetLongitudinalFriction(const JPH_WheelSettingsWV* settings);
+//JPH_CAPI void JPH_WheelSettingsWV_SetLongitudinalFriction(JPH_WheelSettingsWV* settings, const JPH_LinearCurve* value);
+//JPH_CAPI JPH_LinearCurve* JPH_WheelSettingsWV_GetLateralFriction(const JPH_WheelSettingsWV* settings);
+//JPH_CAPI void JPH_WheelSettingsWV_SetLateralFriction(JPH_WheelSettingsWV* settings, const JPH_LinearCurve* value);
+JPH_CAPI float JPH_WheelSettingsWV_GetMaxBrakeTorque(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelSettingsWV_SetMaxBrakeTorque(JPH_WheelSettingsWV* settings, float value);
+JPH_CAPI float JPH_WheelSettingsWV_GetMaxHandBrakeTorque(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelSettingsWV_SetMaxHandBrakeTorque(JPH_WheelSettingsWV* settings, float value);
+
 JPH_CAPI JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings);
+
+/* VehicleAntiRollBar */
+JPH_CAPI void JPH_VehicleAntiRollBar_Init(JPH_VehicleAntiRollBar* antiRollBar);
 
 /* VehicleEngine */
 JPH_CAPI void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings);
