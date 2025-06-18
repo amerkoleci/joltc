@@ -70,9 +70,9 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Body/BodyLockMulti.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
-#include "Jolt/Physics/Vehicle/VehicleController.h"
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
+#include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
 
 #include <iostream>
 #include <cstdarg>
@@ -150,19 +150,29 @@ DEF_MAP_DECL(GroupFilterTable, JPH_GroupFilterTable)
 
 // Vehicle
 DEF_MAP_DECL(WheelSettings, JPH_WheelSettings)
-DEF_MAP_DECL(WheelSettingsWV, JPH_WheelSettingsWV)
 DEF_MAP_DECL(Wheel, JPH_Wheel)
-DEF_MAP_DECL(WheelWV, JPH_WheelWV)
 
 DEF_MAP_DECL(VehicleControllerSettings, JPH_VehicleControllerSettings)
 DEF_MAP_DECL(VehicleController, JPH_VehicleController)
 
+DEF_MAP_DECL(WheelSettingsWV, JPH_WheelSettingsWV)
+DEF_MAP_DECL(WheelWV, JPH_WheelWV)
 DEF_MAP_DECL(WheeledVehicleControllerSettings, JPH_WheeledVehicleControllerSettings)
 DEF_MAP_DECL(WheeledVehicleController, JPH_WheeledVehicleController)
 
 DEF_MAP_DECL(MotorcycleControllerSettings, JPH_MotorcycleControllerSettings)
 DEF_MAP_DECL(MotorcycleController, JPH_MotorcycleController)
 
+DEF_MAP_DECL(WheelSettingsTV, JPH_WheelSettingsTV)
+DEF_MAP_DECL(WheelTV, JPH_WheelTV)
+DEF_MAP_DECL(TrackedVehicleControllerSettings, JPH_TrackedVehicleControllerSettings)
+DEF_MAP_DECL(TrackedVehicleController, JPH_TrackedVehicleController)
+
+DEF_MAP_DECL(VehicleTransmissionSettings, JPH_VehicleTransmissionSettings)
+DEF_MAP_DECL(VehicleCollisionTester, JPH_VehicleCollisionTester)
+DEF_MAP_DECL(VehicleCollisionTesterRay, JPH_VehicleCollisionTesterRay)
+DEF_MAP_DECL(VehicleCollisionTesterCastSphere, JPH_VehicleCollisionTesterCastSphere)
+DEF_MAP_DECL(VehicleCollisionTesterCastCylinder, JPH_VehicleCollisionTesterCastCylinder)
 DEF_MAP_DECL(VehicleConstraint, JPH_VehicleConstraint)
 
 // Callback for traces, connect this to your own trace function if you have one
@@ -9322,9 +9332,84 @@ void JPH_Wheel_SetAngularVelocity(JPH_Wheel* wheel, float value)
 	AsWheel(wheel)->SetAngularVelocity(value);
 }
 
+float JPH_Wheel_GetRotationAngle(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetRotationAngle();
+}
+
+void JPH_Wheel_SetRotationAngle(JPH_Wheel* wheel, float value)
+{
+	AsWheel(wheel)->SetRotationAngle(value);
+}
+
+float JPH_Wheel_GetSteerAngle(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetSteerAngle();
+}
+
+void JPH_Wheel_SetSteerAngle(JPH_Wheel* wheel, float value)
+{
+	AsWheel(wheel)->SetSteerAngle(value);
+}
+
 bool JPH_Wheel_HasContact(const JPH_Wheel* wheel)
 {
 	return AsWheel(wheel)->HasContact();
+}
+
+JPH_BodyID JPH_Wheel_GetContactBodyID(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetContactBodyID().GetIndexAndSequenceNumber();
+}
+
+JPH_SubShapeID JPH_Wheel_GetContactSubShapeID(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetContactSubShapeID().GetValue();
+}
+
+void JPH_Wheel_GetContactPosition(const JPH_Wheel* wheel, JPH_RVec3* result)
+{
+	FromJolt(AsWheel(wheel)->GetContactPosition(), result);
+}
+
+void JPH_Wheel_GetContactPointVelocity(const JPH_Wheel* wheel, JPH_Vec3* result)
+{
+	FromJolt(AsWheel(wheel)->GetContactPointVelocity(), result);
+}
+
+void JPH_Wheel_GetContactNormal(const JPH_Wheel* wheel, JPH_Vec3* result)
+{
+	FromJolt(AsWheel(wheel)->GetContactNormal(), result);
+}
+
+void JPH_Wheel_GetContactLongitudinal(const JPH_Wheel* wheel, JPH_Vec3* result)
+{
+	FromJolt(AsWheel(wheel)->GetContactLongitudinal(), result);
+}
+
+void JPH_Wheel_GetContactLateral(const JPH_Wheel* wheel, JPH_Vec3* result)
+{
+	FromJolt(AsWheel(wheel)->GetContactLateral(), result);
+}
+
+float JPH_Wheel_GetSuspensionLength(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetSuspensionLength();
+}
+
+float JPH_Wheel_GetSuspensionLambda(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetSuspensionLambda();
+}
+
+float JPH_Wheel_GetLongitudinalLambda(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetLongitudinalLambda();
+}
+
+float JPH_Wheel_GetLateralLambda(const JPH_Wheel* wheel)
+{
+	return AsWheel(wheel)->GetLateralLambda();
 }
 
 bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel)
@@ -9332,71 +9417,47 @@ bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel)
 	return AsWheel(wheel)->HasHitHardPoint();
 }
 
-/* WheelWV */
-JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(void)
+
+/* WheelTV */
+JPH_WheelSettingsTV* JPH_WheelSettingsTV_Create(void)
 {
-	auto settings = new JPH::WheelSettingsWV();
+	auto settings = new JPH::WheelSettingsTV();
 	settings->AddRef();
 
-	return ToWheelSettingsWV(settings);
+	return ToWheelSettingsTV(settings);
 }
 
-float JPH_WheelSettingsWV_GetInertia(const JPH_WheelSettingsWV* settings)
+float JPH_WheelSettingsTV_GetLongitudinalFriction(const JPH_WheelSettingsTV* settings)
 {
-	return AsWheelSettingsWV(settings)->mInertia;
+	return AsWheelSettingsTV(settings)->mLongitudinalFriction;
 }
 
-void JPH_WheelSettingsWV_SetInertia(JPH_WheelSettingsWV* settings, float value)
+void JPH_WheelSettingsTV_SetLongitudinalFriction(JPH_WheelSettingsTV* settings, float value)
 {
-	AsWheelSettingsWV(settings)->mInertia = value;
+	AsWheelSettingsTV(settings)->mLongitudinalFriction = value;
 }
 
-float JPH_WheelSettingsWV_GetAngularDamping(const JPH_WheelSettingsWV* settings)
+float JPH_WheelSettingsTV_GetLateralFriction(const JPH_WheelSettingsTV* settings)
 {
-	return AsWheelSettingsWV(settings)->mAngularDamping;
+	return AsWheelSettingsTV(settings)->mLateralFriction;
 }
 
-void JPH_WheelSettingsWV_SetAngularDamping(JPH_WheelSettingsWV* settings, float value)
+void JPH_WheelSettingsTV_SetLateralFriction(JPH_WheelSettingsTV* settings, float value)
 {
-	AsWheelSettingsWV(settings)->mAngularDamping = value;
+	AsWheelSettingsTV(settings)->mLateralFriction = value;
 }
 
-float JPH_WheelSettingsWV_GetMaxSteerAngle(const JPH_WheelSettingsWV* settings)
-{
-	return AsWheelSettingsWV(settings)->mMaxSteerAngle;
-}
-
-void JPH_WheelSettingsWV_SetMaxSteerAngle(JPH_WheelSettingsWV* settings, float value)
-{
-	AsWheelSettingsWV(settings)->mMaxSteerAngle = value;
-}
-
-float JPH_WheelSettingsWV_GetMaxBrakeTorque(const JPH_WheelSettingsWV* settings)
-{
-	return AsWheelSettingsWV(settings)->mMaxBrakeTorque;
-}
-
-void JPH_WheelSettingsWV_SetMaxBrakeTorque(JPH_WheelSettingsWV* settings, float value)
-{
-	AsWheelSettingsWV(settings)->mMaxBrakeTorque = value;
-}
-
-float JPH_WheelSettingsWV_GetMaxHandBrakeTorque(const JPH_WheelSettingsWV* settings)
-{
-	return AsWheelSettingsWV(settings)->mMaxHandBrakeTorque;
-}
-
-void JPH_WheelSettingsWV_SetMaxHandBrakeTorque(JPH_WheelSettingsWV* settings, float value)
-{
-	AsWheelSettingsWV(settings)->mMaxHandBrakeTorque = value;
-}
-
-JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings)
+JPH_WheelTV* JPH_WheelTV_Create(const JPH_WheelSettingsTV* settings)
 {
 	JPH_ASSERT(settings);
 
-	auto wheel = new JPH::WheelWV(*AsWheelSettingsWV(settings));
-	return ToWheelWV(wheel);
+	auto wheel = new JPH::WheelTV(*AsWheelSettingsTV(settings));
+	return ToWheelTV(wheel);
+}
+
+const JPH_WheelSettingsTV* JPH_WheelTV_GetSettings(const JPH_WheelTV* wheel)
+{
+	return ToWheelSettingsTV(AsWheelTV(wheel)->GetSettings());
 }
 
 /* VehicleAntiRollBar */
@@ -9435,91 +9496,213 @@ void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings, const
 	joltSettings->mAngularDamping = settings->angularDamping;
 }
 
-JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(
-	JPH_TransmissionMode	mode,
-	//Array<float>			gearRatios,			// NOTE: BGE: just using default values for now.
-	//Array<float>			reverseGearRatios,	// NOTE: BGE: just using default values for now.
-	float					switchTime,
-	float					clutchReleaseTime,
-	float					switchLatency,
-	float					shiftUpRPM,
-	float					shiftDownRPM,
-	float					clutchStrength)
+/* VehicleDifferentialSettings */
+void JPH_VehicleDifferentialSettings_Init(JPH_VehicleDifferentialSettings* settings)
 {
-	auto settings = new JPH::VehicleTransmissionSettings();
-	settings->mMode = static_cast<JPH::ETransmissionMode>(mode);
-	//settings->mGearRatios = ToJolt(gearRatios);				// NOTE: BGE: just using default values for now.
-	//settings->mReverseGearRatios = ToJolt(reverseGearRatios);	// NOTE: BGE: just using default values for now.
-	settings->mSwitchTime = switchTime;
-	settings->mClutchReleaseTime = clutchReleaseTime;
-	settings->mSwitchLatency = switchLatency;
-	settings->mShiftUpRPM = shiftUpRPM;
-	settings->mShiftDownRPM = shiftDownRPM;
-	settings->mClutchStrength = clutchStrength;
-	return reinterpret_cast<JPH_VehicleTransmissionSettings*>(settings);
+	JPH_ASSERT(settings);
+
+	VehicleDifferentialSettings joltSettings{};
+	settings->leftWheel = joltSettings.mLeftWheel;
+	settings->rightWheel = joltSettings.mRightWheel;
+	settings->differentialRatio = joltSettings.mDifferentialRatio;
+	settings->leftRightSplit = joltSettings.mLeftRightSplit;
+	settings->limitedSlipRatio = joltSettings.mLimitedSlipRatio;
+	settings->engineTorqueRatio = joltSettings.mEngineTorqueRatio;
+}
+
+static void JPH_VehicleDifferentialSettings_ToJolt(VehicleDifferentialSettings* joltSettings, const JPH_VehicleDifferentialSettings* settings)
+{
+	// Copy settings to jolt 
+	joltSettings->mLeftWheel = settings->leftWheel;
+	joltSettings->mRightWheel = settings->rightWheel;
+	joltSettings->mDifferentialRatio = settings->differentialRatio;
+	joltSettings->mLeftRightSplit = settings->leftRightSplit;
+	joltSettings->mLimitedSlipRatio = settings->limitedSlipRatio;
+	joltSettings->mEngineTorqueRatio = settings->engineTorqueRatio;
+}
+
+
+/* VehicleTransmission */
+JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(void)
+{
+	auto settings = new VehicleTransmissionSettings();
+	return ToVehicleTransmissionSettings(settings);
 }
 
 void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings)
 {
 	if (settings)
 	{
-		delete reinterpret_cast<JPH::VehicleTransmissionSettings*>(settings);
+		delete AsVehicleTransmissionSettings(settings);
 	}
+}
+
+JPH_TransmissionMode JPH_VehicleTransmissionSettings_GetMode(const JPH_VehicleTransmissionSettings* settings)
+{
+	return static_cast<JPH_TransmissionMode>(AsVehicleTransmissionSettings(settings)->mMode);
+}
+
+void JPH_VehicleTransmissionSettings_SetMode(JPH_VehicleTransmissionSettings* settings, JPH_TransmissionMode value)
+{
+	AsVehicleTransmissionSettings(settings)->mMode = static_cast<JPH::ETransmissionMode>(value);
+}
+
+uint32_t JPH_VehicleTransmissionSettings_GetGearRatioCount(const JPH_VehicleTransmissionSettings* settings)
+{
+	return static_cast<uint32_t>(AsVehicleTransmissionSettings(settings)->mGearRatios.size());
+}
+
+float JPH_VehicleTransmissionSettings_GetGearRatio(const JPH_VehicleTransmissionSettings* settings, uint32_t index)
+{
+	return AsVehicleTransmissionSettings(settings)->mGearRatios[index];
+}
+
+void JPH_VehicleTransmissionSettings_SetGearRatio(JPH_VehicleTransmissionSettings* settings, uint32_t index, float value)
+{
+	AsVehicleTransmissionSettings(settings)->mGearRatios[index] = value;
+}
+
+void JPH_VehicleTransmissionSettings_SetGearRatios(JPH_VehicleTransmissionSettings* settings, const float* values, uint32_t count)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(values);
+
+	AsVehicleTransmissionSettings(settings)->mGearRatios.resize(count);
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		AsVehicleTransmissionSettings(settings)->mGearRatios[i] = values[i];
+	}
+}
+
+uint32_t JPH_VehicleTransmissionSettings_GetReverseGearRatioCount(const JPH_VehicleTransmissionSettings* settings)
+{
+	return static_cast<uint32_t>(AsVehicleTransmissionSettings(settings)->mReverseGearRatios.size());
+}
+
+float JPH_VehicleTransmissionSettings_GetReverseGearRatio(const JPH_VehicleTransmissionSettings* settings, uint32_t index)
+{
+	return AsVehicleTransmissionSettings(settings)->mReverseGearRatios[index];
+}
+
+void JPH_VehicleTransmissionSettings_SetReverseGearRatio(JPH_VehicleTransmissionSettings* settings, uint32_t index, float value)
+{
+	AsVehicleTransmissionSettings(settings)->mReverseGearRatios[index] = value;
+}
+
+void JPH_VehicleTransmissionSettings_SetReverseGearRatios(JPH_VehicleTransmissionSettings* settings, const float* values, uint32_t count)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(values);
+
+	AsVehicleTransmissionSettings(settings)->mReverseGearRatios.resize(count);
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		AsVehicleTransmissionSettings(settings)->mReverseGearRatios[i] = values[i];
+	}
+}
+
+float JPH_VehicleTransmissionSettings_GetSwitchTime(const JPH_VehicleTransmissionSettings* settings)
+{
+	return AsVehicleTransmissionSettings(settings)->mSwitchTime;
+}
+
+void JPH_VehicleTransmissionSettings_SetSwitchTime(JPH_VehicleTransmissionSettings* settings, float value)
+{
+	AsVehicleTransmissionSettings(settings)->mSwitchTime = value;
+}
+
+float JPH_VehicleTransmissionSettings_GetClutchReleaseTime(const JPH_VehicleTransmissionSettings* settings)
+{
+	return AsVehicleTransmissionSettings(settings)->mClutchReleaseTime;
+}
+
+void JPH_VehicleTransmissionSettings_SetClutchReleaseTime(JPH_VehicleTransmissionSettings* settings, float value)
+{
+	AsVehicleTransmissionSettings(settings)->mClutchReleaseTime = value;
+}
+
+float JPH_VehicleTransmissionSettings_GetSwitchLatency(const JPH_VehicleTransmissionSettings* settings)
+{
+	return AsVehicleTransmissionSettings(settings)->mSwitchLatency;
+}
+
+void JPH_VehicleTransmissionSettings_SetSwitchLatency(JPH_VehicleTransmissionSettings* settings, float value)
+{
+	AsVehicleTransmissionSettings(settings)->mSwitchLatency = value;
+}
+
+float JPH_VehicleTransmissionSettings_GetShiftUpRPM(const JPH_VehicleTransmissionSettings* settings)
+{
+	return AsVehicleTransmissionSettings(settings)->mShiftUpRPM;
+}
+
+void JPH_VehicleTransmissionSettings_SetShiftUpRPM(JPH_VehicleTransmissionSettings* settings, float value)
+{
+	AsVehicleTransmissionSettings(settings)->mShiftUpRPM = value;
+}
+
+float JPH_VehicleTransmissionSettings_GetShiftDownRPM(const JPH_VehicleTransmissionSettings* settings)
+{
+	return AsVehicleTransmissionSettings(settings)->mShiftDownRPM;
+}
+
+void JPH_VehicleTransmissionSettings_SetShiftDownRPM(JPH_VehicleTransmissionSettings* settings, float value)
+{
+	AsVehicleTransmissionSettings(settings)->mShiftDownRPM = value;
+}
+
+float JPH_VehicleTransmissionSettings_GetClutchStrength(const JPH_VehicleTransmissionSettings* settings)
+{
+	return AsVehicleTransmissionSettings(settings)->mClutchStrength;
+}
+
+void JPH_VehicleTransmissionSettings_SetClutchStrength(JPH_VehicleTransmissionSettings* settings, float value)
+{
+	AsVehicleTransmissionSettings(settings)->mClutchStrength = value;
+}
+
+/* VehicleColliionTester */
+void JPH_VehicleCollisionTester_Destroy(JPH_VehicleCollisionTester* tester)
+{
+	if (tester)
+	{
+		auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTester*>(tester);
+		joltTester->Release();
+	}
+}
+
+JPH_ObjectLayer JPH_VehicleCollisionTester_GetObjectLayer(const JPH_VehicleCollisionTester* tester)
+{
+	return static_cast<JPH_ObjectLayer>(AsVehicleCollisionTester(tester)->GetObjectLayer());
+}
+
+void JPH_VehicleCollisionTester_SetObjectLayer(JPH_VehicleCollisionTester* tester, JPH_ObjectLayer value)
+{
+	AsVehicleCollisionTester(tester)->SetObjectLayer(static_cast<JPH::ObjectLayer>(value));
 }
 
 JPH_VehicleCollisionTesterRay* JPH_VehicleCollisionTesterRay_Create(JPH_ObjectLayer layer, const JPH_Vec3* up, float maxSlopeAngle)
 {
-	JPH_ASSERT(up);
-
-	auto tester = new JPH::VehicleCollisionTesterRay(static_cast<JPH::ObjectLayer>(layer), ToJolt(up), maxSlopeAngle);
+	auto tester = new VehicleCollisionTesterRay(static_cast<JPH::ObjectLayer>(layer), ToJolt(up), maxSlopeAngle);
 	tester->AddRef();
 
-	return reinterpret_cast<JPH_VehicleCollisionTesterRay*>(tester);
-}
-
-void JPH_VehicleCollisionTesterRay_Destroy(JPH_VehicleCollisionTesterRay* tester)
-{
-	if (tester)
-	{
-		auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterRay*>(tester);
-		joltTester->Release();
-	}
+	return ToVehicleCollisionTesterRay(tester);
 }
 
 JPH_VehicleCollisionTesterCastSphere* JPH_VehicleCollisionTesterCastSphere_Create(JPH_ObjectLayer layer, float radius, const JPH_Vec3* up, float maxSlopeAngle)
 {
-	JPH_ASSERT(up);
-
-	auto tester = new JPH::VehicleCollisionTesterCastSphere(static_cast<JPH::ObjectLayer>(layer), radius, ToJolt(up), maxSlopeAngle);
+	auto tester = new VehicleCollisionTesterCastSphere(static_cast<JPH::ObjectLayer>(layer), radius, ToJolt(up), maxSlopeAngle);
 	tester->AddRef();
 
-	return reinterpret_cast<JPH_VehicleCollisionTesterCastSphere*>(tester);
-}
-
-void JPH_VehicleCollisionTesterCastSphere_Destroy(JPH_VehicleCollisionTesterCastSphere* tester)
-{
-	if (tester)
-	{
-		auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterCastSphere*>(tester);
-		joltTester->Release();
-	}
+	return ToVehicleCollisionTesterCastSphere(tester);
 }
 
 JPH_VehicleCollisionTesterCastCylinder* JPH_VehicleCollisionTesterCastCylinder_Create(JPH_ObjectLayer layer, float convexRadiusFraction)
 {
-	auto tester = new JPH::VehicleCollisionTesterCastCylinder(static_cast<JPH::ObjectLayer>(layer), convexRadiusFraction);
+	auto tester = new VehicleCollisionTesterCastCylinder(static_cast<JPH::ObjectLayer>(layer), convexRadiusFraction);
 	tester->AddRef();
 
-	return reinterpret_cast<JPH_VehicleCollisionTesterCastCylinder*>(tester);
-}
-
-void JPH_VehicleCollisionTesterCastCylinder_Destroy(JPH_VehicleCollisionTesterCastCylinder* tester)
-{
-	if (tester)
-	{
-		auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterCastCylinder*>(tester);
-		joltTester->Release();
-	}
+	return ToVehicleCollisionTesterCastCylinder(tester);
 }
 
 /* VehicleConstraintSettings */
@@ -9589,10 +9772,10 @@ JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_Ve
 	JPH_ASSERT(body);
 	JPH_ASSERT(settings);
 
-	JPH::VehicleConstraintSettings joltSettings;
+	VehicleConstraintSettings joltSettings;
 	JPH_VehicleConstraintSettings_ToJolt(&joltSettings, settings);
 
-	auto vehicleConstraint = new JPH::VehicleConstraint(*AsBody(body), joltSettings);
+	auto vehicleConstraint = new VehicleConstraint(*AsBody(body), joltSettings);
 	vehicleConstraint->AddRef();
 
 	return ToVehicleConstraint(vehicleConstraint);
@@ -9606,134 +9789,243 @@ void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint)
 	}
 }
 
-JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
+JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
 {
 	JPH_ASSERT(constraint);
 
-	auto joltContraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
-	auto joltListener = static_cast<JPH::PhysicsStepListener*>(joltContraint);
+	auto joltListener = static_cast<JPH::PhysicsStepListener*>(AsVehicleConstraint(constraint));
 	return reinterpret_cast<JPH_PhysicsStepListener*>(joltListener);
 }
 
-JPH_CAPI JPH_WheeledVehicleController* JPH_VehicleConstraint_GetWheeledVehicleController(JPH_VehicleConstraint* constraint)
+void JPH_VehicleConstraint_SetMaxPitchRollAngle(JPH_VehicleConstraint* constraint, float maxPitchRollAngle)
 {
-	JPH_ASSERT(constraint);
-
-	auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
-	auto controller = StaticCast<WheeledVehicleController>(joltConstraint->GetController()); // NOTE: BGE: this should really be a DynamicCast.
-	return reinterpret_cast<JPH_WheeledVehicleController*>(controller);
+	AsVehicleConstraint(constraint)->SetMaxPitchRollAngle(maxPitchRollAngle);
 }
 
 void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester)
 {
-	JPH_ASSERT(constraint);
-	JPH_ASSERT(tester);
+	AsVehicleConstraint(constraint)->SetVehicleCollisionTester(AsVehicleCollisionTester(tester));
+}
 
-	auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTester*>(tester);
-	AsVehicleConstraint(constraint)->SetVehicleCollisionTester(joltTester);
+void JPH_VehicleConstraint_OverrideGravity(JPH_VehicleConstraint* constraint, const JPH_Vec3* value)
+{
+	AsVehicleConstraint(constraint)->OverrideGravity(ToJolt(value));
+}
+
+bool JPH_VehicleConstraint_IsGravityOverridden(const JPH_VehicleConstraint* constraint)
+{
+	return AsVehicleConstraint(constraint)->IsGravityOverridden();
+}
+
+void JPH_VehicleConstraint_GetGravityOverride(const JPH_VehicleConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsVehicleConstraint(constraint)->GetGravityOverride(), result);
+}
+
+void JPH_VehicleConstraint_ResetGravityOverride(JPH_VehicleConstraint* constraint)
+{
+	AsVehicleConstraint(constraint)->ResetGravityOverride();
+}
+
+void JPH_VehicleConstraint_GetLocalForward(const JPH_VehicleConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsVehicleConstraint(constraint)->GetLocalForward(), result);
+}
+
+void JPH_VehicleConstraint_GetLocalUp(const JPH_VehicleConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsVehicleConstraint(constraint)->GetLocalUp(), result);
+}
+
+void JPH_VehicleConstraint_GetWorldUp(const JPH_VehicleConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsVehicleConstraint(constraint)->GetWorldUp(), result);
+}
+
+const JPH_Body* JPH_VehicleConstraint_GetVehicleBody(const JPH_VehicleConstraint* constraint)
+{
+	return ToBody(AsVehicleConstraint(constraint)->GetVehicleBody());
+}
+
+JPH_VehicleController* JPH_VehicleConstraint_GetController(JPH_VehicleConstraint* constraint)
+{
+	return ToVehicleController(AsVehicleConstraint(constraint)->GetController());
+}
+
+uint32_t JPH_VehicleConstraint_GetWheelsCount(JPH_VehicleConstraint* constraint)
+{
+	return static_cast<uint32_t>(AsVehicleConstraint(constraint)->GetWheels().size());
+}
+
+JPH_Wheel* JPH_VehicleConstraint_GetWheel(JPH_VehicleConstraint* constraint, uint32_t index)
+{
+	return ToWheel(AsVehicleConstraint(constraint)->GetWheel(index));
+}
+
+/* VehicleControllerSettings */
+void JPH_VehicleControllerSettings_Destroy(JPH_VehicleControllerSettings* settings)
+{
+	if (settings)
+	{
+		AsVehicleControllerSettings(settings)->Release();
+	}
+}
+
+const JPH_VehicleConstraint* JPH_VehicleController_GetConstraint(JPH_VehicleController* controller)
+{
+	auto constraint = &AsVehicleController(controller)->GetConstraint();
+	return ToVehicleConstraint(constraint);
+}
+
+/* ---- WheelSettingsWV/WheelWV/WheeledVehicleController ---- */
+JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(void)
+{
+	auto settings = new JPH::WheelSettingsWV();
+	settings->AddRef();
+
+	return ToWheelSettingsWV(settings);
+}
+
+float JPH_WheelSettingsWV_GetInertia(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mInertia;
+}
+
+void JPH_WheelSettingsWV_SetInertia(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mInertia = value;
+}
+
+float JPH_WheelSettingsWV_GetAngularDamping(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mAngularDamping;
+}
+
+void JPH_WheelSettingsWV_SetAngularDamping(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mAngularDamping = value;
+}
+
+float JPH_WheelSettingsWV_GetMaxSteerAngle(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mMaxSteerAngle;
+}
+
+void JPH_WheelSettingsWV_SetMaxSteerAngle(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mMaxSteerAngle = value;
+}
+
+float JPH_WheelSettingsWV_GetMaxBrakeTorque(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mMaxBrakeTorque;
+}
+
+void JPH_WheelSettingsWV_SetMaxBrakeTorque(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mMaxBrakeTorque = value;
+}
+
+float JPH_WheelSettingsWV_GetMaxHandBrakeTorque(const JPH_WheelSettingsWV* settings)
+{
+	return AsWheelSettingsWV(settings)->mMaxHandBrakeTorque;
+}
+
+void JPH_WheelSettingsWV_SetMaxHandBrakeTorque(JPH_WheelSettingsWV* settings, float value)
+{
+	AsWheelSettingsWV(settings)->mMaxHandBrakeTorque = value;
+}
+
+JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings)
+{
+	JPH_ASSERT(settings);
+
+	auto wheel = new JPH::WheelWV(*AsWheelSettingsWV(settings));
+	return ToWheelWV(wheel);
+}
+
+const JPH_WheelSettingsWV* JPH_WheelWV_GetSettings(const JPH_WheelWV* wheel)
+{
+	return ToWheelSettingsWV(AsWheelWV(wheel)->GetSettings());
+}
+
+void JPH_WheelWV_ApplyTorque(JPH_WheelWV* wheel, float torque, float deltaTime)
+{
+	AsWheelWV(wheel)->ApplyTorque(torque, deltaTime);
 }
 
 JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
 	const JPH_VehicleEngineSettings* engine,
 	const JPH_VehicleTransmissionSettings* transmission,
-	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
+	uint32_t								differentialsCount,
+	const JPH_VehicleDifferentialSettings** differentials,
 	float									differentialLimitedSlipRatio)
 {
 	JPH_ASSERT(engine);
 	JPH_ASSERT(transmission);
 
-
-	auto settings = new JPH::WheeledVehicleControllerSettings();
+	auto settings = new WheeledVehicleControllerSettings();
 	JPH_VehicleEngineSettings_ToJolt(&settings->mEngine, engine);
-	settings->mTransmission = *reinterpret_cast<const JPH::VehicleTransmissionSettings*>(transmission);
-	settings->mDifferentials.resize(1); // NOTE: BGE: just using default values for now.
-	settings->mDifferentials[0].mLeftWheel = 0;
-	settings->mDifferentials[0].mRightWheel = 1;
+	settings->mTransmission = *AsVehicleTransmissionSettings(transmission);
+
+	settings->mDifferentials.resize(differentialsCount); 
+	for (uint32_t i = 0; i < differentialsCount; ++i)
+	{
+		VehicleDifferentialSettings joltDifferential;
+		JPH_VehicleDifferentialSettings_ToJolt(&joltDifferential, differentials[i]);
+
+		settings->mDifferentials[i] = joltDifferential;
+	}
+
 	settings->mDifferentialLimitedSlipRatio = differentialLimitedSlipRatio;
 	settings->AddRef();
 
 	return ToWheeledVehicleControllerSettings(settings);
 }
 
-void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings)
-{
-	if (settings)
-	{
-		AsWheeledVehicleControllerSettings(settings)->Release();
-	}
-}
-
-JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleController* controller)
-{
-	JPH_ASSERT(controller);
-
-	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
-	auto constraint = &joltController->GetConstraint();
-	return reinterpret_cast<JPH_Constraint*>(constraint);
-}
-
 void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* controller, float forward)
 {
-	JPH_ASSERT(controller);
-
-	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
-	joltController->SetForwardInput(forward);
+	AsWheeledVehicleController(controller)->SetForwardInput(forward);
 }
 
 float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* controller)
 {
-	JPH_ASSERT(controller);
-
-	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
-	return joltController->GetForwardInput();
+	return AsWheeledVehicleController(controller)->GetForwardInput();
 }
 
 void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* controller, float right)
 {
-	JPH_ASSERT(controller);
-
-	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
-	joltController->SetRightInput(right);
+	AsWheeledVehicleController(controller)->SetRightInput(right);
 }
 
 float JPH_WheeledVehicleController_GetRightInput(const JPH_WheeledVehicleController* controller)
 {
-	JPH_ASSERT(controller);
-
-	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
-	return joltController->GetRightInput();
+	return AsWheeledVehicleController(controller)->GetRightInput();
 }
 
 void JPH_WheeledVehicleController_SetBrakeInput(JPH_WheeledVehicleController* controller, float brake)
 {
-	JPH_ASSERT(controller);
-
-	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
-	joltController->SetBrakeInput(brake);
+	AsWheeledVehicleController(controller)->SetBrakeInput(brake);
 }
 
 float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehicleController* controller)
 {
-	JPH_ASSERT(controller);
-
-	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
-	return joltController->GetBrakeInput();
+	return AsWheeledVehicleController(controller)->GetBrakeInput();
 }
 
 void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* controller, float handBrake)
 {
-	JPH_ASSERT(controller);
-
-	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
-	joltController->SetHandBrakeInput(handBrake);
+	AsWheeledVehicleController(controller)->SetHandBrakeInput(handBrake);
 }
 
 float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* controller)
 {
-	JPH_ASSERT(controller);
+	return AsWheeledVehicleController(controller)->GetHandBrakeInput();
+}
 
-	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
-	return joltController->GetHandBrakeInput();
+float JPH_WheeledVehicleController_GetWheelSpeedAtClutch(const JPH_WheeledVehicleController* controller)
+{
+	return AsWheeledVehicleController(controller)->GetWheelSpeedAtClutch();
 }
 
 JPH_SUPPRESS_WARNING_POP

@@ -2562,13 +2562,13 @@ JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Bod
 /* Vehicle */
 typedef struct JPH_WheelSettings						JPH_WheelSettings;
 typedef struct JPH_WheelSettingsWV						JPH_WheelSettingsWV;	/* Inherits JPH_WheelSettings */
+typedef struct JPH_WheelSettingsTV						JPH_WheelSettingsTV;	/* Inherits JPH_WheelSettings */
 
 typedef struct JPH_Wheel								JPH_Wheel;
 typedef struct JPH_WheelWV								JPH_WheelWV;			/* Inherits JPH_Wheel */
-
+typedef struct JPH_WheelTV								JPH_WheelTV;			/* Inherits JPH_Wheel */
 
 typedef struct JPH_VehicleTransmissionSettings			JPH_VehicleTransmissionSettings;
-//typedef struct JPH_VehicleDifferentialSettings		JPH_VehicleDifferentialSettings; // NOTE: BGE: just using default values for now.
 typedef struct JPH_VehicleCollisionTester				JPH_VehicleCollisionTester;
 typedef struct JPH_VehicleCollisionTesterRay			JPH_VehicleCollisionTesterRay;			/* Inherits JPH_VehicleCollisionTester */
 typedef struct JPH_VehicleCollisionTesterCastSphere		JPH_VehicleCollisionTesterCastSphere;	/* Inherits JPH_VehicleCollisionTester */
@@ -2577,11 +2577,14 @@ typedef struct JPH_VehicleConstraint					JPH_VehicleConstraint;					/* Inherits 
 
 typedef struct JPH_VehicleControllerSettings			JPH_VehicleControllerSettings;
 typedef struct JPH_WheeledVehicleControllerSettings		JPH_WheeledVehicleControllerSettings;	/* Inherits JPH_VehicleControllerSettings */
-typedef struct JPH_MotorcycleControllerSettings			JPH_MotorcycleControllerSettings;		/* Inherits JPH_VehicleControllerSettings */
+typedef struct JPH_MotorcycleControllerSettings			JPH_MotorcycleControllerSettings;		/* Inherits JPH_WheeledVehicleControllerSettings */
+typedef struct JPH_TrackedVehicleControllerSettings		JPH_TrackedVehicleControllerSettings;	/* Inherits JPH_VehicleControllerSettings */
+
+typedef struct JPH_WheeledVehicleController				JPH_WheeledVehicleController;	/* Inherits JPH_VehicleController */
+typedef struct JPH_MotorcycleController					JPH_MotorcycleController;		/* Inherits JPH_WheeledVehicleController */
+typedef struct JPH_TrackedVehicleController				JPH_TrackedVehicleController;	/* Inherits JPH_VehicleController */
 
 typedef struct JPH_VehicleController					JPH_VehicleController;
-typedef struct JPH_WheeledVehicleController				JPH_WheeledVehicleController; /* Inherits JPH_VehicleController */
-typedef struct JPH_MotorcycleController					JPH_MotorcycleController; /* Inherits JPH_VehicleController */
 
 typedef struct JPH_VehicleAntiRollBar {
 	int						leftWheel;
@@ -2611,13 +2614,36 @@ typedef struct JPH_VehicleEngineSettings {
 	float					angularDamping;
 } JPH_VehicleEngineSettings;
 
+typedef struct JPH_VehicleDifferentialSettings {
+	int		leftWheel;
+	int		rightWheel;
+	float	differentialRatio;
+	float	leftRightSplit;
+	float	limitedSlipRatio;
+	float	engineTorqueRatio;
+} JPH_VehicleDifferentialSettings;
+
 JPH_CAPI void JPH_VehicleConstraintSettings_Init(JPH_VehicleConstraintSettings* settings);
 
 JPH_CAPI JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* settings);
 JPH_CAPI void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint);
 JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint);
-JPH_CAPI JPH_WheeledVehicleController* JPH_VehicleConstraint_GetWheeledVehicleController(JPH_VehicleConstraint* constraint);
+JPH_CAPI void JPH_VehicleConstraint_SetMaxPitchRollAngle(JPH_VehicleConstraint* constraint, float maxPitchRollAngle);
 JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
+
+JPH_CAPI void JPH_VehicleConstraint_OverrideGravity(JPH_VehicleConstraint* constraint, const JPH_Vec3* value);
+JPH_CAPI bool JPH_VehicleConstraint_IsGravityOverridden(const JPH_VehicleConstraint* constraint);
+JPH_CAPI void JPH_VehicleConstraint_GetGravityOverride(const JPH_VehicleConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_VehicleConstraint_ResetGravityOverride(JPH_VehicleConstraint* constraint);
+
+JPH_CAPI void JPH_VehicleConstraint_GetLocalForward(const JPH_VehicleConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_VehicleConstraint_GetLocalUp(const JPH_VehicleConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_VehicleConstraint_GetWorldUp(const JPH_VehicleConstraint* constraint, JPH_Vec3* result);
+
+JPH_CAPI const JPH_Body* JPH_VehicleConstraint_GetVehicleBody(const JPH_VehicleConstraint* constraint);
+JPH_CAPI JPH_VehicleController* JPH_VehicleConstraint_GetController(JPH_VehicleConstraint* constraint);
+JPH_CAPI uint32_t JPH_VehicleConstraint_GetWheelsCount(JPH_VehicleConstraint* constraint);
+JPH_CAPI JPH_Wheel* JPH_VehicleConstraint_GetWheel(JPH_VehicleConstraint* constraint, uint32_t index);
 
 /* Wheel */
 JPH_CAPI JPH_WheelSettings* JPH_WheelSettings_Create(void);
@@ -2653,10 +2679,88 @@ JPH_CAPI JPH_Wheel* JPH_Wheel_Create(const JPH_WheelSettings* settings);
 JPH_CAPI void JPH_Wheel_Destroy(JPH_Wheel* wheel);
 JPH_CAPI float JPH_Wheel_GetAngularVelocity(const JPH_Wheel* wheel);
 JPH_CAPI void JPH_Wheel_SetAngularVelocity(JPH_Wheel* wheel, float value);
+JPH_CAPI float JPH_Wheel_GetRotationAngle(const JPH_Wheel* wheel);
+JPH_CAPI void JPH_Wheel_SetRotationAngle(JPH_Wheel* wheel, float value);
+JPH_CAPI float JPH_Wheel_GetSteerAngle(const JPH_Wheel* wheel);
+JPH_CAPI void JPH_Wheel_SetSteerAngle(JPH_Wheel* wheel, float value);
 JPH_CAPI bool JPH_Wheel_HasContact(const JPH_Wheel* wheel);
+JPH_CAPI JPH_BodyID JPH_Wheel_GetContactBodyID(const JPH_Wheel* wheel);
+JPH_CAPI JPH_SubShapeID JPH_Wheel_GetContactSubShapeID(const JPH_Wheel* wheel);
+JPH_CAPI void JPH_Wheel_GetContactPosition(const JPH_Wheel* wheel, JPH_RVec3* result);
+JPH_CAPI void JPH_Wheel_GetContactPointVelocity(const JPH_Wheel* wheel, JPH_Vec3* result);
+JPH_CAPI void JPH_Wheel_GetContactNormal(const JPH_Wheel* wheel, JPH_Vec3* result);
+JPH_CAPI void JPH_Wheel_GetContactLongitudinal(const JPH_Wheel* wheel, JPH_Vec3* result);
+JPH_CAPI void JPH_Wheel_GetContactLateral(const JPH_Wheel* wheel, JPH_Vec3* result);
+JPH_CAPI float JPH_Wheel_GetSuspensionLength(const JPH_Wheel* wheel);
+JPH_CAPI float JPH_Wheel_GetSuspensionLambda(const JPH_Wheel* wheel);
+JPH_CAPI float JPH_Wheel_GetLongitudinalLambda(const JPH_Wheel* wheel);
+JPH_CAPI float JPH_Wheel_GetLateralLambda(const JPH_Wheel* wheel);
 JPH_CAPI bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel);
 
-/* WheelWV */
+/* WheelTV */
+JPH_CAPI JPH_WheelSettingsTV* JPH_WheelSettingsTV_Create(void);
+JPH_CAPI float JPH_WheelSettingsTV_GetLongitudinalFriction(const JPH_WheelSettingsTV* settings);
+JPH_CAPI void JPH_WheelSettingsTV_SetLongitudinalFriction(JPH_WheelSettingsTV* settings, float value);
+JPH_CAPI float JPH_WheelSettingsTV_GetLateralFriction(const JPH_WheelSettingsTV* settings);
+JPH_CAPI void JPH_WheelSettingsTV_SetLateralFriction(JPH_WheelSettingsTV* settings, float value);
+
+JPH_CAPI JPH_WheelTV* JPH_WheelTV_Create(const JPH_WheelSettingsTV* settings);
+JPH_CAPI const JPH_WheelSettingsTV* JPH_WheelTV_GetSettings(const JPH_WheelTV* wheel);
+
+/* VehicleAntiRollBar */
+JPH_CAPI void JPH_VehicleAntiRollBar_Init(JPH_VehicleAntiRollBar* antiRollBar);
+
+/* VehicleEngine */
+JPH_CAPI void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings);
+
+/* VehicleDifferentialSettings */
+JPH_CAPI void JPH_VehicleDifferentialSettings_Init(JPH_VehicleDifferentialSettings* settings);
+
+/* VehicleTransmission */
+JPH_CAPI JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(void);
+JPH_CAPI void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings);
+
+JPH_CAPI JPH_TransmissionMode JPH_VehicleTransmissionSettings_GetMode(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetMode(JPH_VehicleTransmissionSettings* settings, JPH_TransmissionMode value);
+
+JPH_CAPI uint32_t JPH_VehicleTransmissionSettings_GetGearRatioCount(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI float JPH_VehicleTransmissionSettings_GetGearRatio(const JPH_VehicleTransmissionSettings* settings, uint32_t index);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetGearRatio(JPH_VehicleTransmissionSettings* settings, uint32_t index, float value);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetGearRatios(JPH_VehicleTransmissionSettings* settings, const float* values, uint32_t count);
+
+JPH_CAPI uint32_t JPH_VehicleTransmissionSettings_GetReverseGearRatioCount(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI float JPH_VehicleTransmissionSettings_GetReverseGearRatio(const JPH_VehicleTransmissionSettings* settings, uint32_t index);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetReverseGearRatio(JPH_VehicleTransmissionSettings* settings, uint32_t index, float value);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetReverseGearRatios(JPH_VehicleTransmissionSettings* settings, const float* values, uint32_t count);
+
+JPH_CAPI float JPH_VehicleTransmissionSettings_GetSwitchTime(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetSwitchTime(JPH_VehicleTransmissionSettings* settings, float value);
+JPH_CAPI float JPH_VehicleTransmissionSettings_GetClutchReleaseTime(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetClutchReleaseTime(JPH_VehicleTransmissionSettings* settings, float value);
+JPH_CAPI float JPH_VehicleTransmissionSettings_GetSwitchLatency(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetSwitchLatency(JPH_VehicleTransmissionSettings* settings, float value);
+JPH_CAPI float JPH_VehicleTransmissionSettings_GetShiftUpRPM(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetShiftUpRPM(JPH_VehicleTransmissionSettings* settings, float value);
+JPH_CAPI float JPH_VehicleTransmissionSettings_GetShiftDownRPM(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetShiftDownRPM(JPH_VehicleTransmissionSettings* settings, float value);
+JPH_CAPI float JPH_VehicleTransmissionSettings_GetClutchStrength(const JPH_VehicleTransmissionSettings* settings);
+JPH_CAPI void JPH_VehicleTransmissionSettings_SetClutchStrength(JPH_VehicleTransmissionSettings* settings, float value);
+
+/* VehicleColliionTester */
+JPH_CAPI void JPH_VehicleCollisionTester_Destroy(JPH_VehicleCollisionTester* tester);
+JPH_CAPI JPH_ObjectLayer JPH_VehicleCollisionTester_GetObjectLayer(const JPH_VehicleCollisionTester* tester);
+JPH_CAPI void JPH_VehicleCollisionTester_SetObjectLayer(JPH_VehicleCollisionTester* tester, JPH_ObjectLayer value);
+
+JPH_CAPI JPH_VehicleCollisionTesterRay* JPH_VehicleCollisionTesterRay_Create(JPH_ObjectLayer layer, const JPH_Vec3* up, float maxSlopeAngle);
+JPH_CAPI JPH_VehicleCollisionTesterCastSphere* JPH_VehicleCollisionTesterCastSphere_Create(JPH_ObjectLayer layer, float radius, const JPH_Vec3* up, float maxSlopeAngle);
+JPH_CAPI JPH_VehicleCollisionTesterCastCylinder* JPH_VehicleCollisionTesterCastCylinder_Create(JPH_ObjectLayer layer, float convexRadiusFraction);
+
+/* VehicleControllerSettings/VehicleController */
+JPH_CAPI void JPH_VehicleControllerSettings_Destroy(JPH_VehicleControllerSettings* settings);
+JPH_CAPI const JPH_VehicleConstraint* JPH_VehicleController_GetConstraint(JPH_VehicleController* controller);
+
+/* ---- WheelSettingsWV/WheelWV/WheeledVehicleController ---- */
+
 JPH_CAPI JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(void);
 JPH_CAPI float JPH_WheelSettingsWV_GetInertia(const JPH_WheelSettingsWV* settings);
 JPH_CAPI void JPH_WheelSettingsWV_SetInertia(JPH_WheelSettingsWV* settings, float value);
@@ -2674,51 +2778,25 @@ JPH_CAPI float JPH_WheelSettingsWV_GetMaxHandBrakeTorque(const JPH_WheelSettings
 JPH_CAPI void JPH_WheelSettingsWV_SetMaxHandBrakeTorque(JPH_WheelSettingsWV* settings, float value);
 
 JPH_CAPI JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings);
+JPH_CAPI const JPH_WheelSettingsWV* JPH_WheelWV_GetSettings(const JPH_WheelWV* wheel);
+JPH_CAPI void JPH_WheelWV_ApplyTorque(JPH_WheelWV* wheel, float torque, float deltaTime);
 
-/* VehicleAntiRollBar */
-JPH_CAPI void JPH_VehicleAntiRollBar_Init(JPH_VehicleAntiRollBar* antiRollBar);
-
-/* VehicleEngine */
-JPH_CAPI void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings);
-
-/* VehicleTransmission */
-JPH_CAPI JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(
-	JPH_TransmissionMode	mode,
-	//Array<float>			gearRatios,			// NOTE: BGE: just using default values for now.
-	//Array<float>			reverseGearRatios,	// NOTE: BGE: just using default values for now.
-	float					switchTime,
-	float					clutchReleaseTime,
-	float					switchLatency,
-	float					shiftUpRPM,
-	float					shiftDownRPM,
-	float					clutchStrength);
-JPH_CAPI void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings);
-
-/* VehicleColliionTester */
-JPH_CAPI JPH_VehicleCollisionTesterRay* JPH_VehicleCollisionTesterRay_Create(JPH_ObjectLayer layer, const JPH_Vec3* up, float maxSlopeAngle);
-JPH_CAPI void JPH_VehicleCollisionTesterRay_Destroy(JPH_VehicleCollisionTesterRay* tester);
-JPH_CAPI JPH_VehicleCollisionTesterCastSphere* JPH_VehicleCollisionTesterCastSphere_Create(JPH_ObjectLayer layer, float radius, const JPH_Vec3* up, float maxSlopeAngle);
-JPH_CAPI void JPH_VehicleCollisionTesterCastSphere_Destroy(JPH_VehicleCollisionTesterCastSphere* tester);
-JPH_CAPI JPH_VehicleCollisionTesterCastCylinder* JPH_VehicleCollisionTesterCastCylinder_Create(JPH_ObjectLayer layer, float convexRadiusFraction);
-JPH_CAPI void JPH_VehicleCollisionTesterCastCylinder_Destroy(JPH_VehicleCollisionTesterCastCylinder* tester);
-
-
-/* WheeledVehicleController */
 JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
 	const JPH_VehicleEngineSettings*		engine,
 	const JPH_VehicleTransmissionSettings*	transmission,
-	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
-	float									differentialLimitedSlipRatio);
-JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings);
+	uint32_t								differentialsCount,
+	const JPH_VehicleDifferentialSettings**	differentials,
+	float									differentialLimitedSlipRatio
+);
 
-JPH_CAPI JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleController* vehicle);
-JPH_CAPI void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* vehicle, float forward);
-JPH_CAPI float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* vehicle);
-JPH_CAPI void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* vehicle, float rightRatio);
-JPH_CAPI float JPH_WheeledVehicleController_GetRightInput(const JPH_WheeledVehicleController* vehicle);
-JPH_CAPI void JPH_WheeledVehicleController_SetBrakeInput(JPH_WheeledVehicleController* vehicle, float brakeInput);
-JPH_CAPI float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehicleController* vehicle);
-JPH_CAPI void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* vehicle, float handBrakeInput);
-JPH_CAPI float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* controller, float forward);
+JPH_CAPI float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* controller);
+JPH_CAPI void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* controller, float rightRatio);
+JPH_CAPI float JPH_WheeledVehicleController_GetRightInput(const JPH_WheeledVehicleController* controller);
+JPH_CAPI void JPH_WheeledVehicleController_SetBrakeInput(JPH_WheeledVehicleController* controller, float brakeInput);
+JPH_CAPI float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehicleController* controller);
+JPH_CAPI void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* controller, float handBrakeInput);
+JPH_CAPI float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* controller);
+JPH_CAPI float JPH_WheeledVehicleController_GetWheelSpeedAtClutch(const JPH_WheeledVehicleController* controller);
 
 #endif /* JOLT_C_H_ */
