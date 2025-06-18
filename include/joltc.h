@@ -50,6 +50,7 @@
 #define JPH_INVALID_COLLISION_GROUP_ID (~0U)
 #define JPH_INVALID_COLLISION_SUBGROUP_ID (~0U)
 
+typedef uint32_t JPH_Bool;
 typedef uint32_t JPH_BodyID;
 typedef uint32_t JPH_SubShapeID;
 typedef uint32_t JPH_ObjectLayer;
@@ -1116,8 +1117,8 @@ JPH_CAPI void JPH_PhysicsSystem_DrawConstraintReferenceFrame(JPH_PhysicsSystem* 
 /* PhysicsStepListener */
 typedef struct JPH_PhysicsStepListenerContext {
 	float					deltaTime;
-	bool					isFirstStep;
-	bool					isLastStep;
+	JPH_Bool				isFirstStep;
+	JPH_Bool				isLastStep;
 	JPH_PhysicsSystem*		physicsSystem;
 } JPH_PhysicsStepListenerContext;
 
@@ -1146,14 +1147,14 @@ JPH_CAPI void JPH_Quat_Add(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* res
 JPH_CAPI void JPH_Quat_Subtract(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_Multiply(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_MultiplyScalar(const JPH_Quat* q, float scalar, JPH_Quat* result);
-JPH_CAPI void JPH_Quat_Divide(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_DivideScalar(const JPH_Quat* q, float scalar, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_Dot(const JPH_Quat* q1, const JPH_Quat* q2, float* result);
 
 JPH_CAPI void JPH_Quat_Conjugated(const JPH_Quat* quat, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_GetTwist(const JPH_Quat* quat, const JPH_Vec3* axis, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_GetSwingTwist(const JPH_Quat* quat, JPH_Quat* outSwing, JPH_Quat* outTwist);
-JPH_CAPI void JPH_Quat_LERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result);
-JPH_CAPI void JPH_Quat_SLERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_Lerp(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_Slerp(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_Rotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3* result);
 JPH_CAPI void JPH_Quat_InverseRotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3* result);
 

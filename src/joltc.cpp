@@ -1495,7 +1495,7 @@ void JPH_Quat_GetSwingTwist(const JPH_Quat* quat, JPH_Quat* outSwing, JPH_Quat* 
 	FromJolt(twist, outTwist);
 }
 
-void JPH_Quat_LERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result)
+void JPH_Quat_Lerp(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result)
 {
 	JPH_ASSERT(from && to && result);
 	auto joltFrom = ToJolt(from);
@@ -1503,7 +1503,7 @@ void JPH_Quat_LERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH
 	FromJolt(joltFrom.LERP(joltTo, fraction), result);
 }
 
-void JPH_Quat_SLERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result)
+void JPH_Quat_Slerp(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result)
 {
 	JPH_ASSERT(from && to && result);
 	auto joltFrom = ToJolt(from);
