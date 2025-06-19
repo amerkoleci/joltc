@@ -2627,7 +2627,6 @@ typedef struct JPH_VehicleDifferentialSettings {
 JPH_CAPI void JPH_VehicleConstraintSettings_Init(JPH_VehicleConstraintSettings* settings);
 
 JPH_CAPI JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* settings);
-JPH_CAPI void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint);
 JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint);
 JPH_CAPI void JPH_VehicleConstraint_SetMaxPitchRollAngle(JPH_VehicleConstraint* constraint, float maxPitchRollAngle);
 JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
@@ -2727,11 +2726,13 @@ JPH_CAPI void JPH_VehicleTransmissionSettings_SetMode(JPH_VehicleTransmissionSet
 JPH_CAPI uint32_t JPH_VehicleTransmissionSettings_GetGearRatioCount(const JPH_VehicleTransmissionSettings* settings);
 JPH_CAPI float JPH_VehicleTransmissionSettings_GetGearRatio(const JPH_VehicleTransmissionSettings* settings, uint32_t index);
 JPH_CAPI void JPH_VehicleTransmissionSettings_SetGearRatio(JPH_VehicleTransmissionSettings* settings, uint32_t index, float value);
+JPH_CAPI const float* JPH_VehicleTransmissionSettings_GetGearRatios(const JPH_VehicleTransmissionSettings* settings);
 JPH_CAPI void JPH_VehicleTransmissionSettings_SetGearRatios(JPH_VehicleTransmissionSettings* settings, const float* values, uint32_t count);
 
 JPH_CAPI uint32_t JPH_VehicleTransmissionSettings_GetReverseGearRatioCount(const JPH_VehicleTransmissionSettings* settings);
 JPH_CAPI float JPH_VehicleTransmissionSettings_GetReverseGearRatio(const JPH_VehicleTransmissionSettings* settings, uint32_t index);
 JPH_CAPI void JPH_VehicleTransmissionSettings_SetReverseGearRatio(JPH_VehicleTransmissionSettings* settings, uint32_t index, float value);
+JPH_CAPI const float* JPH_VehicleTransmissionSettings_GetReverseGearRatios(const JPH_VehicleTransmissionSettings* settings);
 JPH_CAPI void JPH_VehicleTransmissionSettings_SetReverseGearRatios(JPH_VehicleTransmissionSettings* settings, const float* values, uint32_t count);
 
 JPH_CAPI float JPH_VehicleTransmissionSettings_GetSwitchTime(const JPH_VehicleTransmissionSettings* settings);

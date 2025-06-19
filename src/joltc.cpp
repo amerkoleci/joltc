@@ -9562,6 +9562,13 @@ void JPH_VehicleTransmissionSettings_SetGearRatio(JPH_VehicleTransmissionSetting
 	AsVehicleTransmissionSettings(settings)->mGearRatios[index] = value;
 }
 
+const float* JPH_VehicleTransmissionSettings_GetGearRatios(const JPH_VehicleTransmissionSettings* settings)
+{
+	JPH_ASSERT(settings);
+
+	return AsVehicleTransmissionSettings(settings)->mGearRatios.data();
+}
+
 void JPH_VehicleTransmissionSettings_SetGearRatios(JPH_VehicleTransmissionSettings* settings, const float* values, uint32_t count)
 {
 	JPH_ASSERT(settings);
@@ -9587,6 +9594,13 @@ float JPH_VehicleTransmissionSettings_GetReverseGearRatio(const JPH_VehicleTrans
 void JPH_VehicleTransmissionSettings_SetReverseGearRatio(JPH_VehicleTransmissionSettings* settings, uint32_t index, float value)
 {
 	AsVehicleTransmissionSettings(settings)->mReverseGearRatios[index] = value;
+}
+
+const float* JPH_VehicleTransmissionSettings_GetReverseGearRatios(const JPH_VehicleTransmissionSettings* settings)
+{
+	JPH_ASSERT(settings);
+
+	return AsVehicleTransmissionSettings(settings)->mReverseGearRatios.data();
 }
 
 void JPH_VehicleTransmissionSettings_SetReverseGearRatios(JPH_VehicleTransmissionSettings* settings, const float* values, uint32_t count)
@@ -9779,14 +9793,6 @@ JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_Ve
 	vehicleConstraint->AddRef();
 
 	return ToVehicleConstraint(vehicleConstraint);
-}
-
-void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint)
-{
-	if (constraint)
-	{
-		AsVehicleConstraint(constraint)->Release();
-	}
 }
 
 JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
