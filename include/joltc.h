@@ -2602,7 +2602,7 @@ typedef struct JPH_VehicleConstraintSettings {
 	uint32_t						wheelsCount;
 	JPH_WheelSettings**				wheels;
 	uint32_t						antiRollBarsCount;
-	const JPH_VehicleAntiRollBar**	antiRollBars;
+	const JPH_VehicleAntiRollBar*	antiRollBars;
 	JPH_VehicleControllerSettings*	controller;
 } JPH_VehicleConstraintSettings;
 
@@ -2783,13 +2783,22 @@ JPH_CAPI JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings);
 JPH_CAPI const JPH_WheelSettingsWV* JPH_WheelWV_GetSettings(const JPH_WheelWV* wheel);
 JPH_CAPI void JPH_WheelWV_ApplyTorque(JPH_WheelWV* wheel, float torque, float deltaTime);
 
-JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
-	const JPH_VehicleEngineSettings*		engine,
-	const JPH_VehicleTransmissionSettings*	transmission,
-	uint32_t								differentialsCount,
-	const JPH_VehicleDifferentialSettings**	differentials,
-	float									differentialLimitedSlipRatio
-);
+JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(void);
+
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_GetEngine(const JPH_WheeledVehicleControllerSettings* settings, JPH_VehicleEngineSettings* result);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetEngine(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleEngineSettings* value);
+JPH_CAPI const JPH_VehicleTransmissionSettings* JPH_WheeledVehicleControllerSettings_GetTransmission(const JPH_WheeledVehicleControllerSettings* settings);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetTransmission(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleTransmissionSettings* value);
+
+JPH_CAPI uint32_t JPH_WheeledVehicleControllerSettings_GetDifferentialsCount(const JPH_WheeledVehicleControllerSettings* settings);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentialsCount(JPH_WheeledVehicleControllerSettings* settings, uint32_t count);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_GetDifferential(const JPH_WheeledVehicleControllerSettings* settings, uint32_t index, JPH_VehicleDifferentialSettings* result);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferential(JPH_WheeledVehicleControllerSettings* settings, uint32_t index, const JPH_VehicleDifferentialSettings* value);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentials(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleDifferentialSettings* values, uint32_t count);
+
+
+JPH_CAPI float JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(const JPH_WheeledVehicleControllerSettings* settings);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(JPH_WheeledVehicleControllerSettings* settings, float value);
 
 JPH_CAPI void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* controller, float forward);
 JPH_CAPI float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* controller);

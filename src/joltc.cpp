@@ -9484,7 +9484,18 @@ void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings)
 	settings->angularDamping = joltSettings.mAngularDamping;
 }
 
-void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings, const JPH_VehicleEngineSettings* settings)
+static void JPH_VehicleEngineSettings_FromJolt(JPH_VehicleEngineSettings* settings, const VehicleEngineSettings& joltSettings)
+{
+	JPH_ASSERT(settings);
+
+	settings->maxTorque = joltSettings.mMaxTorque;
+	settings->minRPM = joltSettings.mMinRPM;
+	settings->maxRPM = joltSettings.mMaxRPM;
+	settings->inertia = joltSettings.mInertia;
+	settings->angularDamping = joltSettings.mAngularDamping;
+}
+
+static void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings, const JPH_VehicleEngineSettings* settings)
 {
 	JPH_ASSERT(joltSettings);
 	JPH_ASSERT(settings);
@@ -9510,15 +9521,27 @@ void JPH_VehicleDifferentialSettings_Init(JPH_VehicleDifferentialSettings* setti
 	settings->engineTorqueRatio = joltSettings.mEngineTorqueRatio;
 }
 
-static void JPH_VehicleDifferentialSettings_ToJolt(VehicleDifferentialSettings* joltSettings, const JPH_VehicleDifferentialSettings* settings)
+static void JPH_VehicleDifferentialSettings_FromJolt(JPH_VehicleDifferentialSettings* settings, const VehicleDifferentialSettings& joltSettings)
 {
 	// Copy settings to jolt 
-	joltSettings->mLeftWheel = settings->leftWheel;
-	joltSettings->mRightWheel = settings->rightWheel;
-	joltSettings->mDifferentialRatio = settings->differentialRatio;
-	joltSettings->mLeftRightSplit = settings->leftRightSplit;
-	joltSettings->mLimitedSlipRatio = settings->limitedSlipRatio;
-	joltSettings->mEngineTorqueRatio = settings->engineTorqueRatio;
+	settings->leftWheel = joltSettings.mLeftWheel;
+	settings->rightWheel = joltSettings.mRightWheel;
+	settings->differentialRatio = joltSettings.mDifferentialRatio;
+	settings->leftRightSplit = joltSettings.mLeftRightSplit;
+	settings->limitedSlipRatio = joltSettings.mLimitedSlipRatio;
+	settings->engineTorqueRatio = joltSettings.mEngineTorqueRatio;
+}
+
+static VehicleDifferentialSettings JPH_VehicleDifferentialSettings_ToJolt(const JPH_VehicleDifferentialSettings& settings)
+{
+	VehicleDifferentialSettings joltSettings{};
+	joltSettings.mLeftWheel = settings.leftWheel;
+	joltSettings.mRightWheel = settings.rightWheel;
+	joltSettings.mDifferentialRatio = settings.differentialRatio;
+	joltSettings.mLeftRightSplit = settings.leftRightSplit;
+	joltSettings.mLimitedSlipRatio = settings.limitedSlipRatio;
+	joltSettings.mEngineTorqueRatio = settings.engineTorqueRatio;
+	return joltSettings;
 }
 
 
@@ -9768,9 +9791,9 @@ void JPH_VehicleConstraintSettings_ToJolt(VehicleConstraintSettings* joltSetting
 		for (uint32_t i = 0; i < settings->antiRollBarsCount; ++i)
 		{
 			JPH::VehicleAntiRollBar joltAntiRollBar{};
-			joltAntiRollBar.mLeftWheel = settings->antiRollBars[i]->leftWheel;
-			joltAntiRollBar.mRightWheel = settings->antiRollBars[i]->rightWheel;
-			joltAntiRollBar.mStiffness = settings->antiRollBars[i]->stiffness;
+			joltAntiRollBar.mLeftWheel = settings->antiRollBars[i].leftWheel;
+			joltAntiRollBar.mRightWheel = settings->antiRollBars[i].rightWheel;
+			joltAntiRollBar.mStiffness = settings->antiRollBars[i].stiffness;
 			joltSettings->mAntiRollBars.push_back(joltAntiRollBar);
 		}
 	}
@@ -9960,33 +9983,96 @@ void JPH_WheelWV_ApplyTorque(JPH_WheelWV* wheel, float torque, float deltaTime)
 	AsWheelWV(wheel)->ApplyTorque(torque, deltaTime);
 }
 
-JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
-	const JPH_VehicleEngineSettings* engine,
-	const JPH_VehicleTransmissionSettings* transmission,
-	uint32_t								differentialsCount,
-	const JPH_VehicleDifferentialSettings** differentials,
-	float									differentialLimitedSlipRatio)
+JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(void)
 {
-	JPH_ASSERT(engine);
-	JPH_ASSERT(transmission);
-
 	auto settings = new WheeledVehicleControllerSettings();
-	JPH_VehicleEngineSettings_ToJolt(&settings->mEngine, engine);
-	settings->mTransmission = *AsVehicleTransmissionSettings(transmission);
-
-	settings->mDifferentials.resize(differentialsCount); 
-	for (uint32_t i = 0; i < differentialsCount; ++i)
-	{
-		VehicleDifferentialSettings joltDifferential;
-		JPH_VehicleDifferentialSettings_ToJolt(&joltDifferential, differentials[i]);
-
-		settings->mDifferentials[i] = joltDifferential;
-	}
-
-	settings->mDifferentialLimitedSlipRatio = differentialLimitedSlipRatio;
 	settings->AddRef();
 
 	return ToWheeledVehicleControllerSettings(settings);
+}
+
+void JPH_WheeledVehicleControllerSettings_GetEngine(const JPH_WheeledVehicleControllerSettings* settings, JPH_VehicleEngineSettings* result)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(result);
+
+	JPH_VehicleEngineSettings_FromJolt(result, AsWheeledVehicleControllerSettings(settings)->mEngine);
+}
+
+void JPH_WheeledVehicleControllerSettings_SetEngine(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleEngineSettings* value)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(value);
+
+	VehicleEngineSettings joltEngine;
+	JPH_VehicleEngineSettings_ToJolt(&joltEngine, value);
+
+	AsWheeledVehicleControllerSettings(settings)->mEngine = joltEngine;
+}
+
+const JPH_VehicleTransmissionSettings* JPH_WheeledVehicleControllerSettings_GetTransmission(const JPH_WheeledVehicleControllerSettings* settings)
+{
+	JPH_ASSERT(settings);
+
+	return ToVehicleTransmissionSettings(&AsWheeledVehicleControllerSettings(settings)->mTransmission);
+}
+
+void JPH_WheeledVehicleControllerSettings_SetTransmission(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleTransmissionSettings* value)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(value);
+
+	AsWheeledVehicleControllerSettings(settings)->mTransmission = *AsVehicleTransmissionSettings(value);
+}
+
+uint32_t JPH_WheeledVehicleControllerSettings_GetDifferentialsCount(const JPH_WheeledVehicleControllerSettings* settings)
+{
+	return static_cast<uint32_t>(AsWheeledVehicleControllerSettings(settings)->mDifferentials.size());
+}
+
+void JPH_WheeledVehicleControllerSettings_SetDifferentialsCount(JPH_WheeledVehicleControllerSettings* settings, uint32_t count)
+{
+	AsWheeledVehicleControllerSettings(settings)->mDifferentials.resize(count);
+}
+
+void JPH_WheeledVehicleControllerSettings_GetDifferential(const JPH_WheeledVehicleControllerSettings* settings, uint32_t index, JPH_VehicleDifferentialSettings* result)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(result);
+
+	JPH_VehicleDifferentialSettings_FromJolt(result, AsWheeledVehicleControllerSettings(settings)->mDifferentials[index]);
+}
+
+void JPH_WheeledVehicleControllerSettings_SetDifferential(JPH_WheeledVehicleControllerSettings* settings, uint32_t index, const JPH_VehicleDifferentialSettings* value)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(value);
+
+	VehicleDifferentialSettings joltDifferential = JPH_VehicleDifferentialSettings_ToJolt(*value);
+	AsWheeledVehicleControllerSettings(settings)->mDifferentials[index] = joltDifferential;
+}
+
+void JPH_WheeledVehicleControllerSettings_SetDifferentials(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleDifferentialSettings* values, uint32_t count)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(values);
+
+	AsWheeledVehicleControllerSettings(settings)->mDifferentials.resize(count);
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		VehicleDifferentialSettings joltDifferential = JPH_VehicleDifferentialSettings_ToJolt(values[i]);
+		AsWheeledVehicleControllerSettings(settings)->mDifferentials[i] = joltDifferential;
+	}
+}
+
+float JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(const JPH_WheeledVehicleControllerSettings* settings)
+{
+	return AsWheeledVehicleControllerSettings(settings)->mDifferentialLimitedSlipRatio;
+}
+
+void JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(JPH_WheeledVehicleControllerSettings* settings, float value)
+{
+	AsWheeledVehicleControllerSettings(settings)->mDifferentialLimitedSlipRatio = value;
 }
 
 void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* controller, float forward)
