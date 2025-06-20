@@ -9418,48 +9418,6 @@ bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel)
 }
 
 
-/* WheelTV */
-JPH_WheelSettingsTV* JPH_WheelSettingsTV_Create(void)
-{
-	auto settings = new JPH::WheelSettingsTV();
-	settings->AddRef();
-
-	return ToWheelSettingsTV(settings);
-}
-
-float JPH_WheelSettingsTV_GetLongitudinalFriction(const JPH_WheelSettingsTV* settings)
-{
-	return AsWheelSettingsTV(settings)->mLongitudinalFriction;
-}
-
-void JPH_WheelSettingsTV_SetLongitudinalFriction(JPH_WheelSettingsTV* settings, float value)
-{
-	AsWheelSettingsTV(settings)->mLongitudinalFriction = value;
-}
-
-float JPH_WheelSettingsTV_GetLateralFriction(const JPH_WheelSettingsTV* settings)
-{
-	return AsWheelSettingsTV(settings)->mLateralFriction;
-}
-
-void JPH_WheelSettingsTV_SetLateralFriction(JPH_WheelSettingsTV* settings, float value)
-{
-	AsWheelSettingsTV(settings)->mLateralFriction = value;
-}
-
-JPH_WheelTV* JPH_WheelTV_Create(const JPH_WheelSettingsTV* settings)
-{
-	JPH_ASSERT(settings);
-
-	auto wheel = new JPH::WheelTV(*AsWheelSettingsTV(settings));
-	return ToWheelTV(wheel);
-}
-
-const JPH_WheelSettingsTV* JPH_WheelTV_GetSettings(const JPH_WheelTV* wheel)
-{
-	return ToWheelSettingsTV(AsWheelTV(wheel)->GetSettings());
-}
-
 /* VehicleAntiRollBar */
 JPH_CAPI void JPH_VehicleAntiRollBar_Init(JPH_VehicleAntiRollBar* antiRollBar)
 {
@@ -9543,7 +9501,6 @@ static VehicleDifferentialSettings JPH_VehicleDifferentialSettings_ToJolt(const 
 	joltSettings.mEngineTorqueRatio = settings.engineTorqueRatio;
 	return joltSettings;
 }
-
 
 /* VehicleTransmission */
 JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(void)
@@ -9818,14 +9775,6 @@ JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_Ve
 	return ToVehicleConstraint(vehicleConstraint);
 }
 
-JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
-{
-	JPH_ASSERT(constraint);
-
-	auto joltListener = static_cast<JPH::PhysicsStepListener*>(AsVehicleConstraint(constraint));
-	return reinterpret_cast<JPH_PhysicsStepListener*>(joltListener);
-}
-
 void JPH_VehicleConstraint_SetMaxPitchRollAngle(JPH_VehicleConstraint* constraint, float maxPitchRollAngle)
 {
 	AsVehicleConstraint(constraint)->SetMaxPitchRollAngle(maxPitchRollAngle);
@@ -10075,6 +10024,11 @@ void JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(JPH_Wh
 	AsWheeledVehicleControllerSettings(settings)->mDifferentialLimitedSlipRatio = value;
 }
 
+void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* controller, float forward, float right, float brake, float handBrake)
+{
+	AsWheeledVehicleController(controller)->SetDriverInput(forward, right, brake, handBrake);
+}
+
 void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* controller, float forward)
 {
 	AsWheeledVehicleController(controller)->SetForwardInput(forward);
@@ -10118,6 +10072,277 @@ float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleCon
 float JPH_WheeledVehicleController_GetWheelSpeedAtClutch(const JPH_WheeledVehicleController* controller)
 {
 	return AsWheeledVehicleController(controller)->GetWheelSpeedAtClutch();
+}
+
+/* WheelSettingsTV - WheelTV - TrackedVehicleController */
+JPH_WheelSettingsTV* JPH_WheelSettingsTV_Create(void)
+{
+	auto settings = new JPH::WheelSettingsTV();
+	settings->AddRef();
+
+	return ToWheelSettingsTV(settings);
+}
+
+float JPH_WheelSettingsTV_GetLongitudinalFriction(const JPH_WheelSettingsTV* settings)
+{
+	return AsWheelSettingsTV(settings)->mLongitudinalFriction;
+}
+
+void JPH_WheelSettingsTV_SetLongitudinalFriction(JPH_WheelSettingsTV* settings, float value)
+{
+	AsWheelSettingsTV(settings)->mLongitudinalFriction = value;
+}
+
+float JPH_WheelSettingsTV_GetLateralFriction(const JPH_WheelSettingsTV* settings)
+{
+	return AsWheelSettingsTV(settings)->mLateralFriction;
+}
+
+void JPH_WheelSettingsTV_SetLateralFriction(JPH_WheelSettingsTV* settings, float value)
+{
+	AsWheelSettingsTV(settings)->mLateralFriction = value;
+}
+
+JPH_WheelTV* JPH_WheelTV_Create(const JPH_WheelSettingsTV* settings)
+{
+	JPH_ASSERT(settings);
+
+	auto wheel = new JPH::WheelTV(*AsWheelSettingsTV(settings));
+	return ToWheelTV(wheel);
+}
+
+const JPH_WheelSettingsTV* JPH_WheelTV_GetSettings(const JPH_WheelTV* wheel)
+{
+	return ToWheelSettingsTV(AsWheelTV(wheel)->GetSettings());
+}
+
+JPH_TrackedVehicleControllerSettings* JPH_TrackedVehicleControllerSettings_Create(void)
+{
+	auto settings = new JPH::TrackedVehicleControllerSettings();
+	settings->AddRef();
+	return ToTrackedVehicleControllerSettings(settings);
+}
+
+void JPH_TrackedVehicleControllerSettings_GetEngine(const JPH_TrackedVehicleControllerSettings* settings, JPH_VehicleEngineSettings* result)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(result);
+
+	JPH_VehicleEngineSettings_FromJolt(result, AsTrackedVehicleControllerSettings(settings)->mEngine);
+}
+
+void JPH_TrackedVehicleControllerSettings_SetEngine(JPH_TrackedVehicleControllerSettings* settings, const JPH_VehicleEngineSettings* value)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(value);
+
+	VehicleEngineSettings joltEngine;
+	JPH_VehicleEngineSettings_ToJolt(&joltEngine, value);
+
+	AsTrackedVehicleControllerSettings(settings)->mEngine = joltEngine;
+}
+
+const JPH_VehicleTransmissionSettings* JPH_TrackedVehicleControllerSettings_GetTransmission(const JPH_TrackedVehicleControllerSettings* settings)
+{
+	JPH_ASSERT(settings);
+	return ToVehicleTransmissionSettings(&AsTrackedVehicleControllerSettings(settings)->mTransmission);
+}
+
+JPH_CAPI void JPH_TrackedVehicleControllerSettings_SetTransmission(JPH_TrackedVehicleControllerSettings* settings, const JPH_VehicleTransmissionSettings* value)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(value);
+
+	AsTrackedVehicleControllerSettings(settings)->mTransmission = *AsVehicleTransmissionSettings(value);
+}
+
+void JPH_TrackedVehicleController_SetDriverInput(JPH_TrackedVehicleController* controller, float forward, float leftRatio, float rightRatio, float brake)
+{
+	AsTrackedVehicleController(controller)->SetDriverInput(forward, leftRatio, rightRatio, brake);
+}
+
+float JPH_TrackedVehicleController_GetForwardInput(const JPH_TrackedVehicleController* controller)
+{
+	return AsTrackedVehicleController(controller)->GetForwardInput();
+}
+
+void JPH_TrackedVehicleController_SetForwardInput(JPH_TrackedVehicleController* controller, float value)
+{
+	AsTrackedVehicleController(controller)->SetForwardInput(value);
+}
+
+float JPH_TrackedVehicleController_GetLeftRatio(const JPH_TrackedVehicleController* controller)
+{
+	return AsTrackedVehicleController(controller)->GetLeftRatio();
+}
+
+void JPH_TrackedVehicleController_SetLeftRatio(JPH_TrackedVehicleController* controller, float value)
+{
+	AsTrackedVehicleController(controller)->SetLeftRatio(value);
+}
+
+float JPH_TrackedVehicleController_GetRightRatio(const JPH_TrackedVehicleController* controller)
+{
+	return AsTrackedVehicleController(controller)->GetRightRatio();
+}
+
+void JPH_TrackedVehicleController_SetRightRatio(JPH_TrackedVehicleController* controller, float value)
+{
+	AsTrackedVehicleController(controller)->SetRightRatio(value);
+}
+
+float JPH_TrackedVehicleController_GetBrakeInput(const JPH_TrackedVehicleController* controller)
+{
+	return AsTrackedVehicleController(controller)->GetBrakeInput();
+}
+
+void JPH_TrackedVehicleController_SetBrakeInput(JPH_TrackedVehicleController* controller, float value)
+{
+	AsTrackedVehicleController(controller)->SetBrakeInput(value);
+}
+
+/* MotorcycleController */
+JPH_MotorcycleControllerSettings* JPH_MotorcycleControllerSettings_Create(void)
+{
+	auto settings = new JPH::MotorcycleControllerSettings();
+	settings->AddRef();
+
+	return ToMotorcycleControllerSettings(settings);
+}
+
+float JPH_MotorcycleControllerSettings_GetMaxLeanAngle(const JPH_MotorcycleControllerSettings* settings)
+{
+	return AsMotorcycleControllerSettings(settings)->mMaxLeanAngle;
+}
+
+JPH_CAPI void JPH_MotorcycleControllerSettings_SetMaxLeanAngle(JPH_MotorcycleControllerSettings* settings, float value)
+{
+	AsMotorcycleControllerSettings(settings)->mMaxLeanAngle = value;
+}
+
+float JPH_MotorcycleControllerSettings_GetLeanSpringConstant(const JPH_MotorcycleControllerSettings* settings)
+{
+	return AsMotorcycleControllerSettings(settings)->mLeanSpringConstant;
+}
+
+void JPH_MotorcycleControllerSettings_SetLeanSpringConstant(JPH_MotorcycleControllerSettings* settings, float value)
+{
+	AsMotorcycleControllerSettings(settings)->mLeanSpringConstant = value;
+}
+
+float JPH_MotorcycleControllerSettings_GetLeanSpringDamping(const JPH_MotorcycleControllerSettings* settings)
+{
+	return AsMotorcycleControllerSettings(settings)->mLeanSpringDamping;
+}
+
+void JPH_MotorcycleControllerSettings_SetLeanSpringDamping(JPH_MotorcycleControllerSettings* settings, float value)
+{
+	AsMotorcycleControllerSettings(settings)->mLeanSpringDamping = value;
+}
+
+float JPH_MotorcycleControllerSettings_GetLeanSpringIntegrationCoefficient(const JPH_MotorcycleControllerSettings* settings)
+{
+	return AsMotorcycleControllerSettings(settings)->mLeanSpringIntegrationCoefficient;
+}
+
+void JPH_MotorcycleControllerSettings_SetLeanSpringIntegrationCoefficient(JPH_MotorcycleControllerSettings* settings, float value)
+{
+	AsMotorcycleControllerSettings(settings)->mLeanSpringIntegrationCoefficient = value;
+}
+
+float JPH_MotorcycleControllerSettings_GetLeanSpringIntegrationCoefficientDecay(const JPH_MotorcycleControllerSettings* settings)
+{
+	return AsMotorcycleControllerSettings(settings)->mLeanSpringIntegrationCoefficientDecay;
+}
+
+void JPH_MotorcycleControllerSettings_SetLeanSpringIntegrationCoefficientDecay(JPH_MotorcycleControllerSettings* settings, float value)
+{
+	AsMotorcycleControllerSettings(settings)->mLeanSpringIntegrationCoefficientDecay = value;
+}
+
+float JPH_MotorcycleControllerSettings_GetLeanSmoothingFactor(const JPH_MotorcycleControllerSettings* settings)
+{
+	return AsMotorcycleControllerSettings(settings)->mLeanSmoothingFactor;
+}
+
+void JPH_MotorcycleControllerSettings_SetLeanSmoothingFactor(JPH_MotorcycleControllerSettings* settings, float value)
+{
+	AsMotorcycleControllerSettings(settings)->mLeanSmoothingFactor = value;
+}
+
+float JPH_MotorcycleController_GetWheelBase(const JPH_MotorcycleController* controller)
+{
+	return AsMotorcycleController(controller)->GetWheelBase();
+}
+
+bool JPH_MotorcycleControllerSettings_IsLeanControllerEnabled(const JPH_MotorcycleController* controller)
+{
+	return AsMotorcycleController(controller)->IsLeanControllerEnabled();
+}
+
+void JPH_MotorcycleController_EnableLeanController(JPH_MotorcycleController* controller, bool value)
+{
+	AsMotorcycleController(controller)->EnableLeanController(value);
+}
+
+bool JPH_MotorcycleController_IsLeanSteeringLimitEnabled(const JPH_MotorcycleController* controller)
+{
+	return AsMotorcycleController(controller)->IsLeanSteeringLimitEnabled();
+}
+
+void JPH_MotorcycleController_EnableLeanSteeringLimit(JPH_MotorcycleController* controller, bool value)
+{
+	AsMotorcycleController(controller)->EnableLeanSteeringLimit(value);
+}
+
+float JPH_MotorcycleController_GetLeanSpringConstant(const JPH_MotorcycleController* controller)
+{
+	return AsMotorcycleController(controller)->GetLeanSpringConstant();
+}
+
+void JPH_MotorcycleController_SetLeanSpringConstant(JPH_MotorcycleController* controller, float value)
+{
+	AsMotorcycleController(controller)->SetLeanSpringConstant(value);
+}
+
+float JPH_MotorcycleController_GetLeanSpringDamping(const JPH_MotorcycleController* controller)
+{
+	return AsMotorcycleController(controller)->GetLeanSpringDamping();
+}
+
+void JPH_MotorcycleController_SetLeanSpringDamping(JPH_MotorcycleController* controller, float value)
+{
+	AsMotorcycleController(controller)->SetLeanSpringDamping(value);
+}
+
+float JPH_MotorcycleController_GetLeanSpringIntegrationCoefficient(const JPH_MotorcycleController* controller)
+{
+	return AsMotorcycleController(controller)->GetLeanSpringIntegrationCoefficient();
+}
+
+void JPH_MotorcycleController_SetLeanSpringIntegrationCoefficient(JPH_MotorcycleController* controller, float value)
+{
+	AsMotorcycleController(controller)->SetLeanSpringIntegrationCoefficient(value);
+}
+
+float JPH_MotorcycleController_GetLeanSpringIntegrationCoefficientDecay(const JPH_MotorcycleController* controller)
+{
+	return AsMotorcycleController(controller)->GetLeanSpringIntegrationCoefficientDecay();
+}
+
+void JPH_MotorcycleController_SetLeanSpringIntegrationCoefficientDecay(JPH_MotorcycleController* controller, float value)
+{
+	AsMotorcycleController(controller)->SetLeanSpringIntegrationCoefficientDecay(value);
+}
+
+float JPH_MotorcycleController_GetLeanSmoothingFactor(const JPH_MotorcycleController* controller)
+{
+	return AsMotorcycleController(controller)->GetLeanSmoothingFactor();
+}
+
+void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* controller, float value)
+{
+	AsMotorcycleController(controller)->SetLeanSmoothingFactor(value);
 }
 
 JPH_SUPPRESS_WARNING_POP

@@ -2627,7 +2627,7 @@ typedef struct JPH_VehicleDifferentialSettings {
 JPH_CAPI void JPH_VehicleConstraintSettings_Init(JPH_VehicleConstraintSettings* settings);
 
 JPH_CAPI JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* settings);
-JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint);
+
 JPH_CAPI void JPH_VehicleConstraint_SetMaxPitchRollAngle(JPH_VehicleConstraint* constraint, float maxPitchRollAngle);
 JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
 
@@ -2697,16 +2697,6 @@ JPH_CAPI float JPH_Wheel_GetLongitudinalLambda(const JPH_Wheel* wheel);
 JPH_CAPI float JPH_Wheel_GetLateralLambda(const JPH_Wheel* wheel);
 JPH_CAPI bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel);
 
-/* WheelTV */
-JPH_CAPI JPH_WheelSettingsTV* JPH_WheelSettingsTV_Create(void);
-JPH_CAPI float JPH_WheelSettingsTV_GetLongitudinalFriction(const JPH_WheelSettingsTV* settings);
-JPH_CAPI void JPH_WheelSettingsTV_SetLongitudinalFriction(JPH_WheelSettingsTV* settings, float value);
-JPH_CAPI float JPH_WheelSettingsTV_GetLateralFriction(const JPH_WheelSettingsTV* settings);
-JPH_CAPI void JPH_WheelSettingsTV_SetLateralFriction(JPH_WheelSettingsTV* settings, float value);
-
-JPH_CAPI JPH_WheelTV* JPH_WheelTV_Create(const JPH_WheelSettingsTV* settings);
-JPH_CAPI const JPH_WheelSettingsTV* JPH_WheelTV_GetSettings(const JPH_WheelTV* wheel);
-
 /* VehicleAntiRollBar */
 JPH_CAPI void JPH_VehicleAntiRollBar_Init(JPH_VehicleAntiRollBar* antiRollBar);
 
@@ -2761,7 +2751,7 @@ JPH_CAPI JPH_VehicleCollisionTesterCastCylinder* JPH_VehicleCollisionTesterCastC
 JPH_CAPI void JPH_VehicleControllerSettings_Destroy(JPH_VehicleControllerSettings* settings);
 JPH_CAPI const JPH_VehicleConstraint* JPH_VehicleController_GetConstraint(JPH_VehicleController* controller);
 
-/* ---- WheelSettingsWV/WheelWV/WheeledVehicleController ---- */
+/* ---- WheelSettingsWV - WheelWV - WheeledVehicleController ---- */
 
 JPH_CAPI JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(void);
 JPH_CAPI float JPH_WheelSettingsWV_GetInertia(const JPH_WheelSettingsWV* settings);
@@ -2800,6 +2790,7 @@ JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentials(JPH_WheeledV
 JPH_CAPI float JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(const JPH_WheeledVehicleControllerSettings* settings);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(JPH_WheeledVehicleControllerSettings* settings, float value);
 
+JPH_CAPI void JPH_WheeledVehicleController_SetDriverInput(JPH_WheeledVehicleController* controller, float forward, float right, float brake, float handBrake);
 JPH_CAPI void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* controller, float forward);
 JPH_CAPI float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* controller);
 JPH_CAPI void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* controller, float rightRatio);
@@ -2809,5 +2800,64 @@ JPH_CAPI float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehic
 JPH_CAPI void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* controller, float handBrakeInput);
 JPH_CAPI float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* controller);
 JPH_CAPI float JPH_WheeledVehicleController_GetWheelSpeedAtClutch(const JPH_WheeledVehicleController* controller);
+
+/* WheelSettingsTV - WheelTV - TrackedVehicleController */
+/* TODO: Add VehicleTrack and VehicleTrackSettings */
+JPH_CAPI JPH_WheelSettingsTV* JPH_WheelSettingsTV_Create(void);
+JPH_CAPI float JPH_WheelSettingsTV_GetLongitudinalFriction(const JPH_WheelSettingsTV* settings);
+JPH_CAPI void JPH_WheelSettingsTV_SetLongitudinalFriction(JPH_WheelSettingsTV* settings, float value);
+JPH_CAPI float JPH_WheelSettingsTV_GetLateralFriction(const JPH_WheelSettingsTV* settings);
+JPH_CAPI void JPH_WheelSettingsTV_SetLateralFriction(JPH_WheelSettingsTV* settings, float value);
+
+JPH_CAPI JPH_WheelTV* JPH_WheelTV_Create(const JPH_WheelSettingsTV* settings);
+JPH_CAPI const JPH_WheelSettingsTV* JPH_WheelTV_GetSettings(const JPH_WheelTV* wheel);
+
+JPH_CAPI JPH_TrackedVehicleControllerSettings* JPH_TrackedVehicleControllerSettings_Create(void);
+
+JPH_CAPI void JPH_TrackedVehicleControllerSettings_GetEngine(const JPH_TrackedVehicleControllerSettings* settings, JPH_VehicleEngineSettings* result);
+JPH_CAPI void JPH_TrackedVehicleControllerSettings_SetEngine(JPH_TrackedVehicleControllerSettings* settings, const JPH_VehicleEngineSettings* value);
+JPH_CAPI const JPH_VehicleTransmissionSettings* JPH_TrackedVehicleControllerSettings_GetTransmission(const JPH_TrackedVehicleControllerSettings* settings);
+JPH_CAPI void JPH_TrackedVehicleControllerSettings_SetTransmission(JPH_TrackedVehicleControllerSettings* settings, const JPH_VehicleTransmissionSettings* value);
+
+JPH_CAPI void JPH_TrackedVehicleController_SetDriverInput(JPH_TrackedVehicleController* controller, float forward, float leftRatio, float rightRatio, float brake);
+JPH_CAPI float JPH_TrackedVehicleController_GetForwardInput(const JPH_TrackedVehicleController* controller);
+JPH_CAPI void JPH_TrackedVehicleController_SetForwardInput(JPH_TrackedVehicleController* controller, float value);
+JPH_CAPI float JPH_TrackedVehicleController_GetLeftRatio(const JPH_TrackedVehicleController* controller);
+JPH_CAPI void JPH_TrackedVehicleController_SetLeftRatio(JPH_TrackedVehicleController* controller, float value);
+JPH_CAPI float JPH_TrackedVehicleController_GetRightRatio(const JPH_TrackedVehicleController* controller);
+JPH_CAPI void JPH_TrackedVehicleController_SetRightRatio(JPH_TrackedVehicleController* controller, float value);
+JPH_CAPI float JPH_TrackedVehicleController_GetBrakeInput(const JPH_TrackedVehicleController* controller);
+JPH_CAPI void JPH_TrackedVehicleController_SetBrakeInput(JPH_TrackedVehicleController* controller, float value);
+
+/* MotorcycleController */
+JPH_CAPI JPH_MotorcycleControllerSettings* JPH_MotorcycleControllerSettings_Create(void);
+JPH_CAPI float JPH_MotorcycleControllerSettings_GetMaxLeanAngle(const JPH_MotorcycleControllerSettings* settings);
+JPH_CAPI void JPH_MotorcycleControllerSettings_SetMaxLeanAngle(JPH_MotorcycleControllerSettings* settings, float value);
+JPH_CAPI float JPH_MotorcycleControllerSettings_GetLeanSpringConstant(const JPH_MotorcycleControllerSettings* settings);
+JPH_CAPI void JPH_MotorcycleControllerSettings_SetLeanSpringConstant(JPH_MotorcycleControllerSettings* settings, float value);
+JPH_CAPI float JPH_MotorcycleControllerSettings_GetLeanSpringDamping(const JPH_MotorcycleControllerSettings* settings);
+JPH_CAPI void JPH_MotorcycleControllerSettings_SetLeanSpringDamping(JPH_MotorcycleControllerSettings* settings, float value);
+JPH_CAPI float JPH_MotorcycleControllerSettings_GetLeanSpringIntegrationCoefficient(const JPH_MotorcycleControllerSettings* settings);
+JPH_CAPI void JPH_MotorcycleControllerSettings_SetLeanSpringIntegrationCoefficient(JPH_MotorcycleControllerSettings* settings, float value);
+JPH_CAPI float JPH_MotorcycleControllerSettings_GetLeanSpringIntegrationCoefficientDecay(const JPH_MotorcycleControllerSettings* settings);
+JPH_CAPI void JPH_MotorcycleControllerSettings_SetLeanSpringIntegrationCoefficientDecay(JPH_MotorcycleControllerSettings* settings, float value);
+JPH_CAPI float JPH_MotorcycleControllerSettings_GetLeanSmoothingFactor(const JPH_MotorcycleControllerSettings* settings);
+JPH_CAPI void JPH_MotorcycleControllerSettings_SetLeanSmoothingFactor(JPH_MotorcycleControllerSettings* settings, float value);
+
+JPH_CAPI float JPH_MotorcycleController_GetWheelBase(const JPH_MotorcycleController* controller);
+JPH_CAPI bool JPH_MotorcycleControllerSettings_IsLeanControllerEnabled(const JPH_MotorcycleController* controller);
+JPH_CAPI void JPH_MotorcycleController_EnableLeanController(JPH_MotorcycleController* controller, bool value);
+JPH_CAPI bool JPH_MotorcycleController_IsLeanSteeringLimitEnabled(const JPH_MotorcycleController* controller);
+JPH_CAPI void JPH_MotorcycleController_EnableLeanSteeringLimit(JPH_MotorcycleController* controller, bool value);
+JPH_CAPI float JPH_MotorcycleController_GetLeanSpringConstant(const JPH_MotorcycleController* controller);
+JPH_CAPI void JPH_MotorcycleController_SetLeanSpringConstant(JPH_MotorcycleController* controller, float value);
+JPH_CAPI float JPH_MotorcycleController_GetLeanSpringDamping(const JPH_MotorcycleController* controller);
+JPH_CAPI void JPH_MotorcycleController_SetLeanSpringDamping(JPH_MotorcycleController* controller, float value);
+JPH_CAPI float JPH_MotorcycleController_GetLeanSpringIntegrationCoefficient(const JPH_MotorcycleController* controller);
+JPH_CAPI void JPH_MotorcycleController_SetLeanSpringIntegrationCoefficient(JPH_MotorcycleController* controller, float value);
+JPH_CAPI float JPH_MotorcycleController_GetLeanSpringIntegrationCoefficientDecay(const JPH_MotorcycleController* controller);
+JPH_CAPI void JPH_MotorcycleController_SetLeanSpringIntegrationCoefficientDecay(JPH_MotorcycleController* controller, float value);
+JPH_CAPI float JPH_MotorcycleController_GetLeanSmoothingFactor(const JPH_MotorcycleController* controller);
+JPH_CAPI void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* controller, float value);
 
 #endif /* JOLT_C_H_ */
