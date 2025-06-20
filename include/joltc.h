@@ -2845,7 +2845,7 @@ JPH_CAPI float JPH_MotorcycleControllerSettings_GetLeanSmoothingFactor(const JPH
 JPH_CAPI void JPH_MotorcycleControllerSettings_SetLeanSmoothingFactor(JPH_MotorcycleControllerSettings* settings, float value);
 
 JPH_CAPI float JPH_MotorcycleController_GetWheelBase(const JPH_MotorcycleController* controller);
-JPH_CAPI bool JPH_MotorcycleControllerSettings_IsLeanControllerEnabled(const JPH_MotorcycleController* controller);
+JPH_CAPI bool JPH_MotorcycleController_IsLeanControllerEnabled(const JPH_MotorcycleController* controller);
 JPH_CAPI void JPH_MotorcycleController_EnableLeanController(JPH_MotorcycleController* controller, bool value);
 JPH_CAPI bool JPH_MotorcycleController_IsLeanSteeringLimitEnabled(const JPH_MotorcycleController* controller);
 JPH_CAPI void JPH_MotorcycleController_EnableLeanSteeringLimit(JPH_MotorcycleController* controller, bool value);

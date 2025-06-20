@@ -10275,7 +10275,7 @@ float JPH_MotorcycleController_GetWheelBase(const JPH_MotorcycleController* cont
 	return AsMotorcycleController(controller)->GetWheelBase();
 }
 
-bool JPH_MotorcycleControllerSettings_IsLeanControllerEnabled(const JPH_MotorcycleController* controller)
+bool JPH_MotorcycleController_IsLeanControllerEnabled(const JPH_MotorcycleController* controller)
 {
 	return AsMotorcycleController(controller)->IsLeanControllerEnabled();
 }
