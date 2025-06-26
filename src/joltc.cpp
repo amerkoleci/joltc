@@ -148,6 +148,8 @@ DEF_MAP_DECL(Ragdoll, JPH_Ragdoll)
 DEF_MAP_DECL(GroupFilter, JPH_GroupFilter)
 DEF_MAP_DECL(GroupFilterTable, JPH_GroupFilterTable)
 
+DEF_MAP_DECL(PhysicsStepListener, JPH_PhysicsStepListener)
+
 // Vehicle
 DEF_MAP_DECL(WheelSettings, JPH_WheelSettings)
 DEF_MAP_DECL(Wheel, JPH_Wheel)
@@ -5122,7 +5124,7 @@ void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsSte
 	JPH_ASSERT(system);
 	JPH_ASSERT(listener);
 
-	system->physicsSystem->AddStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
+	system->physicsSystem->AddStepListener(AsPhysicsStepListener(listener));
 }
 
 void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
@@ -5130,7 +5132,7 @@ void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_Physics
 	JPH_ASSERT(system);
 	JPH_ASSERT(listener);
 
-	system->physicsSystem->RemoveStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
+	system->physicsSystem->RemoveStepListener(AsPhysicsStepListener(listener));
 }
 
 void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count)
@@ -5251,7 +5253,7 @@ void JPH_PhysicsStepListener_SetProcs(const JPH_PhysicsStepListener_Procs* procs
 JPH_PhysicsStepListener* JPH_PhysicsStepListener_Create(void* userData)
 {
 	auto listener = new ManagedPhysicsStepListener(userData);
-	return reinterpret_cast<JPH_PhysicsStepListener*>(listener);
+	return ToPhysicsStepListener(listener);
 }
 
 void JPH_PhysicsStepListener_Destroy(JPH_PhysicsStepListener* listener)
@@ -9744,14 +9746,14 @@ void JPH_VehicleConstraintSettings_ToJolt(VehicleConstraintSettings* joltSetting
 
 	if (settings->antiRollBarsCount > 0)
 	{
-		joltSettings->mAntiRollBars.reserve(settings->antiRollBarsCount);
+		joltSettings->mAntiRollBars.resize(settings->antiRollBarsCount);
 		for (uint32_t i = 0; i < settings->antiRollBarsCount; ++i)
 		{
 			JPH::VehicleAntiRollBar joltAntiRollBar{};
 			joltAntiRollBar.mLeftWheel = settings->antiRollBars[i].leftWheel;
 			joltAntiRollBar.mRightWheel = settings->antiRollBars[i].rightWheel;
 			joltAntiRollBar.mStiffness = settings->antiRollBars[i].stiffness;
-			joltSettings->mAntiRollBars.push_back(joltAntiRollBar);
+			joltSettings->mAntiRollBars[i] = joltAntiRollBar;
 		}
 	}
 
@@ -9773,6 +9775,14 @@ JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_Ve
 	vehicleConstraint->AddRef();
 
 	return ToVehicleConstraint(vehicleConstraint);
+}
+
+JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
+{
+	JPH_ASSERT(constraint);
+
+	PhysicsStepListener* joltListener = static_cast<PhysicsStepListener*>(AsVehicleConstraint(constraint));
+	return ToPhysicsStepListener(joltListener);
 }
 
 void JPH_VehicleConstraint_SetMaxPitchRollAngle(JPH_VehicleConstraint* constraint, float maxPitchRollAngle)
