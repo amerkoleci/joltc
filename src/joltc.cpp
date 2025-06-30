@@ -9324,6 +9324,11 @@ void JPH_Wheel_Destroy(JPH_Wheel* wheel)
 	}
 }
 
+const JPH_WheelSettings* JPH_Wheel_GetSettings(const JPH_Wheel* wheel)
+{
+	return ToWheelSettings(AsWheel(wheel)->GetSettings());
+}
+
 float JPH_Wheel_GetAngularVelocity(const JPH_Wheel* wheel)
 {
 	return AsWheel(wheel)->GetAngularVelocity();

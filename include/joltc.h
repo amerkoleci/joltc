@@ -2681,6 +2681,7 @@ JPH_CAPI void JPH_WheelSettings_SetEnableSuspensionForcePoint(JPH_WheelSettings*
 
 JPH_CAPI JPH_Wheel* JPH_Wheel_Create(const JPH_WheelSettings* settings);
 JPH_CAPI void JPH_Wheel_Destroy(JPH_Wheel* wheel);
+JPH_CAPI const JPH_WheelSettings* JPH_Wheel_GetSettings(const JPH_Wheel* wheel);
 JPH_CAPI float JPH_Wheel_GetAngularVelocity(const JPH_Wheel* wheel);
 JPH_CAPI void JPH_Wheel_SetAngularVelocity(JPH_Wheel* wheel, float value);
 JPH_CAPI float JPH_Wheel_GetRotationAngle(const JPH_Wheel* wheel);
