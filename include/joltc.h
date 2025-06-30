@@ -2645,6 +2645,9 @@ JPH_CAPI const JPH_Body* JPH_VehicleConstraint_GetVehicleBody(const JPH_VehicleC
 JPH_CAPI JPH_VehicleController* JPH_VehicleConstraint_GetController(JPH_VehicleConstraint* constraint);
 JPH_CAPI uint32_t JPH_VehicleConstraint_GetWheelsCount(JPH_VehicleConstraint* constraint);
 JPH_CAPI JPH_Wheel* JPH_VehicleConstraint_GetWheel(JPH_VehicleConstraint* constraint, uint32_t index);
+JPH_CAPI void JPH_VehicleConstraint_GetWheelLocalBasis(JPH_VehicleConstraint* constraint, const JPH_Wheel* wheel, JPH_Vec3* outForward, JPH_Vec3* outUp, JPH_Vec3* outRight);
+JPH_CAPI void JPH_VehicleConstraint_GetWheelLocalTransform(JPH_VehicleConstraint* constraint, uint32_t wheelIndex, const JPH_Vec3* wheelRight, const JPH_Vec3* wheelUp, JPH_Matrix4x4* result);
+JPH_CAPI void JPH_VehicleConstraint_GetWheelWorldTransform(JPH_VehicleConstraint* constraint, uint32_t wheelIndex, const JPH_Vec3* wheelRight, const JPH_Vec3* wheelUp, JPH_RMatrix4x4* result);
 
 /* Wheel */
 JPH_CAPI JPH_WheelSettings* JPH_WheelSettings_Create(void);

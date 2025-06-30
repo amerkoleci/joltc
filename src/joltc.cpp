@@ -9850,6 +9850,28 @@ JPH_Wheel* JPH_VehicleConstraint_GetWheel(JPH_VehicleConstraint* constraint, uin
 	return ToWheel(AsVehicleConstraint(constraint)->GetWheel(index));
 }
 
+void JPH_VehicleConstraint_GetWheelLocalBasis(JPH_VehicleConstraint* constraint, const JPH_Wheel* wheel, JPH_Vec3* outForward, JPH_Vec3* outUp, JPH_Vec3* outRight)
+{
+	Vec3 forward, up, right;
+
+	AsVehicleConstraint(constraint)->GetWheelLocalBasis(AsWheel(wheel), forward, up, right);
+	FromJolt(forward, outForward);
+	FromJolt(up, outUp);
+	FromJolt(right, outRight);
+}
+
+void JPH_VehicleConstraint_GetWheelLocalTransform(JPH_VehicleConstraint* constraint, uint32_t wheelIndex, const JPH_Vec3* wheelRight, const JPH_Vec3* wheelUp, JPH_Matrix4x4* result)
+{
+	Mat44 joltResult = AsVehicleConstraint(constraint)->GetWheelLocalTransform(wheelIndex, ToJolt(wheelRight), ToJolt(wheelUp));
+	FromJolt(joltResult, result);
+}
+
+void JPH_VehicleConstraint_GetWheelWorldTransform(JPH_VehicleConstraint* constraint, uint32_t wheelIndex, const JPH_Vec3* wheelRight, const JPH_Vec3* wheelUp, JPH_RMatrix4x4* result)
+{
+	RMat44 joltResult = AsVehicleConstraint(constraint)->GetWheelWorldTransform(wheelIndex, ToJolt(wheelRight), ToJolt(wheelUp));
+	FromJolt(joltResult, result);
+}
+
 /* VehicleControllerSettings */
 void JPH_VehicleControllerSettings_Destroy(JPH_VehicleControllerSettings* settings)
 {
