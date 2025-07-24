@@ -3277,12 +3277,12 @@ void JPH_BodyCreationSettings_SetObjectLayer(JPH_BodyCreationSettings* settings,
 	AsBodyCreationSettings(settings)->mObjectLayer = static_cast<JPH::ObjectLayer>(value);
 }
 
-void JPH_BodyCreationSettings_GetCollissionGroup(const JPH_BodyCreationSettings* settings, JPH_CollisionGroup* result)
+void JPH_BodyCreationSettings_GetCollisionGroup(const JPH_BodyCreationSettings* settings, JPH_CollisionGroup* result)
 {
 	FromJolt(AsBodyCreationSettings(settings)->mCollisionGroup, result);
 }
 
-void JPH_BodyCreationSettings_SetCollissionGroup(JPH_BodyCreationSettings* settings, const JPH_CollisionGroup* value)
+void JPH_BodyCreationSettings_SetCollisionGroup(JPH_BodyCreationSettings* settings, const JPH_CollisionGroup* value)
 {
 	AsBodyCreationSettings(settings)->mCollisionGroup = ToJolt(value);
 }
@@ -5483,12 +5483,12 @@ void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interfa
 	AsBodyInterface(interface)->SetPositionRotationAndVelocity(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), ToJolt(linearVelocity), ToJolt(angularVelocity));
 }
 
-void JPH_BodyInterface_GetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result)
+void JPH_BodyInterface_GetCollisionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result)
 {
 	FromJolt(AsBodyInterface(interface)->GetCollisionGroup(JPH::BodyID(bodyId)), result);
 }
 
-void JPH_BodyInterface_SetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group)
+void JPH_BodyInterface_SetCollisionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group)
 {
 	AsBodyInterface(interface)->SetCollisionGroup(JPH::BodyID(bodyId), ToJolt(group));
 }
@@ -6898,12 +6898,12 @@ JPH_ObjectLayer JPH_Body_GetObjectLayer(const JPH_Body* body)
 	return static_cast<JPH_ObjectLayer>(AsBody(body)->GetObjectLayer());
 }
 
-void JPH_Body_GetCollissionGroup(const JPH_Body* body, JPH_CollisionGroup* result)
+void JPH_Body_GetCollisionGroup(const JPH_Body* body, JPH_CollisionGroup* result)
 {
 	FromJolt(AsBody(body)->GetCollisionGroup(), result);
 }
 
-void JPH_Body_SetCollissionGroup(JPH_Body* body, const JPH_CollisionGroup* value)
+void JPH_Body_SetCollisionGroup(JPH_Body* body, const JPH_CollisionGroup* value)
 {
 	AsBody(body)->SetCollisionGroup(ToJolt(value));
 }
