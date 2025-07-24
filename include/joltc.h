@@ -643,7 +643,7 @@ typedef struct JPH_DrawSettings {
 	JPH_BodyManager_ShapeColor	drawShapeColor;                     ///< Coloring scheme to use for shapes
 	bool						drawBoundingBox;					///< Draw a bounding box per body
 	bool						drawCenterOfMassTransform;			///< Draw the center of mass for each body
-	bool						drawWorldTransform;					///< Draw the world transform (which can be different than the center of mass) for each body
+	bool						drawWorldTransform;					///< Draw the world transform (which may differ from its center of mass) of each body
 	bool						drawVelocity;						///< Draw the velocity vector for each body
 	bool						drawMassAndInertia;					///< Draw the mass and inertia (as the box equivalent) for each body
 	bool						drawSleepStats;						///< Draw stats regarding the sleeping algorithm of each body
@@ -959,8 +959,8 @@ typedef struct JPH_CharacterVirtualContact {
 	bool							canPushCharacter;
 } JPH_CharacterVirtualContact;
 
-typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* mssage);
-typedef bool(JPH_API_CALL* JPH_AssertFailureFunc)(const char* expression, const char* mssage, const char* file, uint32_t line);
+typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* message);
+typedef bool(JPH_API_CALL* JPH_AssertFailureFunc)(const char* expression, const char* message, const char* file, uint32_t line);
 
 typedef void JPH_JobFunction(void* arg);
 typedef void JPH_QueueJobCallback(void* context, JPH_JobFunction* job, void* arg);
@@ -1451,8 +1451,8 @@ JPH_CAPI void JPH_BodyCreationSettings_SetUserData(JPH_BodyCreationSettings* set
 JPH_CAPI JPH_ObjectLayer JPH_BodyCreationSettings_GetObjectLayer(const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyCreationSettings_SetObjectLayer(JPH_BodyCreationSettings* settings, JPH_ObjectLayer value);
 
-JPH_CAPI void JPH_BodyCreationSettings_GetCollissionGroup(const JPH_BodyCreationSettings* settings, JPH_CollisionGroup* result);
-JPH_CAPI void JPH_BodyCreationSettings_SetCollissionGroup(JPH_BodyCreationSettings* settings, const JPH_CollisionGroup* value);
+JPH_CAPI void JPH_BodyCreationSettings_GetCollisionGroup(const JPH_BodyCreationSettings* settings, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_BodyCreationSettings_SetCollisionGroup(JPH_BodyCreationSettings* settings, const JPH_CollisionGroup* value);
 
 JPH_CAPI JPH_MotionType JPH_BodyCreationSettings_GetMotionType(const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyCreationSettings_SetMotionType(JPH_BodyCreationSettings* settings, JPH_MotionType value);
@@ -1754,8 +1754,8 @@ JPH_CAPI void JPH_BodyInterface_SetPositionAndRotationWhenChanged(JPH_BodyInterf
 JPH_CAPI void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation);
 JPH_CAPI void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
 
-JPH_CAPI void JPH_BodyInterface_GetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result);
-JPH_CAPI void JPH_BodyInterface_SetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group);
+JPH_CAPI void JPH_BodyInterface_GetCollisionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_BodyInterface_SetCollisionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group);
 
 JPH_CAPI const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 JPH_CAPI void JPH_BodyInterface_SetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_Shape* shape, bool updateMassProperties, JPH_Activation activationMode);
@@ -2024,8 +2024,8 @@ JPH_CAPI void JPH_Body_SetMotionType(JPH_Body* body, JPH_MotionType motionType);
 JPH_CAPI JPH_BroadPhaseLayer JPH_Body_GetBroadPhaseLayer(const JPH_Body* body);
 JPH_CAPI JPH_ObjectLayer JPH_Body_GetObjectLayer(const JPH_Body* body);
 
-JPH_CAPI void JPH_Body_GetCollissionGroup(const JPH_Body* body, JPH_CollisionGroup* result);
-JPH_CAPI void JPH_Body_SetCollissionGroup(JPH_Body* body, const JPH_CollisionGroup* value);
+JPH_CAPI void JPH_Body_GetCollisionGroup(const JPH_Body* body, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_Body_SetCollisionGroup(JPH_Body* body, const JPH_CollisionGroup* value);
 
 JPH_CAPI bool JPH_Body_GetAllowSleeping(JPH_Body* body);
 JPH_CAPI void JPH_Body_SetAllowSleeping(JPH_Body* body, bool allowSleeping);
@@ -2743,7 +2743,7 @@ JPH_CAPI void JPH_VehicleTransmissionSettings_SetShiftDownRPM(JPH_VehicleTransmi
 JPH_CAPI float JPH_VehicleTransmissionSettings_GetClutchStrength(const JPH_VehicleTransmissionSettings* settings);
 JPH_CAPI void JPH_VehicleTransmissionSettings_SetClutchStrength(JPH_VehicleTransmissionSettings* settings, float value);
 
-/* VehicleColliionTester */
+/* VehicleCollisionTester */
 JPH_CAPI void JPH_VehicleCollisionTester_Destroy(JPH_VehicleCollisionTester* tester);
 JPH_CAPI JPH_ObjectLayer JPH_VehicleCollisionTester_GetObjectLayer(const JPH_VehicleCollisionTester* tester);
 JPH_CAPI void JPH_VehicleCollisionTester_SetObjectLayer(JPH_VehicleCollisionTester* tester, JPH_ObjectLayer value);

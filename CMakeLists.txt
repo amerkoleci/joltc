@@ -135,12 +135,25 @@ if (JPH_MASTER_PROJECT AND NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
 endif ()
 
-FetchContent_Declare(
-    JoltPhysics
-    GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-    GIT_TAG v5.3.0
-	SOURCE_SUBDIR "Build"
-)
+# use local JoltPhysics if exists
+set(JoltPhysics_LOCAL_PATH "${CMAKE_SOURCE_DIR}/../JoltPhysics")
+
+if(EXISTS "${JoltPhysics_LOCAL_PATH}/Build/CMakeLists.txt")
+    message(STATUS "Using local JoltPhysics at ${JoltPhysics_LOCAL_PATH}")
+    FetchContent_Declare(
+        JoltPhysics
+        SOURCE_DIR "${JoltPhysics_LOCAL_PATH}"
+        SOURCE_SUBDIR "Build"
+    )
+else()
+    message(STATUS "not found JoltPhysics at ${JoltPhysics_LOCAL_PATH}, Downloading from GitHub jrouwe/JoltPhysics")
+    FetchContent_Declare(
+        JoltPhysics
+        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
+        GIT_TAG v5.3.0
+        SOURCE_SUBDIR "Build"
+    )
+endif()
 FetchContent_MakeAvailable(JoltPhysics)
 
 if (XCODE)
