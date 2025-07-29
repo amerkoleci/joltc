@@ -148,7 +148,7 @@ jobs:
       uses: lukka/get-cmake@v3.29.4
 
     - name: Configure osx-universal
-      run: cmake -S "." -B "build_osx" -G Ninja -DCMAKE_BUILD_TYPE=Distribution -D"CMAKE_OSX_ARCHITECTURES=x86_64;arm64" -DCMAKE_INSTALL_PREFIX:String="SDK"
+      run: cmake -S "." -B "build_osx" -G Ninja -DCMAKE_BUILD_TYPE=Distribution -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_INSTALL_PREFIX:String="SDK"
     - name: Build osx-universal
       run: cmake --build build_osx --config Distribution --verbose --parallel
 
