@@ -7262,20 +7262,16 @@ void JPH_ContactListener_Destroy(JPH_ContactListener* listener)
 class ManagedBodyActivationListener final : public JPH::BodyActivationListener
 {
 public:
-	static const JPH_BodyActivationListener_Procs* s_Procs;
+	static JPH_BodyActivationListener_Procs s_Procs;
 	void* userData = nullptr;
 
-	ManagedBodyActivationListener(void* userData_)
-		: userData(userData_)
-	{
-
-	}
+	ManagedBodyActivationListener(void* userData_) : userData(userData_)	{}
 
 	void OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnBodyActivated)
+		if (s_Procs.OnBodyActivated)
 		{
-			s_Procs->OnBodyActivated(
+			s_Procs.OnBodyActivated(
 				userData,
 				inBodyID.GetIndexAndSequenceNumber(),
 				inBodyUserData
@@ -7285,9 +7281,9 @@ public:
 
 	void OnBodyDeactivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnBodyDeactivated)
+		if (s_Procs.OnBodyDeactivated)
 		{
-			s_Procs->OnBodyDeactivated(
+			s_Procs.OnBodyDeactivated(
 				userData,
 				inBodyID.GetIndexAndSequenceNumber(),
 				inBodyUserData
@@ -7296,11 +7292,9 @@ public:
 	}
 };
 
-const JPH_BodyActivationListener_Procs* ManagedBodyActivationListener::s_Procs = nullptr;
-
 void JPH_BodyActivationListener_SetProcs(const JPH_BodyActivationListener_Procs* procs)
 {
-	ManagedBodyActivationListener::s_Procs = procs;
+	ManagedBodyActivationListener::s_Procs = *procs;
 }
 
 JPH_BodyActivationListener* JPH_BodyActivationListener_Create(void* userData)
@@ -8177,14 +8171,10 @@ bool JPH_CharacterVirtual_HasCollidedWithCharacter(JPH_CharacterVirtual* charact
 class ManagedCharacterContactListener final : public JPH::CharacterContactListener
 {
 public:
-	static const JPH_CharacterContactListener_Procs* s_Procs;
+	static JPH_CharacterContactListener_Procs s_Procs;
 	void* userData = nullptr;
 
-	ManagedCharacterContactListener(void* userData_)
-		: userData(userData_)
-	{
-
-	}
+	ManagedCharacterContactListener(void* userData_) 	: userData(userData_) { }
 
 	void OnAdjustBodyVelocity(const CharacterVirtual* inCharacter, const Body& inBody2, Vec3& ioLinearVelocity, Vec3& ioAngularVelocity) override
 	{
@@ -8192,9 +8182,9 @@ public:
 		FromJolt(ioLinearVelocity, &linearVelocity);
 		FromJolt(ioAngularVelocity, &angularVelocity);
 
-		if (s_Procs != nullptr && s_Procs->OnAdjustBodyVelocity)
+		if (s_Procs.OnAdjustBodyVelocity)
 		{
-			s_Procs->OnAdjustBodyVelocity(
+			s_Procs.OnAdjustBodyVelocity(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToBody(&inBody2),
@@ -8209,9 +8199,9 @@ public:
 
 	bool OnContactValidate(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnContactValidate)
+		if (s_Procs.OnContactValidate)
 		{
-			return s_Procs->OnContactValidate(
+			return s_Procs.OnContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8224,9 +8214,9 @@ public:
 
 	bool OnCharacterContactValidate(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2)  override
 	{
-		if (s_Procs != nullptr && s_Procs->OnCharacterContactValidate)
+		if (s_Procs.OnCharacterContactValidate)
 		{
-			return s_Procs->OnCharacterContactValidate(
+			return s_Procs.OnCharacterContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -8239,7 +8229,7 @@ public:
 
 	void OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnContactAdded)
+		if (s_Procs.OnContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -8251,7 +8241,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			s_Procs->OnContactAdded(
+			s_Procs.OnContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8268,7 +8258,7 @@ public:
 
 	void OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnContactPersisted)
+		if (s_Procs.OnContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -8280,7 +8270,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			s_Procs->OnContactPersisted(
+			s_Procs.OnContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8297,9 +8287,9 @@ public:
 
 	void OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnContactRemoved)
+		if (s_Procs.OnContactRemoved)
 		{
-			s_Procs->OnContactRemoved(
+			s_Procs.OnContactRemoved(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8310,7 +8300,7 @@ public:
 
 	void OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnCharacterContactAdded)
+		if (s_Procs.OnCharacterContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -8339,7 +8329,7 @@ public:
 
 	void OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnCharacterContactPersisted)
+		if (s_Procs.OnCharacterContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -8351,7 +8341,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			s_Procs->OnCharacterContactPersisted(
+			s_Procs.OnCharacterContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -8368,9 +8358,9 @@ public:
 
 	void OnCharacterContactRemoved(const CharacterVirtual* inCharacter, const CharacterID& inOtherCharacterID, const SubShapeID& inSubShapeID2) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnCharacterContactRemoved)
+		if (s_Procs.OnCharacterContactRemoved)
 		{
-			s_Procs->OnCharacterContactRemoved(
+			s_Procs.OnCharacterContactRemoved(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_CharacterID)inOtherCharacterID.GetValue(),
@@ -8384,7 +8374,7 @@ public:
 		const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity,
 		Vec3& ioNewCharacterVelocity) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnContactSolve)
+		if (s_Procs.OnContactSolve)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
@@ -8395,7 +8385,7 @@ public:
 			FromJolt(inCharacterVelocity, &characterVelocity);
 			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
-			s_Procs->OnContactSolve(
+			s_Procs.OnContactSolve(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8414,7 +8404,7 @@ public:
 
 	void OnCharacterContactSolve(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnCharacterContactSolve)
+		if (s_Procs.OnCharacterContactSolve)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
@@ -8425,7 +8415,7 @@ public:
 			FromJolt(inCharacterVelocity, &characterVelocity);
 			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
-			s_Procs->OnCharacterContactSolve(
+			s_Procs.OnCharacterContactSolve(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -8443,11 +8433,9 @@ public:
 	}
 };
 
-const JPH_CharacterContactListener_Procs* ManagedCharacterContactListener::s_Procs = nullptr;
-
 void JPH_CharacterContactListener_SetProcs(const JPH_CharacterContactListener_Procs* procs)
 {
-	ManagedCharacterContactListener::s_Procs = procs;
+	ManagedCharacterContactListener::s_Procs = *procs;
 }
 
 JPH_CharacterContactListener* JPH_CharacterContactListener_Create(void* userData)
@@ -8468,7 +8456,7 @@ void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener
 class ManagedCharacterVsCharacterCollision final : public JPH::CharacterVsCharacterCollision
 {
 public:
-	static const JPH_CharacterVsCharacterCollision_Procs* s_Procs;
+	static JPH_CharacterVsCharacterCollision_Procs s_Procs;
 	void* userData = nullptr;
 
 	ManagedCharacterVsCharacterCollision(void* userData_)
