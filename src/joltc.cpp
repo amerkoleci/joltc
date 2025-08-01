@@ -7273,7 +7273,7 @@ public:
 
 	void OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (s_Procs != nullptr && s_Procs->OnBodyDeactivated)
+		if (s_Procs != nullptr && s_Procs->OnBodyActivated)
 		{
 			s_Procs->OnBodyActivated(
 				userData,
