@@ -2162,8 +2162,7 @@ typedef struct JPH_ContactListener_Procs {
 		JPH_ContactSettings* settings);
 
 	void(JPH_API_CALL* OnContactRemoved)(void* userData,
-		const JPH_SubShapeIDPair* subShapePair
-		);
+		const JPH_SubShapeIDPair* subShapePair);
 } JPH_ContactListener_Procs;
 
 JPH_CAPI void JPH_ContactListener_SetProcs(const JPH_ContactListener_Procs* procs);
