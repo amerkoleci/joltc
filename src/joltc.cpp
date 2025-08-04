@@ -5264,51 +5264,51 @@ void JPH_PhysicsStepListener_Destroy(JPH_PhysicsStepListener* listener)
 	}
 }
 
-JPH_Body* JPH_BodyInterface_CreateBody(JPH_BodyInterface* interface, const JPH_BodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateBody(JPH_BodyInterface* bodyInterface, const JPH_BodyCreationSettings* settings)
 {
-	auto body = AsBodyInterface(interface)->CreateBody(*AsBodyCreationSettings(settings));
+	auto body = AsBodyInterface(bodyInterface)->CreateBody(*AsBodyCreationSettings(settings));
 	return ToBody(body);
 }
 
-JPH_Body* JPH_BodyInterface_CreateBodyWithID(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_BodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateBodyWithID(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, const JPH_BodyCreationSettings* settings)
 {
-	auto body = AsBodyInterface(interface)->CreateBodyWithID(
+	auto body = AsBodyInterface(bodyInterface)->CreateBodyWithID(
 		JPH::BodyID(bodyID),
 		*AsBodyCreationSettings(settings)
 	);
 	return ToBody(body);
 }
 
-JPH_Body* JPH_BodyInterface_CreateBodyWithoutID(JPH_BodyInterface* interface, const JPH_BodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateBodyWithoutID(JPH_BodyInterface* bodyInterface, const JPH_BodyCreationSettings* settings)
 {
-	auto body = AsBodyInterface(interface)->CreateBodyWithoutID(*AsBodyCreationSettings(settings));
+	auto body = AsBodyInterface(bodyInterface)->CreateBodyWithoutID(*AsBodyCreationSettings(settings));
 	return ToBody(body);
 }
 
-void JPH_BodyInterface_DestroyBodyWithoutID(JPH_BodyInterface* interface, JPH_Body* body)
+void JPH_BodyInterface_DestroyBodyWithoutID(JPH_BodyInterface* bodyInterface, JPH_Body* body)
 {
-	AsBodyInterface(interface)->DestroyBodyWithoutID(AsBody(body));
+	AsBodyInterface(bodyInterface)->DestroyBodyWithoutID(AsBody(body));
 }
 
-bool JPH_BodyInterface_AssignBodyID(JPH_BodyInterface* interface, JPH_Body* body)
+bool JPH_BodyInterface_AssignBodyID(JPH_BodyInterface* bodyInterface, JPH_Body* body)
 {
-	return AsBodyInterface(interface)->AssignBodyID(AsBody(body));
+	return AsBodyInterface(bodyInterface)->AssignBodyID(AsBody(body));
 }
 
-bool JPH_BodyInterface_AssignBodyID2(JPH_BodyInterface* interface, JPH_Body* body, JPH_BodyID bodyID)
+bool JPH_BodyInterface_AssignBodyID2(JPH_BodyInterface* bodyInterface, JPH_Body* body, JPH_BodyID bodyID)
 {
-	return AsBodyInterface(interface)->AssignBodyID(AsBody(body), JPH::BodyID(bodyID));
+	return AsBodyInterface(bodyInterface)->AssignBodyID(AsBody(body), JPH::BodyID(bodyID));
 }
 
-JPH_Body* JPH_BodyInterface_UnassignBodyID(JPH_BodyInterface* interface, JPH_BodyID bodyID)
+JPH_Body* JPH_BodyInterface_UnassignBodyID(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
-	auto body = AsBodyInterface(interface)->UnassignBodyID(JPH::BodyID(bodyID));
+	auto body = AsBodyInterface(bodyInterface)->UnassignBodyID(JPH::BodyID(bodyID));
 	return ToBody(body);
 }
 
-JPH_BodyID JPH_BodyInterface_CreateAndAddBody(JPH_BodyInterface* interface, const JPH_BodyCreationSettings* settings, JPH_Activation activationMode)
+JPH_BodyID JPH_BodyInterface_CreateAndAddBody(JPH_BodyInterface* bodyInterface, const JPH_BodyCreationSettings* settings, JPH_Activation activationMode)
 {
-	JPH::BodyID bodyID = AsBodyInterface(interface)->CreateAndAddBody(
+	JPH::BodyID bodyID = AsBodyInterface(bodyInterface)->CreateAndAddBody(
 		*reinterpret_cast<const JPH::BodyCreationSettings*>(settings),
 		(JPH::EActivation)activationMode
 	);
@@ -5316,239 +5316,239 @@ JPH_BodyID JPH_BodyInterface_CreateAndAddBody(JPH_BodyInterface* interface, cons
 	return bodyID.GetIndexAndSequenceNumber();
 }
 
-void JPH_BodyInterface_DestroyBody(JPH_BodyInterface* interface, JPH_BodyID bodyID)
+void JPH_BodyInterface_DestroyBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
-	AsBodyInterface(interface)->DestroyBody(JPH::BodyID(bodyID));
+	AsBodyInterface(bodyInterface)->DestroyBody(JPH::BodyID(bodyID));
 }
 
-JPH_Body* JPH_BodyInterface_CreateSoftBody(JPH_BodyInterface* interface, const JPH_SoftBodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateSoftBody(JPH_BodyInterface* bodyInterface, const JPH_SoftBodyCreationSettings* settings)
 {
-	JPH::Body* body = AsBodyInterface(interface)->CreateSoftBody(*AsSoftBodyCreationSettings(settings));
+	JPH::Body* body = AsBodyInterface(bodyInterface)->CreateSoftBody(*AsSoftBodyCreationSettings(settings));
 	return ToBody(body);
 }
 
-JPH_Body* JPH_BodyInterface_CreateSoftBodyWithID(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_SoftBodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateSoftBodyWithID(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, const JPH_SoftBodyCreationSettings* settings)
 {
-	JPH::Body* body = AsBodyInterface(interface)->CreateSoftBodyWithID(JPH::BodyID(bodyID), *AsSoftBodyCreationSettings(settings));
+	JPH::Body* body = AsBodyInterface(bodyInterface)->CreateSoftBodyWithID(JPH::BodyID(bodyID), *AsSoftBodyCreationSettings(settings));
 	return ToBody(body);
 }
 
-JPH_Body* JPH_BodyInterface_CreateSoftBodyWithoutID(JPH_BodyInterface* interface, const JPH_SoftBodyCreationSettings* settings)
+JPH_Body* JPH_BodyInterface_CreateSoftBodyWithoutID(JPH_BodyInterface* bodyInterface, const JPH_SoftBodyCreationSettings* settings)
 {
-	JPH::Body* body = AsBodyInterface(interface)->CreateSoftBodyWithoutID(*AsSoftBodyCreationSettings(settings));
+	JPH::Body* body = AsBodyInterface(bodyInterface)->CreateSoftBodyWithoutID(*AsSoftBodyCreationSettings(settings));
 	return ToBody(body);
 }
 
-JPH_BodyID JPH_BodyInterface_CreateAndAddSoftBody(JPH_BodyInterface* interface, const JPH_SoftBodyCreationSettings* settings, JPH_Activation activationMode)
+JPH_BodyID JPH_BodyInterface_CreateAndAddSoftBody(JPH_BodyInterface* bodyInterface, const JPH_SoftBodyCreationSettings* settings, JPH_Activation activationMode)
 {
-	JPH::BodyID bodyID = AsBodyInterface(interface)->CreateAndAddSoftBody(
+	JPH::BodyID bodyID = AsBodyInterface(bodyInterface)->CreateAndAddSoftBody(
 		*AsSoftBodyCreationSettings(settings),
 		static_cast<JPH::EActivation>(activationMode)
 	);
 	return bodyID.GetIndexAndSequenceNumber();
 }
 
-void JPH_BodyInterface_AddBody(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_Activation activationMode)
+void JPH_BodyInterface_AddBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, JPH_Activation activationMode)
 {
 	JPH::BodyID joltBodyID(bodyID);
 	JPH_ASSERT(!joltBodyID.IsInvalid());
 
-	AsBodyInterface(interface)->AddBody(joltBodyID, (JPH::EActivation)activationMode);
+	AsBodyInterface(bodyInterface)->AddBody(joltBodyID, (JPH::EActivation)activationMode);
 }
 
-void JPH_BodyInterface_RemoveBody(JPH_BodyInterface* interface, JPH_BodyID bodyID)
+void JPH_BodyInterface_RemoveBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
 	JPH::BodyID joltBodyID(bodyID);
 	JPH_ASSERT(!joltBodyID.IsInvalid());
 
-	AsBodyInterface(interface)->RemoveBody(joltBodyID);
+	AsBodyInterface(bodyInterface)->RemoveBody(joltBodyID);
 }
 
-void JPH_BodyInterface_RemoveAndDestroyBody(JPH_BodyInterface* interface, JPH_BodyID bodyID)
+void JPH_BodyInterface_RemoveAndDestroyBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
 	JPH::BodyID joltBodyID(bodyID);
 	JPH_ASSERT(!joltBodyID.IsInvalid());
 
-	AsBodyInterface(interface)->RemoveBody(joltBodyID);
-	AsBodyInterface(interface)->DestroyBody(joltBodyID);
+	AsBodyInterface(bodyInterface)->RemoveBody(joltBodyID);
+	AsBodyInterface(bodyInterface)->DestroyBody(joltBodyID);
 }
 
-bool JPH_BodyInterface_IsActive(JPH_BodyInterface* interface, JPH_BodyID bodyID)
+bool JPH_BodyInterface_IsActive(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
-	return AsBodyInterface(interface)->IsActive(JPH::BodyID(bodyID));
+	return AsBodyInterface(bodyInterface)->IsActive(JPH::BodyID(bodyID));
 }
 
-bool JPH_BodyInterface_IsAdded(JPH_BodyInterface* interface, JPH_BodyID bodyID)
+bool JPH_BodyInterface_IsAdded(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
-	return AsBodyInterface(interface)->IsAdded(JPH::BodyID(bodyID));
+	return AsBodyInterface(bodyInterface)->IsAdded(JPH::BodyID(bodyID));
 }
 
-JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* interface, JPH_BodyID bodyID)
+JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
-	return static_cast<JPH_BodyType>(AsBodyInterface(interface)->GetBodyType(JPH::BodyID(bodyID)));
+	return static_cast<JPH_BodyType>(AsBodyInterface(bodyInterface)->GetBodyType(JPH::BodyID(bodyID)));
 }
 
-void JPH_BodyInterface_SetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_Vec3* velocity)
+void JPH_BodyInterface_SetLinearVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, const JPH_Vec3* velocity)
 {
-	AsBodyInterface(interface)->SetLinearVelocity(JPH::BodyID(bodyID), ToJolt(velocity));
+	AsBodyInterface(bodyInterface)->SetLinearVelocity(JPH::BodyID(bodyID), ToJolt(velocity));
 }
 
-void JPH_BodyInterface_GetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_Vec3* velocity)
+void JPH_BodyInterface_GetLinearVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, JPH_Vec3* velocity)
 {
-	auto joltVector = AsBodyInterface(interface)->GetLinearVelocity(JPH::BodyID(bodyID));
+	auto joltVector = AsBodyInterface(bodyInterface)->GetLinearVelocity(JPH::BodyID(bodyID));
 	FromJolt(joltVector, velocity);
 }
 
-void JPH_BodyInterface_GetCenterOfMassPosition(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_RVec3* position)
+void JPH_BodyInterface_GetCenterOfMassPosition(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, JPH_RVec3* position)
 {
-	auto joltVector = AsBodyInterface(interface)->GetCenterOfMassPosition(JPH::BodyID(bodyID));
+	auto joltVector = AsBodyInterface(bodyInterface)->GetCenterOfMassPosition(JPH::BodyID(bodyID));
 	FromJolt(joltVector, position);
 }
 
-JPH_MotionType JPH_BodyInterface_GetMotionType(JPH_BodyInterface* interface, JPH_BodyID bodyID)
+JPH_MotionType JPH_BodyInterface_GetMotionType(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
-	return static_cast<JPH_MotionType>(AsBodyInterface(interface)->GetMotionType(JPH::BodyID(bodyID)));
+	return static_cast<JPH_MotionType>(AsBodyInterface(bodyInterface)->GetMotionType(JPH::BodyID(bodyID)));
 }
 
-void JPH_BodyInterface_SetMotionType(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_MotionType motionType, JPH_Activation activationMode)
+void JPH_BodyInterface_SetMotionType(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, JPH_MotionType motionType, JPH_Activation activationMode)
 {
-	AsBodyInterface(interface)->SetMotionType(
+	AsBodyInterface(bodyInterface)->SetMotionType(
 		JPH::BodyID(bodyID),
 		static_cast<JPH::EMotionType>(motionType),
 		static_cast<JPH::EActivation>(activationMode)
 	);
 }
 
-float JPH_BodyInterface_GetRestitution(const JPH_BodyInterface* interface, JPH_BodyID bodyID)
+float JPH_BodyInterface_GetRestitution(const JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
-	return AsBodyInterface(interface)->GetRestitution(JPH::BodyID(bodyID));
+	return AsBodyInterface(bodyInterface)->GetRestitution(JPH::BodyID(bodyID));
 }
 
-void JPH_BodyInterface_SetRestitution(JPH_BodyInterface* interface, JPH_BodyID bodyID, float restitution)
+void JPH_BodyInterface_SetRestitution(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, float restitution)
 {
-	AsBodyInterface(interface)->SetRestitution(JPH::BodyID(bodyID), restitution);
+	AsBodyInterface(bodyInterface)->SetRestitution(JPH::BodyID(bodyID), restitution);
 }
 
-float JPH_BodyInterface_GetFriction(const JPH_BodyInterface* interface, JPH_BodyID bodyID)
+float JPH_BodyInterface_GetFriction(const JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
-	return AsBodyInterface(interface)->GetFriction(JPH::BodyID(bodyID));
+	return AsBodyInterface(bodyInterface)->GetFriction(JPH::BodyID(bodyID));
 }
 
-void JPH_BodyInterface_SetFriction(JPH_BodyInterface* interface, JPH_BodyID bodyID, float friction)
+void JPH_BodyInterface_SetFriction(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, float friction)
 {
-	AsBodyInterface(interface)->SetFriction(JPH::BodyID(bodyID), friction);
+	AsBodyInterface(bodyInterface)->SetFriction(JPH::BodyID(bodyID), friction);
 }
 
-void JPH_BodyInterface_SetPosition(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Activation activationMode)
+void JPH_BodyInterface_SetPosition(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Activation activationMode)
 {
-	AsBodyInterface(interface)->SetPosition(JPH::BodyID(bodyId), ToJolt(position), static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(bodyInterface)->SetPosition(JPH::BodyID(bodyId), ToJolt(position), static_cast<JPH::EActivation>(activationMode));
 }
 
-void JPH_BodyInterface_GetPosition(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* result)
+void JPH_BodyInterface_GetPosition(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_RVec3* result)
 {
-	FromJolt(AsBodyInterface(interface)->GetPosition(JPH::BodyID(bodyId)), result);
+	FromJolt(AsBodyInterface(bodyInterface)->GetPosition(JPH::BodyID(bodyId)), result);
 }
 
-void JPH_BodyInterface_SetRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Quat* rotation, JPH_Activation activationMode)
+void JPH_BodyInterface_SetRotation(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Quat* rotation, JPH_Activation activationMode)
 {
-	AsBodyInterface(interface)->SetRotation(JPH::BodyID(bodyId), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(bodyInterface)->SetRotation(JPH::BodyID(bodyId), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
 }
 
-void JPH_BodyInterface_GetRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Quat* result)
+void JPH_BodyInterface_GetRotation(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Quat* result)
 {
-	FromJolt(AsBodyInterface(interface)->GetRotation(JPH::BodyID(bodyId)), result);
+	FromJolt(AsBodyInterface(bodyInterface)->GetRotation(JPH::BodyID(bodyId)), result);
 }
 
-void JPH_BodyInterface_SetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode)
+void JPH_BodyInterface_SetPositionAndRotation(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode)
 {
-	AsBodyInterface(interface)->SetPositionAndRotation(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(bodyInterface)->SetPositionAndRotation(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
 }
 
-void JPH_BodyInterface_SetPositionAndRotationWhenChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode)
+void JPH_BodyInterface_SetPositionAndRotationWhenChanged(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode)
 {
-	AsBodyInterface(interface)->SetPositionAndRotationWhenChanged(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(bodyInterface)->SetPositionAndRotationWhenChanged(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), static_cast<JPH::EActivation>(activationMode));
 }
 
-void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation)
+void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation)
 {
 	JPH::RVec3 joltPosition;
 	JPH::Quat joltRotation;
-	AsBodyInterface(interface)->GetPositionAndRotation(JPH::BodyID(bodyId), joltPosition, joltRotation);
+	AsBodyInterface(bodyInterface)->GetPositionAndRotation(JPH::BodyID(bodyId), joltPosition, joltRotation);
 	FromJolt(joltPosition, position);
 	FromJolt(joltRotation, rotation);
 }
 
-void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
-	AsBodyInterface(interface)->SetPositionRotationAndVelocity(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), ToJolt(linearVelocity), ToJolt(angularVelocity));
+	AsBodyInterface(bodyInterface)->SetPositionRotationAndVelocity(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), ToJolt(linearVelocity), ToJolt(angularVelocity));
 }
 
-void JPH_BodyInterface_GetCollisionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result)
+void JPH_BodyInterface_GetCollisionGroup(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_CollisionGroup* result)
 {
-	FromJolt(AsBodyInterface(interface)->GetCollisionGroup(JPH::BodyID(bodyId)), result);
+	FromJolt(AsBodyInterface(bodyInterface)->GetCollisionGroup(JPH::BodyID(bodyId)), result);
 }
 
-void JPH_BodyInterface_SetCollisionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group)
+void JPH_BodyInterface_SetCollisionGroup(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, const JPH_CollisionGroup* group)
 {
-	AsBodyInterface(interface)->SetCollisionGroup(JPH::BodyID(bodyId), ToJolt(group));
+	AsBodyInterface(bodyInterface)->SetCollisionGroup(JPH::BodyID(bodyId), ToJolt(group));
 }
 
-const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	const JPH::Shape* shape = AsBodyInterface(interface)->GetShape(JPH::BodyID(bodyId)).GetPtr();
+	const JPH::Shape* shape = AsBodyInterface(bodyInterface)->GetShape(JPH::BodyID(bodyId)).GetPtr();
 	return ToShape(shape);
 }
 
-void JPH_BodyInterface_SetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_Shape* shape, bool updateMassProperties, JPH_Activation activationMode)
+void JPH_BodyInterface_SetShape(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, const JPH_Shape* shape, bool updateMassProperties, JPH_Activation activationMode)
 {
-	AsBodyInterface(interface)->SetShape(JPH::BodyID(bodyId), AsShape(shape), updateMassProperties, static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(bodyInterface)->SetShape(JPH::BodyID(bodyId), AsShape(shape), updateMassProperties, static_cast<JPH::EActivation>(activationMode));
 }
 
-void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* previousCenterOfMass, bool updateMassProperties, JPH_Activation activationMode)
+void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* previousCenterOfMass, bool updateMassProperties, JPH_Activation activationMode)
 {
-	AsBodyInterface(interface)->NotifyShapeChanged(JPH::BodyID(bodyId), ToJolt(previousCenterOfMass), updateMassProperties, static_cast<JPH::EActivation>(activationMode));
+	AsBodyInterface(bodyInterface)->NotifyShapeChanged(JPH::BodyID(bodyId), ToJolt(previousCenterOfMass), updateMassProperties, static_cast<JPH::EActivation>(activationMode));
 }
 
-void JPH_BodyInterface_ActivateBody(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+void JPH_BodyInterface_ActivateBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	AsBodyInterface(interface)->ActivateBody(JPH::BodyID(bodyId));
+	AsBodyInterface(bodyInterface)->ActivateBody(JPH::BodyID(bodyId));
 }
 
-void JPH_BodyInterface_DeactivateBody(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+void JPH_BodyInterface_DeactivateBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	AsBodyInterface(interface)->DeactivateBody(JPH::BodyID(bodyId));
+	AsBodyInterface(bodyInterface)->DeactivateBody(JPH::BodyID(bodyId));
 }
 
-JPH_ObjectLayer JPH_BodyInterface_GetObjectLayer(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+JPH_ObjectLayer JPH_BodyInterface_GetObjectLayer(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	return AsBodyInterface(interface)->GetObjectLayer(JPH::BodyID(bodyId));
+	return AsBodyInterface(bodyInterface)->GetObjectLayer(JPH::BodyID(bodyId));
 }
 
-void JPH_BodyInterface_SetObjectLayer(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_ObjectLayer layer)
+void JPH_BodyInterface_SetObjectLayer(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_ObjectLayer layer)
 {
-	AsBodyInterface(interface)->SetObjectLayer(JPH::BodyID(bodyId), layer);
+	AsBodyInterface(bodyInterface)->SetObjectLayer(JPH::BodyID(bodyId), layer);
 }
 
-void JPH_BodyInterface_GetWorldTransform(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RMatrix4x4* result)
+void JPH_BodyInterface_GetWorldTransform(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_RMatrix4x4* result)
 {
-	const JPH::RMat44& mat = AsBodyInterface(interface)->GetWorldTransform(JPH::BodyID(bodyId));
+	const JPH::RMat44& mat = AsBodyInterface(bodyInterface)->GetWorldTransform(JPH::BodyID(bodyId));
 	FromJolt(mat, result);
 }
 
-void JPH_BodyInterface_GetCenterOfMassTransform(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RMatrix4x4* result)
+void JPH_BodyInterface_GetCenterOfMassTransform(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_RMatrix4x4* result)
 {
-	const JPH::RMat44& mat = AsBodyInterface(interface)->GetCenterOfMassTransform(JPH::BodyID(bodyId));
+	const JPH::RMat44& mat = AsBodyInterface(bodyInterface)->GetCenterOfMassTransform(JPH::BodyID(bodyId));
 	FromJolt(mat, result);
 }
 
-void JPH_BodyInterface_MoveKinematic(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* targetPosition, JPH_Quat* targetRotation, float deltaTime)
+void JPH_BodyInterface_MoveKinematic(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_RVec3* targetPosition, JPH_Quat* targetRotation, float deltaTime)
 {
-	AsBodyInterface(interface)->MoveKinematic(JPH::BodyID(bodyId), ToJolt(targetPosition), ToJolt(targetRotation), deltaTime);
+	AsBodyInterface(bodyInterface)->MoveKinematic(JPH::BodyID(bodyId), ToJolt(targetPosition), ToJolt(targetRotation), deltaTime);
 }
 
-bool JPH_BodyInterface_ApplyBuoyancyImpulse(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime)
+bool JPH_BodyInterface_ApplyBuoyancyImpulse(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime)
 {
-	return AsBodyInterface(interface)->ApplyBuoyancyImpulse(
+	return AsBodyInterface(bodyInterface)->ApplyBuoyancyImpulse(
 		JPH::BodyID(bodyId),
 		ToJolt(surfacePosition),
 		ToJolt(surfaceNormal),
@@ -5561,137 +5561,137 @@ bool JPH_BodyInterface_ApplyBuoyancyImpulse(JPH_BodyInterface* interface, JPH_Bo
 	);
 }
 
-void JPH_BodyInterface_SetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_SetLinearAndAngularVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
-	AsBodyInterface(interface)->SetLinearAndAngularVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity), ToJolt(angularVelocity));
+	AsBodyInterface(bodyInterface)->SetLinearAndAngularVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity), ToJolt(angularVelocity));
 }
 
-void JPH_BodyInterface_GetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_GetLinearAndAngularVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
 	JPH::Vec3 linear, angular;
-	AsBodyInterface(interface)->GetLinearAndAngularVelocity(JPH::BodyID(bodyId), linear, angular);
+	AsBodyInterface(bodyInterface)->GetLinearAndAngularVelocity(JPH::BodyID(bodyId), linear, angular);
 	FromJolt(linear, linearVelocity);
 	FromJolt(angular, angularVelocity);
 }
 
-void JPH_BodyInterface_AddLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity)
+void JPH_BodyInterface_AddLinearVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity)
 {
-	AsBodyInterface(interface)->AddLinearVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity));
+	AsBodyInterface(bodyInterface)->AddLinearVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity));
 }
 
-void JPH_BodyInterface_AddLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_AddLinearAndAngularVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
-	AsBodyInterface(interface)->AddLinearAndAngularVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity), ToJolt(angularVelocity));
+	AsBodyInterface(bodyInterface)->AddLinearAndAngularVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity), ToJolt(angularVelocity));
 }
 
-void JPH_BodyInterface_SetAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_SetAngularVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* angularVelocity)
 {
-	AsBodyInterface(interface)->SetAngularVelocity(JPH::BodyID(bodyId), ToJolt(angularVelocity));
+	AsBodyInterface(bodyInterface)->SetAngularVelocity(JPH::BodyID(bodyId), ToJolt(angularVelocity));
 }
 
-void JPH_BodyInterface_GetAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_GetAngularVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* angularVelocity)
 {
-	auto result = AsBodyInterface(interface)->GetAngularVelocity(JPH::BodyID(bodyId));
+	auto result = AsBodyInterface(bodyInterface)->GetAngularVelocity(JPH::BodyID(bodyId));
 	FromJolt(result, angularVelocity);
 }
 
-void JPH_BodyInterface_GetPointVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* point, JPH_Vec3* velocity)
+void JPH_BodyInterface_GetPointVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_RVec3* point, JPH_Vec3* velocity)
 {
-	auto result = AsBodyInterface(interface)->GetPointVelocity(JPH::BodyID(bodyId), ToJolt(point));
+	auto result = AsBodyInterface(bodyInterface)->GetPointVelocity(JPH::BodyID(bodyId), ToJolt(point));
 	FromJolt(result, velocity);
 }
 
-void JPH_BodyInterface_AddForce(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* force)
+void JPH_BodyInterface_AddForce(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* force)
 {
-	AsBodyInterface(interface)->AddForce(JPH::BodyID(bodyId), ToJolt(force));
+	AsBodyInterface(bodyInterface)->AddForce(JPH::BodyID(bodyId), ToJolt(force));
 }
 
-void JPH_BodyInterface_AddForce2(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* force, JPH_RVec3* point)
+void JPH_BodyInterface_AddForce2(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* force, JPH_RVec3* point)
 {
-	AsBodyInterface(interface)->AddForce(JPH::BodyID(bodyId), ToJolt(force), ToJolt(point));
+	AsBodyInterface(bodyInterface)->AddForce(JPH::BodyID(bodyId), ToJolt(force), ToJolt(point));
 }
 
-void JPH_BodyInterface_AddTorque(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* torque)
+void JPH_BodyInterface_AddTorque(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* torque)
 {
-	AsBodyInterface(interface)->AddTorque(JPH::BodyID(bodyId), ToJolt(torque));
+	AsBodyInterface(bodyInterface)->AddTorque(JPH::BodyID(bodyId), ToJolt(torque));
 }
 
-void JPH_BodyInterface_AddForceAndTorque(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* force, JPH_Vec3* torque)
+void JPH_BodyInterface_AddForceAndTorque(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* force, JPH_Vec3* torque)
 {
-	AsBodyInterface(interface)->AddForceAndTorque(JPH::BodyID(bodyId), ToJolt(force), ToJolt(torque));
+	AsBodyInterface(bodyInterface)->AddForceAndTorque(JPH::BodyID(bodyId), ToJolt(force), ToJolt(torque));
 }
 
-void JPH_BodyInterface_AddImpulse(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* impulse)
+void JPH_BodyInterface_AddImpulse(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* impulse)
 {
-	AsBodyInterface(interface)->AddImpulse(JPH::BodyID(bodyId), ToJolt(impulse));
+	AsBodyInterface(bodyInterface)->AddImpulse(JPH::BodyID(bodyId), ToJolt(impulse));
 }
 
-void JPH_BodyInterface_AddImpulse2(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* impulse, JPH_RVec3* point)
+void JPH_BodyInterface_AddImpulse2(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* impulse, JPH_RVec3* point)
 {
-	AsBodyInterface(interface)->AddImpulse(JPH::BodyID(bodyId), ToJolt(impulse), ToJolt(point));
+	AsBodyInterface(bodyInterface)->AddImpulse(JPH::BodyID(bodyId), ToJolt(impulse), ToJolt(point));
 }
 
-void JPH_BodyInterface_AddAngularImpulse(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* angularImpulse)
+void JPH_BodyInterface_AddAngularImpulse(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* angularImpulse)
 {
-	AsBodyInterface(interface)->AddAngularImpulse(JPH::BodyID(bodyId), ToJolt(angularImpulse));
+	AsBodyInterface(bodyInterface)->AddAngularImpulse(JPH::BodyID(bodyId), ToJolt(angularImpulse));
 }
 
-void JPH_BodyInterface_SetMotionQuality(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_MotionQuality quality)
+void JPH_BodyInterface_SetMotionQuality(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_MotionQuality quality)
 {
-	AsBodyInterface(interface)->SetMotionQuality(JPH::BodyID(bodyId), static_cast<JPH::EMotionQuality>(quality));
+	AsBodyInterface(bodyInterface)->SetMotionQuality(JPH::BodyID(bodyId), static_cast<JPH::EMotionQuality>(quality));
 }
 
-JPH_MotionQuality JPH_BodyInterface_GetMotionQuality(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+JPH_MotionQuality JPH_BodyInterface_GetMotionQuality(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	return static_cast<JPH_MotionQuality>(AsBodyInterface(interface)->GetMotionQuality(JPH::BodyID(bodyId)));
+	return static_cast<JPH_MotionQuality>(AsBodyInterface(bodyInterface)->GetMotionQuality(JPH::BodyID(bodyId)));
 }
 
-void JPH_BodyInterface_GetInverseInertia(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Matrix4x4* result)
+void JPH_BodyInterface_GetInverseInertia(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Matrix4x4* result)
 {
-	const JPH::Mat44& mat = AsBodyInterface(interface)->GetInverseInertia(JPH::BodyID(bodyId));
+	const JPH::Mat44& mat = AsBodyInterface(bodyInterface)->GetInverseInertia(JPH::BodyID(bodyId));
 	FromJolt(mat, result);
 }
 
-void JPH_BodyInterface_SetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId, float value)
+void JPH_BodyInterface_SetGravityFactor(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, float value)
 {
-	AsBodyInterface(interface)->SetGravityFactor(JPH::BodyID(bodyId), value);
+	AsBodyInterface(bodyInterface)->SetGravityFactor(JPH::BodyID(bodyId), value);
 }
 
-float JPH_BodyInterface_GetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+float JPH_BodyInterface_GetGravityFactor(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	return AsBodyInterface(interface)->GetGravityFactor(JPH::BodyID(bodyId));
+	return AsBodyInterface(bodyInterface)->GetGravityFactor(JPH::BodyID(bodyId));
 }
 
-void JPH_BodyInterface_SetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId, bool value)
+void JPH_BodyInterface_SetUseManifoldReduction(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, bool value)
 {
-	AsBodyInterface(interface)->SetUseManifoldReduction(JPH::BodyID(bodyId), value);
+	AsBodyInterface(bodyInterface)->SetUseManifoldReduction(JPH::BodyID(bodyId), value);
 }
 
-bool JPH_BodyInterface_GetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+bool JPH_BodyInterface_GetUseManifoldReduction(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	return AsBodyInterface(interface)->GetUseManifoldReduction(JPH::BodyID(bodyId));
+	return AsBodyInterface(bodyInterface)->GetUseManifoldReduction(JPH::BodyID(bodyId));
 }
 
-void JPH_BodyInterface_SetUserData(JPH_BodyInterface* interface, JPH_BodyID bodyId, uint64_t userData)
+void JPH_BodyInterface_SetUserData(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, uint64_t userData)
 {
-	AsBodyInterface(interface)->SetUserData(JPH::BodyID(bodyId), userData);
+	AsBodyInterface(bodyInterface)->SetUserData(JPH::BodyID(bodyId), userData);
 }
 
-uint64_t JPH_BodyInterface_GetUserData(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+uint64_t JPH_BodyInterface_GetUserData(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	return AsBodyInterface(interface)->GetUserData(JPH::BodyID(bodyId));
+	return AsBodyInterface(bodyInterface)->GetUserData(JPH::BodyID(bodyId));
 }
 
-const JPH_PhysicsMaterial* JPH_BodyInterface_GetMaterial(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_SubShapeID subShapeID)
+const JPH_PhysicsMaterial* JPH_BodyInterface_GetMaterial(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_SubShapeID subShapeID)
 {
 	auto joltSubShapeID = JPH::SubShapeID();
 	joltSubShapeID.SetValue(subShapeID);
-	return FromJolt(AsBodyInterface(interface)->GetMaterial(JPH::BodyID(bodyId), joltSubShapeID));
+	return FromJolt(AsBodyInterface(bodyInterface)->GetMaterial(JPH::BodyID(bodyId), joltSubShapeID));
 }
 
-void JPH_BodyInterface_InvalidateContactCache(JPH_BodyInterface* interface, JPH_BodyID bodyId)
+void JPH_BodyInterface_InvalidateContactCache(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
 {
-	AsBodyInterface(interface)->InvalidateContactCache(JPH::BodyID(bodyId));
+	AsBodyInterface(bodyInterface)->InvalidateContactCache(JPH::BodyID(bodyId));
 }
 
 //--------------------------------------------------------------------------------------------------
