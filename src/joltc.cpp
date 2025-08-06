@@ -3213,12 +3213,12 @@ void JPH_BodyCreationSettings_SetRotation(JPH_BodyCreationSettings* settings, co
 	AsBodyCreationSettings(settings)->mRotation = ToJolt(value);
 }
 
-void JPH_BodyCreationSettings_GetLinearVelocity(JPH_BodyCreationSettings* settings, JPH_Vec3* velocity)
+void JPH_BodyCreationSettings_GetLinearVelocity(JPH_BodyCreationSettings* settings, JPH_RVec3* velocity)
 {
 	FromJolt(AsBodyCreationSettings(settings)->mLinearVelocity, velocity);
 }
 
-void JPH_BodyCreationSettings_SetLinearVelocity(JPH_BodyCreationSettings* settings, const JPH_Vec3* velocity)
+void JPH_BodyCreationSettings_SetLinearVelocity(JPH_BodyCreationSettings* settings, const JPH_RVec3* velocity)
 {
 	AsBodyCreationSettings(settings)->mLinearVelocity = ToJolt(velocity);
 }
@@ -3403,36 +3403,6 @@ float JPH_BodyCreationSettings_GetAngularDamping(const JPH_BodyCreationSettings*
 void JPH_BodyCreationSettings_SetAngularDamping(JPH_BodyCreationSettings* settings, float value)
 {
 	AsBodyCreationSettings(settings)->mAngularDamping = value;
-}
-
-float JPH_BodyCreationSettings_GetMaxLinearVelocity(const JPH_BodyCreationSettings* settings)
-{
-	return AsBodyCreationSettings(settings)->mMaxLinearVelocity;
-}
-
-void JPH_BodyCreationSettings_SetMaxLinearVelocity(JPH_BodyCreationSettings* settings, float value)
-{
-	AsBodyCreationSettings(settings)->mMaxLinearVelocity = value;
-}
-
-float JPH_BodyCreationSettings_GetMaxAngularVelocity(const JPH_BodyCreationSettings* settings)
-{
-	return AsBodyCreationSettings(settings)->mMaxAngularVelocity;
-}
-
-void JPH_BodyCreationSettings_SetMaxAngularVelocity(JPH_BodyCreationSettings* settings, float value)
-{
-	AsBodyCreationSettings(settings)->mMaxAngularVelocity = value;
-}
-
-float JPH_BodyCreationSettings_GetGravityFactor(const JPH_BodyCreationSettings* settings)
-{
-	return AsBodyCreationSettings(settings)->mGravityFactor;
-}
-
-void JPH_BodyCreationSettings_SetGravityFactor(JPH_BodyCreationSettings* settings, float value)
-{
-	AsBodyCreationSettings(settings)->mGravityFactor = value;
 }
 
 uint32_t JPH_BodyCreationSettings_GetNumVelocityStepsOverride(const JPH_BodyCreationSettings* settings)
@@ -5030,21 +5000,6 @@ uint32_t JPH_PhysicsSystem_GetNumConstraints(const JPH_PhysicsSystem* system)
 	return (uint32_t)system->physicsSystem->GetConstraints().size();
 }
 
-void JPH_PhysicsSystem_SetGravity(JPH_PhysicsSystem* system, const JPH_Vec3* value)
-{
-	JPH_ASSERT(system);
-
-	system->physicsSystem->SetGravity(ToJolt(value));
-}
-
-void JPH_PhysicsSystem_GetGravity(JPH_PhysicsSystem* system, JPH_Vec3* result)
-{
-	JPH_ASSERT(system);
-
-	auto joltVector = system->physicsSystem->GetGravity();
-	FromJolt(joltVector, result);
-}
-
 void JPH_PhysicsSystem_AddConstraint(JPH_PhysicsSystem* system, JPH_Constraint* constraint)
 {
 	JPH_ASSERT(system);
@@ -5363,12 +5318,12 @@ JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* interface, JPH_Bod
 	return static_cast<JPH_BodyType>(AsBodyInterface(interface)->GetBodyType(JPH::BodyID(bodyID)));
 }
 
-void JPH_BodyInterface_SetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_Vec3* velocity)
+void JPH_BodyInterface_SetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_RVec3* velocity)
 {
 	AsBodyInterface(interface)->SetLinearVelocity(JPH::BodyID(bodyID), ToJolt(velocity));
 }
 
-void JPH_BodyInterface_GetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_Vec3* velocity)
+void JPH_BodyInterface_GetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_RVec3* velocity)
 {
 	auto joltVector = AsBodyInterface(interface)->GetLinearVelocity(JPH::BodyID(bodyID));
 	FromJolt(joltVector, velocity);
@@ -5453,7 +5408,7 @@ void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interface, JPH_
 	FromJolt(joltRotation, rotation);
 }
 
-void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
 	AsBodyInterface(interface)->SetPositionRotationAndVelocity(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), ToJolt(linearVelocity), ToJolt(angularVelocity));
 }
@@ -5536,25 +5491,26 @@ bool JPH_BodyInterface_ApplyBuoyancyImpulse(JPH_BodyInterface* interface, JPH_Bo
 	);
 }
 
-void JPH_BodyInterface_SetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_SetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
 	AsBodyInterface(interface)->SetLinearAndAngularVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity), ToJolt(angularVelocity));
 }
 
-void JPH_BodyInterface_GetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_GetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
-	JPH::Vec3 linear, angular;
+	JPH::RVec3 linear;
+	JPH::Vec3 angular;
 	AsBodyInterface(interface)->GetLinearAndAngularVelocity(JPH::BodyID(bodyId), linear, angular);
 	FromJolt(linear, linearVelocity);
 	FromJolt(angular, angularVelocity);
 }
 
-void JPH_BodyInterface_AddLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity)
+void JPH_BodyInterface_AddLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* linearVelocity)
 {
 	AsBodyInterface(interface)->AddLinearVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity));
 }
 
-void JPH_BodyInterface_AddLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
+void JPH_BodyInterface_AddLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
 	AsBodyInterface(interface)->AddLinearAndAngularVelocity(JPH::BodyID(bodyId), ToJolt(linearVelocity), ToJolt(angularVelocity));
 }
@@ -5570,7 +5526,7 @@ void JPH_BodyInterface_GetAngularVelocity(JPH_BodyInterface* interface, JPH_Body
 	FromJolt(result, angularVelocity);
 }
 
-void JPH_BodyInterface_GetPointVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* point, JPH_Vec3* velocity)
+void JPH_BodyInterface_GetPointVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* point, JPH_RVec3* velocity)
 {
 	auto result = AsBodyInterface(interface)->GetPointVelocity(JPH::BodyID(bodyId), ToJolt(point));
 	FromJolt(result, velocity);
@@ -5625,16 +5581,6 @@ void JPH_BodyInterface_GetInverseInertia(JPH_BodyInterface* interface, JPH_BodyI
 {
 	const JPH::Mat44& mat = AsBodyInterface(interface)->GetInverseInertia(JPH::BodyID(bodyId));
 	FromJolt(mat, result);
-}
-
-void JPH_BodyInterface_SetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId, float value)
-{
-	AsBodyInterface(interface)->SetGravityFactor(JPH::BodyID(bodyId), value);
-}
-
-float JPH_BodyInterface_GetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId)
-{
-	return AsBodyInterface(interface)->GetGravityFactor(JPH::BodyID(bodyId));
 }
 
 void JPH_BodyInterface_SetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId, bool value)
@@ -6912,18 +6858,18 @@ void JPH_Body_SetRestitution(JPH_Body* body, float restitution)
 	reinterpret_cast<JPH::Body*>(body)->SetRestitution(restitution);
 }
 
-void JPH_Body_GetLinearVelocity(JPH_Body* body, JPH_Vec3* velocity)
+void JPH_Body_GetLinearVelocity(JPH_Body* body, JPH_RVec3* velocity)// Todo
 {
 	auto joltVector = reinterpret_cast<JPH::Body*>(body)->GetLinearVelocity();
 	FromJolt(joltVector, velocity);
 }
 
-void JPH_Body_SetLinearVelocity(JPH_Body* body, const JPH_Vec3* velocity)
+void JPH_Body_SetLinearVelocity(JPH_Body* body, const JPH_RVec3* velocity)// Todo
 {
 	reinterpret_cast<JPH::Body*>(body)->SetLinearVelocity(ToJolt(velocity));
 }
 
-void JPH_Body_SetLinearVelocityClamped(JPH_Body* body, const JPH_Vec3* velocity)
+void JPH_Body_SetLinearVelocityClamped(JPH_Body* body, const JPH_RVec3* velocity)
 {
 	reinterpret_cast<JPH::Body*>(body)->SetLinearVelocityClamped(ToJolt(velocity));
 }
@@ -6944,12 +6890,12 @@ void JPH_Body_SetAngularVelocityClamped(JPH_Body* body, const JPH_Vec3* velocity
 	AsBody(body)->SetAngularVelocityClamped(ToJolt(velocity));
 }
 
-void JPH_Body_GetPointVelocityCOM(JPH_Body* body, const JPH_Vec3* pointRelativeToCOM, JPH_Vec3* velocity)
+void JPH_Body_GetPointVelocityCOM(JPH_Body* body, const JPH_Vec3* pointRelativeToCOM, JPH_RVec3* velocity)
 {
 	FromJolt(AsBody(body)->GetPointVelocityCOM(ToJolt(pointRelativeToCOM)), velocity);
 }
 
-void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_RVec3* point, JPH_Vec3* velocity)
+void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_RVec3* point, JPH_RVec3* velocity)
 {
 	FromJolt(AsBody(body)->GetPointVelocity(ToJolt(point)), velocity);
 }
@@ -7598,22 +7544,22 @@ void JPH_Character_PostSimulation(JPH_Character* character, float maxSeparationD
 	AsCharacter(character)->PostSimulation(maxSeparationDistance, lockBodies);
 }
 
-void JPH_Character_SetLinearAndAngularVelocity(JPH_Character* character, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity, bool lockBodies)
+void JPH_Character_SetLinearAndAngularVelocity(JPH_Character* character, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity, bool lockBodies)
 {
 	AsCharacter(character)->SetLinearAndAngularVelocity(ToJolt(linearVelocity), ToJolt(angularVelocity), lockBodies);
 }
 
-void JPH_Character_GetLinearVelocity(JPH_Character* character, JPH_Vec3* result)
+void JPH_Character_GetLinearVelocity(JPH_Character* character, JPH_RVec3* result)
 {
 	FromJolt(AsCharacter(character)->GetLinearVelocity(), result);
 }
 
-void JPH_Character_SetLinearVelocity(JPH_Character* character, const JPH_Vec3* value, bool lockBodies)
+void JPH_Character_SetLinearVelocity(JPH_Character* character, const JPH_RVec3* value, bool lockBodies)
 {
 	AsCharacter(character)->SetLinearVelocity(ToJolt(value), lockBodies);
 }
 
-void JPH_Character_AddLinearVelocity(JPH_Character* character, const JPH_Vec3* value, bool lockBodies)
+void JPH_Character_AddLinearVelocity(JPH_Character* character, const JPH_RVec3* value, bool lockBodies)
 {
 	AsCharacter(character)->AddLinearVelocity(ToJolt(value), lockBodies);
 }
@@ -7975,7 +7921,7 @@ void JPH_CharacterVirtual_Update(JPH_CharacterVirtual* character,
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
 	AsCharacterVirtual(character)->Update(deltaTime,
-		system->physicsSystem->GetGravity(),
+		{},
 		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
 		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
 		ToJolt(bodyFilter),
@@ -8002,7 +7948,7 @@ void JPH_CharacterVirtual_ExtendedUpdate(JPH_CharacterVirtual* character, float 
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
 	AsCharacterVirtual(character)->ExtendedUpdate(deltaTime,
-		system->physicsSystem->GetGravity(),
+		{},
 		joltSettings,
 		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
 		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
@@ -9325,7 +9271,7 @@ void JPH_Wheel_GetContactPosition(const JPH_Wheel* wheel, JPH_RVec3* result)
 	FromJolt(AsWheel(wheel)->GetContactPosition(), result);
 }
 
-void JPH_Wheel_GetContactPointVelocity(const JPH_Wheel* wheel, JPH_Vec3* result)
+void JPH_Wheel_GetContactPointVelocity(const JPH_Wheel* wheel, JPH_RVec3* result)
 {
 	FromJolt(AsWheel(wheel)->GetContactPointVelocity(), result);
 }
@@ -9744,26 +9690,6 @@ void JPH_VehicleConstraint_SetMaxPitchRollAngle(JPH_VehicleConstraint* constrain
 void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester)
 {
 	AsVehicleConstraint(constraint)->SetVehicleCollisionTester(AsVehicleCollisionTester(tester));
-}
-
-void JPH_VehicleConstraint_OverrideGravity(JPH_VehicleConstraint* constraint, const JPH_Vec3* value)
-{
-	AsVehicleConstraint(constraint)->OverrideGravity(ToJolt(value));
-}
-
-bool JPH_VehicleConstraint_IsGravityOverridden(const JPH_VehicleConstraint* constraint)
-{
-	return AsVehicleConstraint(constraint)->IsGravityOverridden();
-}
-
-void JPH_VehicleConstraint_GetGravityOverride(const JPH_VehicleConstraint* constraint, JPH_Vec3* result)
-{
-	FromJolt(AsVehicleConstraint(constraint)->GetGravityOverride(), result);
-}
-
-void JPH_VehicleConstraint_ResetGravityOverride(JPH_VehicleConstraint* constraint)
-{
-	AsVehicleConstraint(constraint)->ResetGravityOverride();
 }
 
 void JPH_VehicleConstraint_GetLocalForward(const JPH_VehicleConstraint* constraint, JPH_Vec3* result)

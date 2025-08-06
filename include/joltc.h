@@ -690,9 +690,9 @@ typedef struct JPH_CollisionEstimationResultImpulse {
 } JPH_CollisionEstimationResultImpulse;
 
 typedef struct JPH_CollisionEstimationResult {
-	JPH_Vec3								linearVelocity1;
+	JPH_RVec3								linearVelocity1;
 	JPH_Vec3								angularVelocity1;
-	JPH_Vec3								linearVelocity2;
+	JPH_RVec3								linearVelocity2;
 	JPH_Vec3								angularVelocity2;
 
 	JPH_Vec3								tangent1;
@@ -1094,9 +1094,6 @@ JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumActiveBodies(const JPH_PhysicsSystem* 
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetMaxBodies(const JPH_PhysicsSystem* system);
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumConstraints(const JPH_PhysicsSystem* system);
 
-JPH_CAPI void JPH_PhysicsSystem_SetGravity(JPH_PhysicsSystem* system, const JPH_Vec3* value);
-JPH_CAPI void JPH_PhysicsSystem_GetGravity(JPH_PhysicsSystem* system, JPH_Vec3* result);
-
 JPH_CAPI void JPH_PhysicsSystem_AddConstraint(JPH_PhysicsSystem* system, JPH_Constraint* constraint);
 JPH_CAPI void JPH_PhysicsSystem_RemoveConstraint(JPH_PhysicsSystem* system, JPH_Constraint* constraint);
 
@@ -1439,8 +1436,8 @@ JPH_CAPI void JPH_BodyCreationSettings_SetPosition(JPH_BodyCreationSettings* set
 JPH_CAPI void JPH_BodyCreationSettings_GetRotation(JPH_BodyCreationSettings* settings, JPH_Quat* result);
 JPH_CAPI void JPH_BodyCreationSettings_SetRotation(JPH_BodyCreationSettings* settings, const JPH_Quat* value);
 
-JPH_CAPI void JPH_BodyCreationSettings_GetLinearVelocity(JPH_BodyCreationSettings* settings, JPH_Vec3* velocity);
-JPH_CAPI void JPH_BodyCreationSettings_SetLinearVelocity(JPH_BodyCreationSettings* settings, const JPH_Vec3* velocity);
+JPH_CAPI void JPH_BodyCreationSettings_GetLinearVelocity(JPH_BodyCreationSettings* settings, JPH_RVec3* velocity);
+JPH_CAPI void JPH_BodyCreationSettings_SetLinearVelocity(JPH_BodyCreationSettings* settings, const JPH_RVec3* velocity);
 
 JPH_CAPI void JPH_BodyCreationSettings_GetAngularVelocity(JPH_BodyCreationSettings* settings, JPH_Vec3* velocity);
 JPH_CAPI void JPH_BodyCreationSettings_SetAngularVelocity(JPH_BodyCreationSettings* settings, const JPH_Vec3* velocity);
@@ -1495,15 +1492,6 @@ JPH_CAPI void JPH_BodyCreationSettings_SetLinearDamping(JPH_BodyCreationSettings
 
 JPH_CAPI float JPH_BodyCreationSettings_GetAngularDamping(const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyCreationSettings_SetAngularDamping(JPH_BodyCreationSettings* settings, float value);
-
-JPH_CAPI float JPH_BodyCreationSettings_GetMaxLinearVelocity(const JPH_BodyCreationSettings* settings);
-JPH_CAPI void JPH_BodyCreationSettings_SetMaxLinearVelocity(JPH_BodyCreationSettings* settings, float value);
-
-JPH_CAPI float JPH_BodyCreationSettings_GetMaxAngularVelocity(const JPH_BodyCreationSettings* settings);
-JPH_CAPI void JPH_BodyCreationSettings_SetMaxAngularVelocity(JPH_BodyCreationSettings* settings, float value);
-
-JPH_CAPI float JPH_BodyCreationSettings_GetGravityFactor(const JPH_BodyCreationSettings* settings);
-JPH_CAPI void JPH_BodyCreationSettings_SetGravityFactor(JPH_BodyCreationSettings* settings, float value);
 
 JPH_CAPI uint32_t JPH_BodyCreationSettings_GetNumVelocityStepsOverride(const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyCreationSettings_SetNumVelocityStepsOverride(JPH_BodyCreationSettings* settings, uint32_t value);
@@ -1730,8 +1718,8 @@ JPH_CAPI bool JPH_BodyInterface_IsActive(JPH_BodyInterface* interface, JPH_BodyI
 JPH_CAPI bool JPH_BodyInterface_IsAdded(JPH_BodyInterface* interface, JPH_BodyID bodyID);
 JPH_CAPI JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* interface, JPH_BodyID bodyID);
 
-JPH_CAPI void JPH_BodyInterface_SetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_Vec3* velocity);
-JPH_CAPI void JPH_BodyInterface_GetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_Vec3* velocity);
+JPH_CAPI void JPH_BodyInterface_SetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, const JPH_RVec3* velocity);
+JPH_CAPI void JPH_BodyInterface_GetLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_RVec3* velocity);
 JPH_CAPI void JPH_BodyInterface_GetCenterOfMassPosition(JPH_BodyInterface* interface, JPH_BodyID bodyID, JPH_RVec3* position);
 
 JPH_CAPI JPH_MotionType JPH_BodyInterface_GetMotionType(JPH_BodyInterface* interface, JPH_BodyID bodyID);
@@ -1752,7 +1740,7 @@ JPH_CAPI void JPH_BodyInterface_GetRotation(JPH_BodyInterface* interface, JPH_Bo
 JPH_CAPI void JPH_BodyInterface_SetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode);
 JPH_CAPI void JPH_BodyInterface_SetPositionAndRotationWhenChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode);
 JPH_CAPI void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation);
-JPH_CAPI void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
+JPH_CAPI void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity);
 
 JPH_CAPI void JPH_BodyInterface_GetCollisionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result);
 JPH_CAPI void JPH_BodyInterface_SetCollisionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group);
@@ -1773,16 +1761,16 @@ JPH_CAPI void JPH_BodyInterface_GetCenterOfMassTransform(JPH_BodyInterface* inte
 JPH_CAPI void JPH_BodyInterface_MoveKinematic(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* targetPosition, JPH_Quat* targetRotation, float deltaTime);
 JPH_CAPI bool JPH_BodyInterface_ApplyBuoyancyImpulse(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* surfacePosition, const JPH_Vec3* surfaceNormal, float buoyancy, float linearDrag, float angularDrag, const JPH_Vec3* fluidVelocity, const JPH_Vec3* gravity, float deltaTime);
 
-JPH_CAPI void JPH_BodyInterface_SetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
-JPH_CAPI void JPH_BodyInterface_GetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
+JPH_CAPI void JPH_BodyInterface_SetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity);
+JPH_CAPI void JPH_BodyInterface_GetLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity);
 
-JPH_CAPI void JPH_BodyInterface_AddLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity);
-JPH_CAPI void JPH_BodyInterface_AddLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
+JPH_CAPI void JPH_BodyInterface_AddLinearVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* linearVelocity);
+JPH_CAPI void JPH_BodyInterface_AddLinearAndAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity);
 
 JPH_CAPI void JPH_BodyInterface_SetAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* angularVelocity);
 JPH_CAPI void JPH_BodyInterface_GetAngularVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* angularVelocity);
 
-JPH_CAPI void JPH_BodyInterface_GetPointVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* point, JPH_Vec3* velocity);
+JPH_CAPI void JPH_BodyInterface_GetPointVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* point, JPH_RVec3* velocity);
 
 JPH_CAPI void JPH_BodyInterface_AddForce(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* force);
 JPH_CAPI void JPH_BodyInterface_AddForce2(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Vec3* force, JPH_RVec3* point);
@@ -1797,9 +1785,6 @@ JPH_CAPI void JPH_BodyInterface_SetMotionQuality(JPH_BodyInterface* interface, J
 JPH_CAPI JPH_MotionQuality JPH_BodyInterface_GetMotionQuality(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 
 JPH_CAPI void JPH_BodyInterface_GetInverseInertia(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_Matrix4x4* result);
-
-JPH_CAPI void JPH_BodyInterface_SetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId, float value);
-JPH_CAPI float JPH_BodyInterface_GetGravityFactor(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 
 JPH_CAPI void JPH_BodyInterface_SetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId, bool value);
 JPH_CAPI bool JPH_BodyInterface_GetUseManifoldReduction(JPH_BodyInterface* interface, JPH_BodyID bodyId);
@@ -2035,15 +2020,15 @@ JPH_CAPI float JPH_Body_GetFriction(const JPH_Body* body);
 JPH_CAPI void JPH_Body_SetFriction(JPH_Body* body, float friction);
 JPH_CAPI float JPH_Body_GetRestitution(const JPH_Body* body);
 JPH_CAPI void JPH_Body_SetRestitution(JPH_Body* body, float restitution);
-JPH_CAPI void JPH_Body_GetLinearVelocity(JPH_Body* body, JPH_Vec3* velocity);
-JPH_CAPI void JPH_Body_SetLinearVelocity(JPH_Body* body, const JPH_Vec3* velocity);
-JPH_CAPI void JPH_Body_SetLinearVelocityClamped(JPH_Body* body, const JPH_Vec3* velocity);
+JPH_CAPI void JPH_Body_GetLinearVelocity(JPH_Body* body, JPH_RVec3* velocity);
+JPH_CAPI void JPH_Body_SetLinearVelocity(JPH_Body* body, const JPH_RVec3* velocity);
+JPH_CAPI void JPH_Body_SetLinearVelocityClamped(JPH_Body* body, const JPH_RVec3* velocity);
 JPH_CAPI void JPH_Body_GetAngularVelocity(JPH_Body* body, JPH_Vec3* velocity);
 JPH_CAPI void JPH_Body_SetAngularVelocity(JPH_Body* body, const JPH_Vec3* velocity);
 JPH_CAPI void JPH_Body_SetAngularVelocityClamped(JPH_Body* body, const JPH_Vec3* velocity);
 
-JPH_CAPI void JPH_Body_GetPointVelocityCOM(JPH_Body* body, const JPH_Vec3* pointRelativeToCOM, JPH_Vec3* velocity);
-JPH_CAPI void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_RVec3* point, JPH_Vec3* velocity);
+JPH_CAPI void JPH_Body_GetPointVelocityCOM(JPH_Body* body, const JPH_Vec3* pointRelativeToCOM, JPH_RVec3* velocity);
+JPH_CAPI void JPH_Body_GetPointVelocity(JPH_Body* body, const JPH_RVec3* point, JPH_RVec3* velocity);
 
 JPH_CAPI void JPH_Body_AddForce(JPH_Body* body, const JPH_Vec3* force);
 JPH_CAPI void JPH_Body_AddForceAtPosition(JPH_Body* body, const JPH_Vec3* force, const JPH_RVec3* position);
@@ -2250,10 +2235,10 @@ JPH_CAPI void JPH_Character_AddToPhysicsSystem(JPH_Character* character, JPH_Act
 JPH_CAPI void JPH_Character_RemoveFromPhysicsSystem(JPH_Character* character, bool lockBodies /* = true */);
 JPH_CAPI void JPH_Character_Activate(JPH_Character* character, bool lockBodies /* = true */);
 JPH_CAPI void JPH_Character_PostSimulation(JPH_Character* character, float maxSeparationDistance, bool lockBodies /* = true */);
-JPH_CAPI void JPH_Character_SetLinearAndAngularVelocity(JPH_Character* character, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity, bool lockBodies /* = true */);
-JPH_CAPI void JPH_Character_GetLinearVelocity(JPH_Character* character, JPH_Vec3* result);
-JPH_CAPI void JPH_Character_SetLinearVelocity(JPH_Character* character, const JPH_Vec3* value, bool lockBodies /* = true */);
-JPH_CAPI void JPH_Character_AddLinearVelocity(JPH_Character* character, const JPH_Vec3* value, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Character_SetLinearAndAngularVelocity(JPH_Character* character, JPH_RVec3* linearVelocity, JPH_Vec3* angularVelocity, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Character_GetLinearVelocity(JPH_Character* character, JPH_RVec3* result);
+JPH_CAPI void JPH_Character_SetLinearVelocity(JPH_Character* character, const JPH_RVec3* value, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Character_AddLinearVelocity(JPH_Character* character, const JPH_RVec3* value, bool lockBodies /* = true */);
 JPH_CAPI void JPH_Character_AddImpulse(JPH_Character* character, const JPH_Vec3* value, bool lockBodies /* = true */);
 JPH_CAPI JPH_BodyID JPH_Character_GetBodyID(const JPH_Character* character);
 
@@ -2631,11 +2616,6 @@ JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JP
 JPH_CAPI void JPH_VehicleConstraint_SetMaxPitchRollAngle(JPH_VehicleConstraint* constraint, float maxPitchRollAngle);
 JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
 
-JPH_CAPI void JPH_VehicleConstraint_OverrideGravity(JPH_VehicleConstraint* constraint, const JPH_Vec3* value);
-JPH_CAPI bool JPH_VehicleConstraint_IsGravityOverridden(const JPH_VehicleConstraint* constraint);
-JPH_CAPI void JPH_VehicleConstraint_GetGravityOverride(const JPH_VehicleConstraint* constraint, JPH_Vec3* result);
-JPH_CAPI void JPH_VehicleConstraint_ResetGravityOverride(JPH_VehicleConstraint* constraint);
-
 JPH_CAPI void JPH_VehicleConstraint_GetLocalForward(const JPH_VehicleConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI void JPH_VehicleConstraint_GetLocalUp(const JPH_VehicleConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI void JPH_VehicleConstraint_GetWorldUp(const JPH_VehicleConstraint* constraint, JPH_Vec3* result);
@@ -2691,7 +2671,7 @@ JPH_CAPI bool JPH_Wheel_HasContact(const JPH_Wheel* wheel);
 JPH_CAPI JPH_BodyID JPH_Wheel_GetContactBodyID(const JPH_Wheel* wheel);
 JPH_CAPI JPH_SubShapeID JPH_Wheel_GetContactSubShapeID(const JPH_Wheel* wheel);
 JPH_CAPI void JPH_Wheel_GetContactPosition(const JPH_Wheel* wheel, JPH_RVec3* result);
-JPH_CAPI void JPH_Wheel_GetContactPointVelocity(const JPH_Wheel* wheel, JPH_Vec3* result);
+JPH_CAPI void JPH_Wheel_GetContactPointVelocity(const JPH_Wheel* wheel, JPH_RVec3* result);
 JPH_CAPI void JPH_Wheel_GetContactNormal(const JPH_Wheel* wheel, JPH_Vec3* result);
 JPH_CAPI void JPH_Wheel_GetContactLongitudinal(const JPH_Wheel* wheel, JPH_Vec3* result);
 JPH_CAPI void JPH_Wheel_GetContactLateral(const JPH_Wheel* wheel, JPH_Vec3* result);
