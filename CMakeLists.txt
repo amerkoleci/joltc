@@ -15,6 +15,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11" CACHE STRING "Minimum OS X deployment version")
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for OS X")
 
+# Set default symbol visibility to hidden. This prevents all Jolt's symbols to be exported on macOS. This can cause crashes if a program loads multiple shared libraries with different versions of Jolt.
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
 # Determine if engine is built as a subproject (using add_subdirectory)
 # or if it is the master project.
 if (NOT DEFINED JPH_MASTER_PROJECT)
