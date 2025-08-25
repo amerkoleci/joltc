@@ -16,10 +16,10 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Get CMake
-      uses: lukka/get-cmake@v3.29.4
+      uses: lukka/get-cmake@v4.0.2
       
     - name: Configure win-x64
       run: cmake -S "." -B "build_win_64" -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE:String=Distribution -DCMAKE_INSTALL_PREFIX:String="SDK"
@@ -40,15 +40,43 @@ jobs:
       run: cmake -S "." -B "build_win_arm64_double" -G "Visual Studio 17 2022" -A ARM64 -DCMAKE_BUILD_TYPE:String=Distribution -DDOUBLE_PRECISION=ON -DCMAKE_INSTALL_PREFIX:String="SDK"
     - name: Build win-arm64 double
       run: cmake --build build_win_arm64_double --config Distribution
+      
+    - name: Configure win-x64 Debug
+      run: cmake -S "." -B "build_win_64" -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE:String=Debug -DCMAKE_INSTALL_PREFIX:String="SDK"
+    - name: Build win-x64 Debug
+      run: cmake --build build_win_64 --config Debug
+
+    - name: Configure win-x64 double Debug
+      run: cmake -S "." -B "build_win_64_double" -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE:String=Debug -DDOUBLE_PRECISION=ON -DCMAKE_INSTALL_PREFIX:String="SDK"
+    - name: Build win-x64 double Debug
+      run: cmake --build build_win_64_double --config Debug
+
+    - name: Configure win-arm64
+      run: cmake -S "." -B "build_win_arm64" -G "Visual Studio 17 2022" -A ARM64 -DCMAKE_BUILD_TYPE:String=Distribution -DCMAKE_INSTALL_PREFIX:String="SDK"
+    - name: Build win-arm64
+      run: cmake --build build_win_arm64 --config Distribution
+
+    - name: Configure win-arm64 double Debug
+      run: cmake -S "." -B "build_win_arm64_double" -G "Visual Studio 17 2022" -A ARM64 -DCMAKE_BUILD_TYPE:String=Debug -DDOUBLE_PRECISION=ON -DCMAKE_INSTALL_PREFIX:String="SDK"
+    - name: Build win-arm64 double Debug
+      run: cmake --build build_win_arm64_double --config Debug
 
     - name: Package Windows
       run: |
         mkdir bin/win-x64
         mkdir bin/win-arm64
         mv build_win_64\bin\Distribution\joltc.dll bin/win-x64
+        mv build_win_64\bin\Debug\joltcd.dll bin/win-x64
+        mv build_win_64\bin\Debug\joltcd.pdb bin/win-x64
         mv build_win_64_double\bin\Distribution\joltc_double.dll bin/win-x64
+        mv build_win_64_double\bin\Debug\joltc_doubled.dll bin/win-x64
+        mv build_win_64_double\bin\Debug\joltc_doubled.pdb bin/win-x64
         mv build_win_arm64\bin\Distribution\joltc.dll bin/win-arm64
+        mv build_win_arm64\bin\Debug\joltcd.dll bin/win-arm64
+        mv build_win_arm64\bin\Debug\joltcd.pdb bin/win-arm64
         mv build_win_arm64_double\bin\Distribution\joltc_double.dll bin/win-arm64
+        mv build_win_arm64_double\bin\Debug\joltc_doubled.dll bin/win-arm64
+        mv build_win_arm64_double\bin\Debug\joltc_doubled.pdb bin/win-arm64
     - uses: actions/upload-artifact@v4
       with:
         name: libs_windows
@@ -57,10 +85,10 @@ jobs:
   linux:
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Get CMake
-      uses: lukka/get-cmake@v3.29.4
+      uses: lukka/get-cmake@v4.0.2
 
     - name: Install dependencies on Ubuntu
       run: |
@@ -76,7 +104,17 @@ jobs:
     - name: CMake Configure (linux-arm64)
       run: cmake -S "." -B "build_linux_arm64" -G Ninja -DCMAKE_BUILD_TYPE=Distribution -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX:String="SDK"
     - name: Build linux-arm64
-      run: cmake --build build_linux_arm64 --config Distribution --verbose --parallel      
+      run: cmake --build build_linux_arm64 --config Distribution --verbose --parallel
+      
+    - name: CMake Configure (linux-x64) Debug
+      run: cmake -S "." -B "build_linux_x64" -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:String="SDK"
+    - name: Build linux-x64 Debug
+      run: cmake --build build_linux_x64 --config Debug --verbose --parallel
+
+    - name: CMake Configure (linux-arm64) Debug
+      run: cmake -S "." -B "build_linux_arm64" -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_INSTALL_PREFIX:String="SDK"
+    - name: Build linux-arm64 Debug
+      run: cmake --build build_linux_arm64 --config Debug --verbose --parallel
 
     # Android
     - name: Setup Android NDK
@@ -131,6 +169,8 @@ jobs:
         mkdir -p bin/android-x64
         mv build_linux_x64/lib/libjoltc.so bin/linux-x64/libjoltc.so
         mv build_linux_arm64/lib/libjoltc.so bin/linux-arm64/libjoltc.so
+        mv build_linux_x64/lib/libjoltcd.so bin/linux-x64/libjoltc.so
+        mv build_linux_arm64/lib/libjoltcd.so bin/linux-arm64/libjoltc.so
         mv build_android_arm64_v8a/lib/libjoltc.so bin/android-arm64/libjoltc.so
         mv build_android_armeabi_v7a/lib/libjoltc.so bin/android-arm/libjoltc.so
         mv build_android_x86_64/lib/libjoltc.so bin/android-x64/libjoltc.so        
@@ -142,10 +182,10 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Get CMake
-      uses: lukka/get-cmake@v3.29.4
+      uses: lukka/get-cmake@v4.0.2
 
     - name: Configure osx-universal
       run: cmake -S "." -B "build_osx" -G Ninja -DCMAKE_BUILD_TYPE=Distribution -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_INSTALL_PREFIX:String="SDK"

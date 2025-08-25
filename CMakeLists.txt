@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_INSTALL_MESSAGE LAZY)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_DEBUG_POSTFIX "d")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11" CACHE STRING "Minimum OS X deployment version")
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for OS X")
@@ -125,6 +126,7 @@ option(USE_STD_VECTOR "Use std::vector instead of own Array class" OFF)
 # Setting this option will compile the ObjectStream class and RTTI attribute information
 option(ENABLE_OBJECT_STREAM "Compile the ObjectStream class and RTTI attribute information" ON)
 
+option(JPH_INSTALL "Install target" ${JPH_MASTER_PROJECT})
 option(JPH_SAMPLES "Build samples" ${JPH_MASTER_PROJECT})
 
 # Define standard configurations (Debug, Release, Distribution)
@@ -357,16 +359,23 @@ else()
 
 endif ()
 
-install(TARGETS ${TARGET_NAME}
-    EXPORT ${TARGET_NAME}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+if (JPH_INSTALL)
+	install(
+		FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/joltc.h
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Jolt
+	)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/joltc.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Jolt
-)
+	install(TARGETS ${TARGET_NAME}
+		EXPORT ${TARGET_NAME}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	)
+
+	if (MSVC)
+		install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> DESTINATION bin OPTIONAL)
+	endif ()
+endif()
  
 if (JPH_SAMPLES)
 	add_subdirectory(samples)
