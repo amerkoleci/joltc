@@ -599,6 +599,7 @@ static JPH::IndexedTriangle ToIndexedTriangle(const JPH_IndexedTriangle& triangl
 }
 
 // 10 MB was not enough for large simulation, let's use TempAllocatorMalloc
+static bool s_initialized = false;
 static TempAllocator* s_TempAllocator = nullptr;
 
 class JobSystemCallback final : public JPH::JobSystemWithBarrier
@@ -697,6 +698,9 @@ void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem)
 
 bool JPH_Init()
 {
+	if (s_initialized)
+		return true;
+
 	JPH::RegisterDefaultAllocator();
 
 	// TODO
@@ -711,12 +715,16 @@ bool JPH_Init()
 
 	// Init temp allocator
 	s_TempAllocator = new TempAllocatorImplWithMallocFallback(8 * 1024 * 1024);
+	s_initialized = true;
 
 	return true;
 }
 
 void JPH_Shutdown(void)
 {
+	if (!s_initialized)
+		return;
+
 	delete s_TempAllocator; s_TempAllocator = nullptr;
 
 	// Unregisters all types with the factory and cleans up the default material
@@ -725,6 +733,8 @@ void JPH_Shutdown(void)
 	// Destroy the factory
 	delete JPH::Factory::sInstance;
 	JPH::Factory::sInstance = nullptr;
+
+	s_initialized = false;
 }
 
 void JPH_SetTraceHandler(JPH_TraceFunc handler)
