@@ -134,6 +134,7 @@ jobs:
         -DANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}
         -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake"
         -DCMAKE_INSTALL_PREFIX:String="SDK"
+        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384"
     - name: Build (android-arm64-v8a)
       run: cmake --build build_android_arm64_v8a --config Distribution --verbose --parallel
 
@@ -145,6 +146,7 @@ jobs:
         -DANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}
         -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake"
         -DCMAKE_INSTALL_PREFIX:String="SDK"
+        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384"
     - name: Build (android-armeabi-v7a)
       run: cmake --build build_android_armeabi_v7a --config Distribution --verbose --parallel
 
@@ -156,6 +158,7 @@ jobs:
         -DANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}
         -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake"
         -DCMAKE_INSTALL_PREFIX:String="SDK"
+        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384"
     - name: Build (android-armeabi-v7a)
       run: cmake --build build_android_x86_64 --config Distribution --verbose --parallel
 
@@ -167,6 +170,7 @@ jobs:
         -DANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}
         -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake"
         -DCMAKE_INSTALL_PREFIX:String="SDK"
+        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384"
     - name: Build (android-arm64-v8a) Debug
       run: cmake --build build_android_arm64_v8a --config Debug --verbose --parallel
 
@@ -178,6 +182,7 @@ jobs:
         -DANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}
         -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake"
         -DCMAKE_INSTALL_PREFIX:String="SDK"
+        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384"
     - name: Build (android-armeabi-v7a) Debug
       run: cmake --build build_android_armeabi_v7a --config Debug --verbose --parallel
 
@@ -189,6 +194,7 @@ jobs:
         -DANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}
         -DCMAKE_TOOLCHAIN_FILE="${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake"
         -DCMAKE_INSTALL_PREFIX:String="SDK"
+        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,max-page-size=16384"
     - name: Build (android-armeabi-v7a) Debug
       run: cmake --build build_android_x86_64 --config Debug --verbose --parallel
 
