@@ -133,7 +133,6 @@ typedef struct JPH_Body									JPH_Body;
 typedef struct JPH_CollideShapeResult					JPH_CollideShapeResult;
 typedef struct JPH_ContactListener						JPH_ContactListener;
 typedef struct JPH_ContactManifold						JPH_ContactManifold;
-typedef struct JPH_ContactSettings						JPH_ContactSettings;
 
 typedef struct JPH_GroupFilter							JPH_GroupFilter;
 typedef struct JPH_GroupFilterTable						JPH_GroupFilterTable;  /* Inherits JPH_GroupFilter */
@@ -515,6 +514,18 @@ typedef struct JPH_MassProperties {
 	float mass;
 	JPH_Matrix4x4 inertia;
 } JPH_MassProperties;
+
+typedef struct JPH_ContactSettings {
+	float					combinedFriction;
+	float					combinedRestitution;
+	float					invMassScale1;
+	float					invInertiaScale1;
+	float					invMassScale2;
+	float					invInertiaScale2;
+	JPH_Bool				isSensor;
+	JPH_Vec3				relativeLinearSurfaceVelocity;
+	JPH_Vec3				relativeAngularSurfaceVelocity;
+} JPH_ContactSettings;
 
 typedef struct JPH_CollideSettingsBase {
 	/// How active edges (edges that a moving object should bump into) are handled
@@ -2197,26 +2208,6 @@ JPH_CAPI JPH_SubShapeID JPH_ContactManifold_GetSubShapeID2(const JPH_ContactMani
 JPH_CAPI uint32_t JPH_ContactManifold_GetPointCount(const JPH_ContactManifold* manifold);
 JPH_CAPI void JPH_ContactManifold_GetWorldSpaceContactPointOn1(const JPH_ContactManifold* manifold, uint32_t index, JPH_RVec3* result);
 JPH_CAPI void JPH_ContactManifold_GetWorldSpaceContactPointOn2(const JPH_ContactManifold* manifold, uint32_t index, JPH_RVec3* result);
-
-/* ContactSettings */
-JPH_CAPI float JPH_ContactSettings_GetFriction(JPH_ContactSettings* settings);
-JPH_CAPI void JPH_ContactSettings_SetFriction(JPH_ContactSettings* settings, float friction);
-JPH_CAPI float JPH_ContactSettings_GetRestitution(JPH_ContactSettings* settings);
-JPH_CAPI void JPH_ContactSettings_SetRestitution(JPH_ContactSettings* settings, float restitution);
-JPH_CAPI float JPH_ContactSettings_GetInvMassScale1(JPH_ContactSettings* settings);
-JPH_CAPI void JPH_ContactSettings_SetInvMassScale1(JPH_ContactSettings* settings, float scale);
-JPH_CAPI float JPH_ContactSettings_GetInvInertiaScale1(JPH_ContactSettings* settings);
-JPH_CAPI void JPH_ContactSettings_SetInvInertiaScale1(JPH_ContactSettings* settings, float scale);
-JPH_CAPI float JPH_ContactSettings_GetInvMassScale2(JPH_ContactSettings* settings);
-JPH_CAPI void JPH_ContactSettings_SetInvMassScale2(JPH_ContactSettings* settings, float scale);
-JPH_CAPI float JPH_ContactSettings_GetInvInertiaScale2(JPH_ContactSettings* settings);
-JPH_CAPI void JPH_ContactSettings_SetInvInertiaScale2(JPH_ContactSettings* settings, float scale);
-JPH_CAPI bool JPH_ContactSettings_GetIsSensor(const JPH_ContactSettings* settings);
-JPH_CAPI void JPH_ContactSettings_SetIsSensor(JPH_ContactSettings* settings, bool sensor);
-JPH_CAPI void JPH_ContactSettings_GetRelativeLinearSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* result);
-JPH_CAPI void JPH_ContactSettings_SetRelativeLinearSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* velocity);
-JPH_CAPI void JPH_ContactSettings_GetRelativeAngularSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* result);
-JPH_CAPI void JPH_ContactSettings_SetRelativeAngularSurfaceVelocity(JPH_ContactSettings* settings, JPH_Vec3* velocity);
 
 /* CharacterBase */
 JPH_CAPI void JPH_CharacterBase_Destroy(JPH_CharacterBase* character);
