@@ -10383,6 +10383,20 @@ int JPH_StateRecorderImpl_GetDataSize(JPH_StateRecorderImpl* recorder)
 	return AsStateRecorderImpl(recorder)->GetDataSize();
 }
 
+void JPH_StateRecorderImpl_WriteBytes(JPH_StateRecorderImpl* recorder, const void* inData, int inNumBytes)
+{
+	AsStateRecorderImpl(recorder)->WriteBytes(inData, inNumBytes);
+}
+
+void JPH_StateRecorderImpl_ReadBytes(JPH_StateRecorderImpl* recorder, void* inData, int inNumBytes)
+{
+	AsStateRecorderImpl(recorder)->ReadBytes(inData, inNumBytes);
+}
+
+bool JPH_StateRecorderImpl_IsEqual(JPH_StateRecorderImpl* recorder1, JPH_StateRecorderImpl* recorder2)
+{
+	return AsStateRecorderImpl(recorder1)->IsEqual(AsStateRecorderImpl(*recorder2));
+}
 
 class ManagedStateRecorderFilter final : public JPH::StateRecorderFilter
 {

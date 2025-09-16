@@ -2879,6 +2879,9 @@ JPH_CAPI void JPH_StateRecorderImpl_Rewind(JPH_StateRecorderImpl* recorder);
 JPH_CAPI bool JPH_StateRecorderImpl_IsEOF(const JPH_StateRecorderImpl* recorder);
 JPH_CAPI bool JPH_StateRecorderImpl_IsFailed(const JPH_StateRecorderImpl* recorder);
 JPH_CAPI int JPH_StateRecorderImpl_GetDataSize(JPH_StateRecorderImpl* recorder);
+JPH_CAPI void JPH_StateRecorderImpl_WriteBytes(JPH_StateRecorderImpl* recorder, const void* inData, int inNumBytes);
+JPH_CAPI void JPH_StateRecorderImpl_ReadBytes(JPH_StateRecorderImpl* recorder, void* inData, int inNumBytes);
+JPH_CAPI bool JPH_StateRecorderImpl_IsEqual(JPH_StateRecorderImpl* recorder1, JPH_StateRecorderImpl* recorder2);
 
 /* StateRecorderFilter */
 typedef struct JPH_StateRecorderFilter_Procs {
