@@ -10448,4 +10448,15 @@ void JPH_StateRecorderFilter_SetProcs(const JPH_StateRecorderFilter_Procs* procs
 	ManagedStateRecorderFilter::s_Procs = procs;
 }
 
+JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(void* userData)
+{
+	auto filter = new ManagedStateRecorderFilter(userData);
+	return ToStateRecorderFilter(filter);
+}
+
+void JPH_StateRecorderFilter_Destroy(const JPH_StateRecorderFilter* filter)
+{
+	delete AsStateRecorderFilter(filter);
+}
+
 JPH_SUPPRESS_WARNING_POP
