@@ -10398,6 +10398,11 @@ bool JPH_StateRecorderImpl_IsEqual(JPH_StateRecorderImpl* recorder1, JPH_StateRe
 	return AsStateRecorderImpl(recorder1)->IsEqual(AsStateRecorderImpl(*recorder2));
 }
 
+void JPH_StateRecorderImpl_Clear(JPH_StateRecorderImpl* recorder)
+{
+	AsStateRecorderImpl(recorder)->Clear();
+}
+
 class ManagedStateRecorderFilter final : public JPH::StateRecorderFilter
 {
 public:
