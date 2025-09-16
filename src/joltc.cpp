@@ -73,6 +73,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
+#include "Jolt/Physics/StateRecorderImpl.h"
 
 #include <iostream>
 #include <cstdarg>
@@ -176,6 +177,9 @@ DEF_MAP_DECL(VehicleCollisionTesterRay, JPH_VehicleCollisionTesterRay)
 DEF_MAP_DECL(VehicleCollisionTesterCastSphere, JPH_VehicleCollisionTesterCastSphere)
 DEF_MAP_DECL(VehicleCollisionTesterCastCylinder, JPH_VehicleCollisionTesterCastCylinder)
 DEF_MAP_DECL(VehicleConstraint, JPH_VehicleConstraint)
+
+DEF_MAP_DECL(StateRecorderImpl, JPH_StateRecorderImpl)
+DEF_MAP_DECL(StateRecorderFilter, JPH_StateRecorderFilter)
 
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
@@ -5198,6 +5202,18 @@ void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH
 	{
 		constraints[i] = ToConstraint(list[i].GetPtr());
 	}
+}
+
+void JPH_PhysicsSystem_SaveState(const JPH_PhysicsSystem* system, JPH_StateRecorderImpl* inStream, JPH_StateRecorderState inState, const JPH_StateRecorderFilter *inFilter)
+{
+	JPH_ASSERT(system);
+	system->physicsSystem->SaveState(AsStateRecorderImpl(*inStream), static_cast<EStateRecorderState>(inState), AsStateRecorderFilter(inFilter));
+}
+
+void JPH_PhysicsSystem_RestoreState(const JPH_PhysicsSystem* system, JPH_StateRecorderImpl* inStream, const JPH_StateRecorderFilter *inFilter)
+{
+	JPH_ASSERT(system);
+	system->physicsSystem->RestoreState(AsStateRecorderImpl(*inStream), AsStateRecorderFilter(inFilter));
 }
 
 #ifdef JPH_DEBUG_RENDERER
@@ -10333,6 +10349,103 @@ float JPH_MotorcycleController_GetLeanSmoothingFactor(const JPH_MotorcycleContro
 void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* controller, float value)
 {
 	AsMotorcycleController(controller)->SetLeanSmoothingFactor(value);
+}
+
+/* JPH_StateRecorderImpl */
+JPH_StateRecorderImpl* JPH_StateRecorderImpl_Create()
+{
+	auto recorder = new StateRecorderImpl();
+	return ToStateRecorderImpl(recorder);
+}
+
+void JPH_StateRecorderImpl_Destroy(const JPH_StateRecorderImpl* recorder)
+{
+	delete AsStateRecorderImpl(recorder);
+}
+
+void JPH_StateRecorderImpl_Rewind(JPH_StateRecorderImpl* recorder)
+{
+	AsStateRecorderImpl(recorder)->Rewind();
+}
+
+bool JPH_StateRecorderImpl_IsEOF(const JPH_StateRecorderImpl* recorder)
+{
+	return AsStateRecorderImpl(recorder)->IsEOF();
+}
+
+bool JPH_StateRecorderImpl_IsFailed(const JPH_StateRecorderImpl* recorder)
+{
+	return AsStateRecorderImpl(recorder)->IsFailed();
+}
+
+int JPH_StateRecorderImpl_GetDataSize(JPH_StateRecorderImpl* recorder)
+{
+	return AsStateRecorderImpl(recorder)->GetDataSize();
+}
+
+
+class ManagedStateRecorderFilter final : public JPH::StateRecorderFilter
+{
+public:
+	static const JPH_StateRecorderFilter_Procs* s_Procs;
+	void* userData = nullptr;
+
+	ManagedStateRecorderFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
+
+	bool ShouldSaveBody([[maybe_unused]] const Body &inBody) const override
+	{ 
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldSaveBody)
+		{
+			return s_Procs->ShouldSaveBody(userData, ToBody(&inBody));
+		}
+
+		return true;
+	}
+
+	bool ShouldSaveConstraint([[maybe_unused]] const Constraint &inConstraint) const override
+	{ 
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldSaveConstraint)
+		{
+			return s_Procs->ShouldSaveConstraint(userData, ToConstraint(&inConstraint));
+		}
+
+		return true;
+	}
+
+	bool ShouldSaveContact([[maybe_unused]] const BodyID &inBody1, [[maybe_unused]] const BodyID &inBody2) const override
+	{ 
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldSaveContact)
+		{
+			return s_Procs->ShouldSaveContact(userData, (JPH_BodyID)inBody1.GetIndexAndSequenceNumber(), (JPH_BodyID)inBody2.GetIndexAndSequenceNumber());
+		}
+
+		return true;
+	}
+
+	bool ShouldRestoreContact([[maybe_unused]] const BodyID &inBody1, [[maybe_unused]] const BodyID &inBody2) const override
+	{ 
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldRestoreContact)
+		{
+			return s_Procs->ShouldRestoreContact(userData, (JPH_BodyID)inBody1.GetIndexAndSequenceNumber(), (JPH_BodyID)inBody2.GetIndexAndSequenceNumber());
+		}
+
+		return true;
+	}
+};
+
+const JPH_StateRecorderFilter_Procs* ManagedStateRecorderFilter::s_Procs = nullptr;
+
+void JPH_StateRecorderFilter_SetProcs(const JPH_StateRecorderFilter_Procs* procs)
+{
+	ManagedStateRecorderFilter::s_Procs = procs;
 }
 
 JPH_SUPPRESS_WARNING_POP

@@ -137,6 +137,9 @@ typedef struct JPH_ContactManifold						JPH_ContactManifold;
 typedef struct JPH_GroupFilter							JPH_GroupFilter;
 typedef struct JPH_GroupFilterTable						JPH_GroupFilterTable;  /* Inherits JPH_GroupFilter */
 
+typedef struct JPH_StateRecorderImpl					JPH_StateRecorderImpl;
+typedef struct JPH_StateRecorderFilter					JPH_StateRecorderFilter;
+
 /* Enums */
 typedef enum JPH_PhysicsUpdateError {
 	JPH_PhysicsUpdateError_None = 0,
@@ -431,6 +434,16 @@ typedef enum JPH_TransmissionMode {
     _JPH_TransmissionMode_Count,
     _JPH_TransmissionMode_Force32 = 0x7FFFFFFF
 } JPH_TransmissionMode;
+
+typedef enum JPH_StateRecorderState
+{
+	None				= 0,														///< Save nothing
+	Global				= 1,														///< Save global physics system state (delta time, gravity, etc.)
+	Bodies				= 2,														///< Save the state of bodies
+	Contacts			= 4,														///< Save the state of contacts
+	Constraints			= 8,														///< Save the state of constraints
+	All					= Global | Bodies | Contacts | JPH_StateRecorderState::Constraints					///< Save all state
+} JPH_StateRecorderState;
 
 typedef struct JPH_Vec3 {
 	float x;
@@ -1119,6 +1132,9 @@ JPH_CAPI void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JP
 
 JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
+
+JPH_CAPI void JPH_PhysicsSystem_SaveState(const JPH_PhysicsSystem* system, JPH_StateRecorderImpl* inStream, JPH_StateRecorderState inState, const JPH_StateRecorderFilter *inFilter);
+JPH_CAPI void JPH_PhysicsSystem_RestoreState(const JPH_PhysicsSystem* system, JPH_StateRecorderImpl* inStream, const JPH_StateRecorderFilter *inFilter);
 
 JPH_CAPI void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, const JPH_BodyDrawFilter* bodyFilter /* = nullptr */);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraints(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
@@ -2855,5 +2871,20 @@ JPH_CAPI float JPH_MotorcycleController_GetLeanSpringIntegrationCoefficientDecay
 JPH_CAPI void JPH_MotorcycleController_SetLeanSpringIntegrationCoefficientDecay(JPH_MotorcycleController* controller, float value);
 JPH_CAPI float JPH_MotorcycleController_GetLeanSmoothingFactor(const JPH_MotorcycleController* controller);
 JPH_CAPI void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* controller, float value);
+
+/* JPH_StateRecorderImpl */
+JPH_CAPI JPH_StateRecorderImpl* JPH_StateRecorderImpl_Create();
+JPH_CAPI void JPH_StateRecorderImpl_Destroy(const JPH_StateRecorderImpl* recorder);
+JPH_CAPI void JPH_StateRecorderImpl_Rewind(JPH_StateRecorderImpl* recorder);
+JPH_CAPI bool JPH_StateRecorderImpl_IsEOF(const JPH_StateRecorderImpl* recorder);
+JPH_CAPI bool JPH_StateRecorderImpl_IsFailed(const JPH_StateRecorderImpl* recorder);
+JPH_CAPI int JPH_StateRecorderImpl_GetDataSize(JPH_StateRecorderImpl* recorder);
+
+typedef struct JPH_StateRecorderFilter_Procs {
+	bool(JPH_API_CALL* ShouldSaveBody)(void* userData, const JPH_Body* body);
+	bool(JPH_API_CALL* ShouldSaveConstraint)(void* userData, const JPH_Constraint* constraint);
+	bool(JPH_API_CALL* ShouldSaveContact)(void* userData, const JPH_BodyID bodyID1, const JPH_BodyID bodyID2);
+	bool(JPH_API_CALL* ShouldRestoreContact)(void* userData, const JPH_BodyID bodyID1, const JPH_BodyID bodyID2);
+} JPH_StateRecorderFilter_Procs;
 
 #endif /* JOLT_C_H_ */
