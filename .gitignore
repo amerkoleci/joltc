@@ -267,6 +267,7 @@ artifacts/
 artifacts-*/
 
 build/*
+build_**/*
 
 # Rider
 .idea
