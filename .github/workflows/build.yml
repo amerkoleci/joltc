@@ -93,7 +93,7 @@ jobs:
     - name: Install dependencies on Ubuntu
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+        sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu llvm
 
     # Linux
     - name: CMake Configure (linux-x64)
@@ -216,6 +216,11 @@ jobs:
         mv build_android_arm64_v8a/lib/libjoltcd.so bin/android-arm64/libjoltcd.so
         mv build_android_armeabi_v7a/lib/libjoltcd.so bin/android-arm/libjoltcd.so
         mv build_android_x86_64/lib/libjoltcd.so bin/android-x64/libjoltcd.so
+        llvm-strip --strip-unneeded bin/linux-x64/libjoltc.so
+        llvm-strip --strip-unneeded bin/linux-arm64/libjoltc.so
+        llvm-strip --strip-unneeded bin/android-arm/libjoltc.so
+        llvm-strip --strip-unneeded bin/android-arm64/libjoltc.so
+        llvm-strip --strip-unneeded bin/android-x64/libjoltc.so
     - uses: actions/upload-artifact@v4
       with:
         name: libs_linux
