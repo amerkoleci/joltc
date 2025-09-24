@@ -49,6 +49,7 @@
 #define JPH_MAX_PHYSICS_BARRIERS (8) // int cMaxPhysicsBarriers = 8
 #define JPH_INVALID_COLLISION_GROUP_ID (~0U)
 #define JPH_INVALID_COLLISION_SUBGROUP_ID (~0U)
+#define JPH_M_PI (3.14159265358979323846f) // To avoid collision with JPH_PI
 
 typedef uint32_t JPH_Bool;
 typedef uint32_t JPH_BodyID;
@@ -1096,7 +1097,7 @@ JPH_CAPI const JPH_NarrowPhaseQuery* JPH_PhysicsSystem_GetNarrowPhaseQueryNoLock
 
 JPH_CAPI void JPH_PhysicsSystem_SetContactListener(JPH_PhysicsSystem* system, JPH_ContactListener* listener);
 JPH_CAPI void JPH_PhysicsSystem_SetBodyActivationListener(JPH_PhysicsSystem* system, JPH_BodyActivationListener* listener);
-JPH_CAPI void JPH_PhysicsSystem_SetSimShapeFilter(JPH_PhysicsSystem* system, JPH_SimShapeFilter* filter);
+JPH_CAPI void JPH_PhysicsSystem_SetSimShapeFilter(JPH_PhysicsSystem* system, const JPH_SimShapeFilter* filter);
 
 JPH_CAPI bool JPH_PhysicsSystem_WereBodiesInContact(const JPH_PhysicsSystem* system, JPH_BodyID body1, JPH_BodyID body2);
 
@@ -1143,7 +1144,10 @@ JPH_CAPI JPH_PhysicsStepListener* JPH_PhysicsStepListener_Create(void* userData)
 JPH_CAPI void JPH_PhysicsStepListener_Destroy(JPH_PhysicsStepListener* listener);
 
 /* Math */
-JPH_CAPI void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* quat);
+JPH_CAPI float JPH_Math_Sin(float value);
+JPH_CAPI float JPH_Math_Cos(float value);
+
+JPH_CAPI void JPH_Quat_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* quat);
 JPH_CAPI void JPH_Quat_GetAxisAngle(const JPH_Quat* quat, JPH_Vec3* outAxis, float* outAngle);
 JPH_CAPI void JPH_Quat_GetEulerAngles(const JPH_Quat* quat, JPH_Vec3* result);
 JPH_CAPI void JPH_Quat_RotateAxisX(const JPH_Quat* quat, JPH_Vec3* result);
@@ -1169,6 +1173,9 @@ JPH_CAPI void JPH_Quat_Slerp(const JPH_Quat* from, const JPH_Quat* to, float fra
 JPH_CAPI void JPH_Quat_Rotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3* result);
 JPH_CAPI void JPH_Quat_InverseRotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3* result);
 
+JPH_CAPI void JPH_Vec3_AxisX(JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_AxisY(JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_AxisZ(JPH_Vec3* result);
 JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq);
 JPH_CAPI bool JPH_Vec3_IsNearZero(const JPH_Vec3* v, float maxDistSq);
 JPH_CAPI bool JPH_Vec3_IsNormalized(const JPH_Vec3* v, float tolerance);
@@ -1189,6 +1196,8 @@ JPH_CAPI void JPH_Vec3_Add(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* res
 JPH_CAPI void JPH_Vec3_Subtract(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
 JPH_CAPI void JPH_Vec3_Multiply(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
 JPH_CAPI void JPH_Vec3_MultiplyScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_MultiplyMatrix(const JPH_Matrix4x4* left, const JPH_Vec3* right, JPH_Vec3* result);
+
 JPH_CAPI void JPH_Vec3_Divide(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
 JPH_CAPI void JPH_Vec3_DivideScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result);
 
@@ -1200,6 +1209,7 @@ JPH_CAPI void JPH_Matrix4x4_MultiplyScalar(const JPH_Matrix4x4* m, float scalar,
 JPH_CAPI void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result);
 JPH_CAPI void JPH_Matrix4x4_Identity(JPH_Matrix4x4* result);
 JPH_CAPI void JPH_Matrix4x4_Rotation(JPH_Matrix4x4* result, const JPH_Quat* rotation);
+JPH_CAPI void JPH_Matrix4x4_Rotation2(JPH_Matrix4x4* result, const JPH_Vec3* axis, float angle);
 JPH_CAPI void JPH_Matrix4x4_Translation(JPH_Matrix4x4* result, const JPH_Vec3* translation);
 JPH_CAPI void JPH_Matrix4x4_RotationTranslation(JPH_Matrix4x4* result, const JPH_Quat* rotation, const JPH_Vec3* translation);
 JPH_CAPI void JPH_Matrix4x4_InverseRotationTranslation(JPH_Matrix4x4* result, const JPH_Quat* rotation, const JPH_Vec3* translation);

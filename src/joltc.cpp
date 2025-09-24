@@ -1320,12 +1320,6 @@ void JPH_ShapeFilter_SetBodyID2(JPH_ShapeFilter* filter, JPH_BodyID id)
 }
 
 /* JPH_SimShapeFilter */
-static const JPH::SimShapeFilter& ToJolt(const JPH_SimShapeFilter* filter)
-{
-	static const JPH::SimShapeFilter g_defaultSimShapeFilter = {};
-	return filter ? *reinterpret_cast<const JPH::SimShapeFilter*>(filter) : g_defaultSimShapeFilter;
-}
-
 class ManagedSimShapeFilter final : public JPH::SimShapeFilter
 {
 public:
@@ -1382,7 +1376,17 @@ void JPH_SimShapeFilter_Destroy(JPH_SimShapeFilter* filter)
 }
 
 /* Math */
-void JPH_Quaternion_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* quat)
+float JPH_Math_Sin(float value)
+{
+	return JPH::Sin(value);
+}
+
+float JPH_Math_Cos(float value)
+{
+	return JPH::Cos(value);
+}
+
+void JPH_Quat_FromTo(const JPH_Vec3* from, const JPH_Vec3* to, JPH_Quat* quat)
 {
 	FromJolt(JPH::Quat::sFromTo(ToJolt(from), ToJolt(to)), quat);
 }
@@ -1571,7 +1575,22 @@ void JPH_Quat_FromEulerAngles(const JPH_Vec3* angles, JPH_Quat* result)
 	FromJolt(JPH::Quat::sEulerAngles(ToJolt(angles)), result);
 }
 
-JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq)
+void JPH_Vec3_AxisX(JPH_Vec3* result)
+{
+	FromJolt(JPH::Vec3::sAxisX(), result);
+}
+
+void JPH_Vec3_AxisY(JPH_Vec3* result)
+{
+	FromJolt(JPH::Vec3::sAxisY(), result);
+}
+
+void JPH_Vec3_AxisZ(JPH_Vec3* result)
+{
+	FromJolt(JPH::Vec3::sAxisZ(), result);
+}
+
+bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq)
 {
 	JPH_ASSERT(v1 != nullptr);
 	JPH_ASSERT(v2 != nullptr);
@@ -1582,7 +1601,7 @@ JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float max
 	return joltV1.IsClose(joltV2, maxDistSq);
 }
 
-JPH_CAPI bool JPH_Vec3_IsNearZero(const JPH_Vec3* v, float maxDistSq)
+bool JPH_Vec3_IsNearZero(const JPH_Vec3* v, float maxDistSq)
 {
 	JPH_ASSERT(v != nullptr);
 
@@ -1590,7 +1609,7 @@ JPH_CAPI bool JPH_Vec3_IsNearZero(const JPH_Vec3* v, float maxDistSq)
 	return joltV.IsNearZero(maxDistSq);
 }
 
-JPH_CAPI bool JPH_Vec3_IsNormalized(const JPH_Vec3* v, float tolerance)
+bool JPH_Vec3_IsNormalized(const JPH_Vec3* v, float tolerance)
 {
 	JPH_ASSERT(v != nullptr);
 
@@ -1598,7 +1617,7 @@ JPH_CAPI bool JPH_Vec3_IsNormalized(const JPH_Vec3* v, float tolerance)
 	return joltV.IsNormalized(tolerance);
 }
 
-JPH_CAPI bool JPH_Vec3_IsNaN(const JPH_Vec3* v)
+bool JPH_Vec3_IsNaN(const JPH_Vec3* v)
 {
 	JPH_ASSERT(v != nullptr);
 
@@ -1606,7 +1625,7 @@ JPH_CAPI bool JPH_Vec3_IsNaN(const JPH_Vec3* v)
 	return joltV.IsNaN();
 }
 
-JPH_CAPI void JPH_Vec3_Negate(const JPH_Vec3* v, JPH_Vec3* result)
+void JPH_Vec3_Negate(const JPH_Vec3* v, JPH_Vec3* result)
 {
 	JPH_ASSERT(v != nullptr);
 	JPH_ASSERT(result != nullptr);
@@ -1615,7 +1634,7 @@ JPH_CAPI void JPH_Vec3_Negate(const JPH_Vec3* v, JPH_Vec3* result)
 	FromJolt(-joltV, result);
 }
 
-JPH_CAPI void JPH_Vec3_Normalized(const JPH_Vec3* v, JPH_Vec3* result)
+void JPH_Vec3_Normalized(const JPH_Vec3* v, JPH_Vec3* result)
 {
 	JPH_ASSERT(v != nullptr);
 	JPH_ASSERT(result != nullptr);
@@ -1624,7 +1643,7 @@ JPH_CAPI void JPH_Vec3_Normalized(const JPH_Vec3* v, JPH_Vec3* result)
 	FromJolt(joltV.Normalized(), result);
 }
 
-JPH_CAPI void JPH_Vec3_Cross(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
+void JPH_Vec3_Cross(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
 {
 	JPH_ASSERT(v1 != nullptr);
 	JPH_ASSERT(v2 != nullptr);
@@ -1635,7 +1654,7 @@ JPH_CAPI void JPH_Vec3_Cross(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* r
 	FromJolt(joltV1.Cross(joltV2), result);
 }
 
-JPH_CAPI void JPH_Vec3_Abs(const JPH_Vec3* v, JPH_Vec3* result)
+void JPH_Vec3_Abs(const JPH_Vec3* v, JPH_Vec3* result)
 {
 	JPH_ASSERT(v != nullptr);
 	JPH_ASSERT(result != nullptr);
@@ -1671,6 +1690,11 @@ void JPH_Vec3_MultiplyScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result)
 	JPH_ASSERT(v && result);
 	JPH::Vec3 joltVec = ToJolt(v);
 	FromJolt(joltVec * scalar, result);
+}
+
+void JPH_Vec3_MultiplyMatrix(const JPH_Matrix4x4* left, const JPH_Vec3* right, JPH_Vec3* result)
+{
+	FromJolt(ToJolt(left) * ToJolt(right), result);
 }
 
 void JPH_Vec3_Divide(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
@@ -1751,22 +1775,31 @@ void JPH_Matrix4x4_MultiplyScalar(const JPH_Matrix4x4* m, float scalar, JPH_Matr
 	FromJolt(joltM * scalar, result);
 }
 
-void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result) {
+void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result) 
+{
 	const JPH::Mat44 mat = JPH::Mat44::sZero();
 	FromJolt(mat, result);
 }
 
-void JPH_Matrix4x4_Identity(JPH_Matrix4x4* result) {
+void JPH_Matrix4x4_Identity(JPH_Matrix4x4* result)
+{
 	const JPH::Mat44 mat = JPH::Mat44::sIdentity();
 	FromJolt(mat, result);
 }
 
-void JPH_Matrix4x4_Rotation(JPH_Matrix4x4* result, const JPH_Quat* rotation) {
+void JPH_Matrix4x4_Rotation(JPH_Matrix4x4* result, const JPH_Quat* rotation)
+{
 	const JPH::Mat44 mat = JPH::Mat44::sRotation(ToJolt(rotation));
 	FromJolt(mat, result);
 }
 
-void JPH_Matrix4x4_Translation(JPH_Matrix4x4* result, const JPH_Vec3* translation) {
+void JPH_Matrix4x4_Rotation2(JPH_Matrix4x4* result, const JPH_Vec3* axis, float angle)
+{
+	FromJolt(JPH::Mat44::sRotation(ToJolt(axis), angle), result);
+}
+
+void JPH_Matrix4x4_Translation(JPH_Matrix4x4* result, const JPH_Vec3* translation) 
+{
 	const JPH::Mat44 mat = JPH::Mat44::sTranslation(ToJolt(translation));
 	FromJolt(mat, result);
 }
@@ -2682,8 +2715,8 @@ JPH_MeshShapeSettings* JPH_MeshShapeSettings_Create(const JPH_Triangle* triangle
 
 JPH_MeshShapeSettings* JPH_MeshShapeSettings_Create2(const JPH_Vec3* vertices, uint32_t verticesCount, const JPH_IndexedTriangle* triangles, uint32_t triangleCount)
 {
-	VertexList joltVertices;
-	IndexedTriangleList joltTriangles;
+	JPH::VertexList joltVertices;
+	JPH::IndexedTriangleList joltTriangles;
 
 	joltVertices.reserve(verticesCount);
 	joltTriangles.reserve(triangleCount);
@@ -5047,11 +5080,11 @@ void JPH_PhysicsSystem_SetBodyActivationListener(JPH_PhysicsSystem* system, JPH_
 	system->physicsSystem->SetBodyActivationListener(joltListener);
 }
 
-void JPH_PhysicsSystem_SetSimShapeFilter(JPH_PhysicsSystem* system, JPH_SimShapeFilter* filter)
+void JPH_PhysicsSystem_SetSimShapeFilter(JPH_PhysicsSystem* system, const JPH_SimShapeFilter* filter)
 {
 	JPH_ASSERT(system);
 
-	auto joltFilter = reinterpret_cast<JPH::SimShapeFilter*>(filter);
+	auto joltFilter = reinterpret_cast<const JPH::SimShapeFilter*>(filter);
 	system->physicsSystem->SetSimShapeFilter(joltFilter);
 }
 
