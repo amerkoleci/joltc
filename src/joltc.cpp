@@ -117,6 +117,7 @@ DEF_MAP_DECL(MotionProperties, JPH_MotionProperties)
 DEF_MAP_DECL(BroadPhaseQuery, JPH_BroadPhaseQuery)
 DEF_MAP_DECL(NarrowPhaseQuery, JPH_NarrowPhaseQuery)
 DEF_MAP_DECL(PhysicsMaterial, JPH_PhysicsMaterial)
+
 DEF_MAP_DECL(Shape, JPH_Shape)
 DEF_MAP_DECL(ShapeSettings, JPH_ShapeSettings)
 DEF_MAP_DECL(EmptyShape, JPH_EmptyShape)
@@ -129,6 +130,36 @@ DEF_MAP_DECL(MeshShape, JPH_MeshShape)
 DEF_MAP_DECL(MeshShapeSettings, JPH_MeshShapeSettings)
 DEF_MAP_DECL(HeightFieldShape, JPH_HeightFieldShape)
 DEF_MAP_DECL(HeightFieldShapeSettings, JPH_HeightFieldShapeSettings)
+DEF_MAP_DECL(ConvexShape, JPH_ConvexShape)
+DEF_MAP_DECL(ConvexShapeSettings, JPH_ConvexShapeSettings)
+DEF_MAP_DECL(ConvexHullShape, JPH_ConvexHullShape)
+DEF_MAP_DECL(ConvexHullShapeSettings, JPH_ConvexHullShapeSettings)
+DEF_MAP_DECL(SphereShape, JPH_SphereShape)
+DEF_MAP_DECL(SphereShapeSettings, JPH_SphereShapeSettings)
+DEF_MAP_DECL(BoxShape, JPH_BoxShape)
+DEF_MAP_DECL(BoxShapeSettings, JPH_BoxShapeSettings)
+DEF_MAP_DECL(PlaneShape, JPH_PlaneShape)
+DEF_MAP_DECL(PlaneShapeSettings, JPH_PlaneShapeSettings)
+DEF_MAP_DECL(CapsuleShape, JPH_CapsuleShape)
+DEF_MAP_DECL(CapsuleShapeSettings, JPH_CapsuleShapeSettings)
+DEF_MAP_DECL(CylinderShape, JPH_CylinderShape)
+DEF_MAP_DECL(CylinderShapeSettings, JPH_CylinderShapeSettings)
+DEF_MAP_DECL(TriangleShape, JPH_TriangleShape)
+DEF_MAP_DECL(TriangleShapeSettings, JPH_TriangleShapeSettings)
+DEF_MAP_DECL(TaperedCylinderShape, JPH_TaperedCylinderShape)
+DEF_MAP_DECL(TaperedCylinderShapeSettings, JPH_TaperedCylinderShapeSettings)
+DEF_MAP_DECL(TaperedCapsuleShape, JPH_TaperedCapsuleShape)
+DEF_MAP_DECL(TaperedCapsuleShapeSettings, JPH_TaperedCapsuleShapeSettings)
+DEF_MAP_DECL(StaticCompoundShape, JPH_StaticCompoundShape)
+DEF_MAP_DECL(StaticCompoundShapeSettings, JPH_StaticCompoundShapeSettings)
+DEF_MAP_DECL(DecoratedShape, JPH_DecoratedShape)
+DEF_MAP_DECL(RotatedTranslatedShape, JPH_RotatedTranslatedShape)
+DEF_MAP_DECL(RotatedTranslatedShapeSettings, JPH_RotatedTranslatedShapeSettings)
+DEF_MAP_DECL(ScaledShape, JPH_ScaledShape)
+DEF_MAP_DECL(ScaledShapeSettings, JPH_ScaledShapeSettings)
+DEF_MAP_DECL(OffsetCenterOfMassShape, JPH_OffsetCenterOfMassShape)
+DEF_MAP_DECL(OffsetCenterOfMassShapeSettings, JPH_OffsetCenterOfMassShapeSettings)
+
 DEF_MAP_DECL(Constraint, JPH_Constraint)
 DEF_MAP_DECL(TwoBodyConstraint, JPH_TwoBodyConstraint)
 DEF_MAP_DECL(FixedConstraint, JPH_FixedConstraint)
@@ -2017,27 +2048,27 @@ void JPH_Shape_Destroy(JPH_Shape* shape)
 
 JPH_ShapeType JPH_Shape_GetType(const JPH_Shape* shape)
 {
-	return static_cast<JPH_ShapeType>(reinterpret_cast<const JPH::Shape*>(shape)->GetType());
+	return static_cast<JPH_ShapeType>(AsShape(shape)->GetType());
 }
 
 JPH_ShapeSubType JPH_Shape_GetSubType(const JPH_Shape* shape)
 {
-	return static_cast<JPH_ShapeSubType>(reinterpret_cast<const JPH::Shape*>(shape)->GetSubType());
+	return static_cast<JPH_ShapeSubType>(AsShape(shape)->GetSubType());
 }
 
 uint64_t JPH_Shape_GetUserData(const JPH_Shape* shape)
 {
-	return reinterpret_cast<const JPH::Shape*>(shape)->GetUserData();
+	return AsShape(shape)->GetUserData();
 }
 
 void JPH_Shape_SetUserData(JPH_Shape* shape, uint64_t userData)
 {
-	reinterpret_cast<JPH::Shape*>(shape)->SetUserData(userData);
+	AsShape(shape)->SetUserData(userData);
 }
 
 bool JPH_Shape_MustBeStatic(const JPH_Shape* shape)
 {
-	return reinterpret_cast<const JPH::Shape*>(shape)->MustBeStatic();
+	return AsShape(shape)->MustBeStatic();
 }
 
 void JPH_Shape_GetCenterOfMass(const JPH_Shape* shape, JPH_Vec3* result)
@@ -2096,7 +2127,7 @@ void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeI
 	FromJolt(joltNormal, normal);
 }
 
-JPH_CAPI void JPH_Shape_GetSupportingFace(const JPH_Shape* shape,
+void JPH_Shape_GetSupportingFace(const JPH_Shape* shape,
 	const JPH_SubShapeID subShapeID,
 	const JPH_Vec3* direction,
 	const JPH_Vec3* scale,
@@ -2324,22 +2355,22 @@ bool JPH_Shape_CollidePoint2(const JPH_Shape* shape, const JPH_Vec3* point,
 /* ConvexShape */
 float JPH_ConvexShapeSettings_GetDensity(const JPH_ConvexShapeSettings* shape)
 {
-	return reinterpret_cast<const JPH::ConvexShapeSettings*>(shape)->mDensity;
+	return AsConvexShapeSettings(shape)->mDensity;
 }
 
 void JPH_ConvexShapeSettings_SetDensity(JPH_ConvexShapeSettings* shape, float value)
 {
-	reinterpret_cast<JPH::ConvexShapeSettings*>(shape)->SetDensity(value);
+	AsConvexShapeSettings(shape)->SetDensity(value);
 }
 
 float JPH_ConvexShape_GetDensity(const JPH_ConvexShape* shape)
 {
-	return reinterpret_cast<const JPH::ConvexShape*>(shape)->GetDensity();
+	return AsConvexShape(shape)->GetDensity();
 }
 
 void JPH_ConvexShape_SetDensity(JPH_ConvexShape* shape, float density)
 {
-	reinterpret_cast<JPH::ConvexShape*>(shape)->SetDensity(density);
+	AsConvexShape(shape)->SetDensity(density);
 }
 
 /* BoxShape */
@@ -2348,19 +2379,18 @@ JPH_BoxShapeSettings* JPH_BoxShapeSettings_Create(const JPH_Vec3* halfExtent, fl
 	auto settings = new JPH::BoxShapeSettings(ToJolt(halfExtent), convexRadius);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_BoxShapeSettings*>(settings);
+	return ToBoxShapeSettings(settings);
 }
 
 JPH_BoxShape* JPH_BoxShapeSettings_CreateShape(const JPH_BoxShapeSettings* settings)
 {
-	const JPH::BoxShapeSettings* joltSettings = reinterpret_cast<const JPH::BoxShapeSettings*>(settings);
-	auto shape_result = joltSettings->Create();
-	if (!shape_result.IsValid())
+	auto shapeResult = AsBoxShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
 	{
 		return nullptr;
 	}
 
-	auto shape = shape_result.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_BoxShape*>(shape);
@@ -2371,20 +2401,18 @@ JPH_BoxShape* JPH_BoxShape_Create(const JPH_Vec3* halfExtent, float convexRadius
 	auto shape = new JPH::BoxShape(ToJolt(halfExtent), convexRadius);
 	shape->AddRef();
 
-	return reinterpret_cast<JPH_BoxShape*>(shape);
+	return ToBoxShape(shape);
 }
 
 void JPH_BoxShape_GetHalfExtent(const JPH_BoxShape* shape, JPH_Vec3* halfExtent)
 {
-	auto joltShape = reinterpret_cast<const JPH::BoxShape*>(shape);
-	auto joltVector = joltShape->GetHalfExtent();
+	auto joltVector = AsBoxShape(shape)->GetHalfExtent();
 	FromJolt(joltVector, halfExtent);
 }
 
 float JPH_BoxShape_GetConvexRadius(const JPH_BoxShape* shape)
 {
-	auto joltShape = reinterpret_cast<const JPH::BoxShape*>(shape);
-	return joltShape->GetConvexRadius();
+	return AsBoxShape(shape)->GetConvexRadius();
 }
 
 /* SphereShapeSettings */
@@ -2393,15 +2421,18 @@ JPH_SphereShapeSettings* JPH_SphereShapeSettings_Create(float radius)
 	auto settings = new JPH::SphereShapeSettings(radius);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_SphereShapeSettings*>(settings);
+	return ToSphereShapeSettings(settings);
 }
 
 JPH_SphereShape* JPH_SphereShapeSettings_CreateShape(const JPH_SphereShapeSettings* settings)
 {
-	const JPH::SphereShapeSettings* jolt_settings = reinterpret_cast<const JPH::SphereShapeSettings*>(settings);
-	auto shape_res = jolt_settings->Create();
+	auto shapeResult = AsSphereShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_SphereShape*>(shape);
@@ -2409,14 +2440,12 @@ JPH_SphereShape* JPH_SphereShapeSettings_CreateShape(const JPH_SphereShapeSettin
 
 float JPH_SphereShapeSettings_GetRadius(const JPH_SphereShapeSettings* settings)
 {
-	JPH_ASSERT(settings);
-	return reinterpret_cast<const JPH::SphereShapeSettings*>(settings)->mRadius;
+	return AsSphereShapeSettings(settings)->mRadius;
 }
 
 void JPH_SphereShapeSettings_SetRadius(JPH_SphereShapeSettings* settings, float radius)
 {
-	JPH_ASSERT(settings);
-	reinterpret_cast<JPH::SphereShapeSettings*>(settings)->mRadius = radius;
+	AsSphereShapeSettings(settings)->mRadius = radius;
 }
 
 JPH_SphereShape* JPH_SphereShape_Create(float radius)
@@ -2424,12 +2453,12 @@ JPH_SphereShape* JPH_SphereShape_Create(float radius)
 	auto shape = new JPH::SphereShape(radius);
 	shape->AddRef();
 
-	return reinterpret_cast<JPH_SphereShape*>(shape);
+	return ToSphereShape(shape);
 }
 
 float JPH_SphereShape_GetRadius(const JPH_SphereShape* shape)
 {
-	return reinterpret_cast<const JPH::SphereShape*>(shape)->GetRadius();
+	return AsSphereShape(shape)->GetRadius();
 }
 
 /* PlaneShape */
@@ -2440,15 +2469,18 @@ JPH_PlaneShapeSettings* JPH_PlaneShapeSettings_Create(const JPH_Plane* plane, co
 	auto settings = new JPH::PlaneShapeSettings(ToJolt(plane), joltMaterial, halfExtent);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_PlaneShapeSettings*>(settings);
+	return ToPlaneShapeSettings(settings);
 }
 
 JPH_PlaneShape* JPH_PlaneShapeSettings_CreateShape(const JPH_PlaneShapeSettings* settings)
 {
-	const JPH::PlaneShapeSettings* joltSettings = reinterpret_cast<const JPH::PlaneShapeSettings*>(settings);
-	auto shape_res = joltSettings->Create();
+	auto shapeResult = AsPlaneShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_PlaneShape*>(shape);
@@ -2461,17 +2493,17 @@ JPH_PlaneShape* JPH_PlaneShape_Create(const JPH_Plane* plane, const JPH_PhysicsM
 	auto shape = new JPH::PlaneShape(ToJolt(plane), joltMaterial, halfExtent);
 	shape->AddRef();
 
-	return reinterpret_cast<JPH_PlaneShape*>(shape);
+	return ToPlaneShape(shape);
 }
 
 void JPH_PlaneShape_GetPlane(const JPH_PlaneShape* shape, JPH_Plane* result)
 {
-	FromJolt(reinterpret_cast<const JPH::PlaneShape*>(shape)->GetPlane(), result);
+	FromJolt(AsPlaneShape(shape)->GetPlane(), result);
 }
 
 float JPH_PlaneShape_GetHalfExtent(const JPH_PlaneShape* shape)
 {
-	return reinterpret_cast<const JPH::PlaneShape*>(shape)->GetHalfExtent();
+	return AsPlaneShape(shape)->GetHalfExtent();
 }
 
 /* TriangleShape */
@@ -2480,15 +2512,19 @@ JPH_TriangleShapeSettings* JPH_TriangleShapeSettings_Create(const JPH_Vec3* v1, 
 	auto settings = new JPH::TriangleShapeSettings(ToJolt(v1), ToJolt(v2), ToJolt(v3), convexRadius);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_TriangleShapeSettings*>(settings);
+	return ToTriangleShapeSettings(settings);
 }
 
 JPH_TriangleShape* JPH_TriangleShapeSettings_CreateShape(const JPH_TriangleShapeSettings* settings)
 {
 	const JPH::TriangleShapeSettings* joltSettings = reinterpret_cast<const JPH::TriangleShapeSettings*>(settings);
-	auto shape_res = joltSettings->Create();
+	auto shapeResult = joltSettings->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_TriangleShape*>(shape);
@@ -2499,27 +2535,27 @@ JPH_TriangleShape* JPH_TriangleShape_Create(const JPH_Vec3* v1, const JPH_Vec3* 
 	auto shape = new JPH::TriangleShape(ToJolt(v1), ToJolt(v2), ToJolt(v3), convexRadius);
 	shape->AddRef();
 
-	return reinterpret_cast<JPH_TriangleShape*>(shape);
+	return ToTriangleShape(shape);
 }
 
 float JPH_TriangleShape_GetConvexRadius(const JPH_TriangleShape* shape)
 {
-	return reinterpret_cast<const JPH::TriangleShape*>(shape)->GetConvexRadius();
+	return AsTriangleShape(shape)->GetConvexRadius();
 }
 
 void JPH_TriangleShape_GetVertex1(const JPH_TriangleShape* shape, JPH_Vec3* result)
 {
-	FromJolt(reinterpret_cast<const JPH::TriangleShape*>(shape)->GetVertex1(), result);
+	FromJolt(AsTriangleShape(shape)->GetVertex1(), result);
 }
 
 void JPH_TriangleShape_GetVertex2(const JPH_TriangleShape* shape, JPH_Vec3* result)
 {
-	FromJolt(reinterpret_cast<const JPH::TriangleShape*>(shape)->GetVertex2(), result);
+	FromJolt(AsTriangleShape(shape)->GetVertex2(), result);
 }
 
 void JPH_TriangleShape_GetVertex3(const JPH_TriangleShape* shape, JPH_Vec3* result)
 {
-	FromJolt(reinterpret_cast<const JPH::TriangleShape*>(shape)->GetVertex3(), result);
+	FromJolt(AsTriangleShape(shape)->GetVertex3(), result);
 }
 
 /* CapsuleShapeSettings */
@@ -2528,15 +2564,18 @@ JPH_CapsuleShapeSettings* JPH_CapsuleShapeSettings_Create(float halfHeightOfCyli
 	auto settings = new JPH::CapsuleShapeSettings(halfHeightOfCylinder, radius);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_CapsuleShapeSettings*>(settings);
+	return ToCapsuleShapeSettings(settings);
 }
 
 JPH_CapsuleShape* JPH_CapsuleShapeSettings_CreateShape(const JPH_CapsuleShapeSettings* settings)
 {
-	const JPH::CapsuleShapeSettings* joltSettings = reinterpret_cast<const JPH::CapsuleShapeSettings*>(settings);
-	auto shape_res = joltSettings->Create();
+	auto shapeResult = AsCapsuleShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_CapsuleShape*>(shape);
@@ -2547,19 +2586,17 @@ JPH_CapsuleShape* JPH_CapsuleShape_Create(float halfHeightOfCylinder, float radi
 	auto shape = new JPH::CapsuleShape(halfHeightOfCylinder, radius, 0);
 	shape->AddRef();
 
-	return reinterpret_cast<JPH_CapsuleShape*>(shape);
+	return ToCapsuleShape(shape);
 }
 
 float JPH_CapsuleShape_GetRadius(const JPH_CapsuleShape* shape)
 {
-	JPH_ASSERT(shape);
-	return reinterpret_cast<const JPH::CapsuleShape*>(shape)->GetRadius();
+	return AsCapsuleShape(shape)->GetRadius();
 }
 
 float JPH_CapsuleShape_GetHalfHeightOfCylinder(const JPH_CapsuleShape* shape)
 {
-	JPH_ASSERT(shape);
-	return reinterpret_cast<const JPH::CapsuleShape*>(shape)->GetHalfHeightOfCylinder();
+	return AsCapsuleShape(shape)->GetHalfHeightOfCylinder();
 }
 
 /* CylinderShapeSettings */
@@ -2568,15 +2605,18 @@ JPH_CylinderShapeSettings* JPH_CylinderShapeSettings_Create(float halfHeight, fl
 	auto settings = new JPH::CylinderShapeSettings(halfHeight, radius, convexRadius);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_CylinderShapeSettings*>(settings);
+	return ToCylinderShapeSettings(settings);
 }
 
 JPH_CylinderShape* JPH_CylinderShapeSettings_CreateShape(const JPH_CylinderShapeSettings* settings)
 {
-	const JPH::CylinderShapeSettings* joltSettings = reinterpret_cast<const JPH::CylinderShapeSettings*>(settings);
-	auto shape_res = joltSettings->Create();
+	auto shapeResult = AsCylinderShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_CylinderShape*>(shape);
@@ -2587,17 +2627,17 @@ JPH_CylinderShape* JPH_CylinderShape_Create(float halfHeight, float radius)
 	auto shape = new JPH::CylinderShape(halfHeight, radius, 0.f, 0);
 	shape->AddRef();
 
-	return reinterpret_cast<JPH_CylinderShape*>(shape);
+	return ToCylinderShape(shape);
 }
 
 float JPH_CylinderShape_GetRadius(const JPH_CylinderShape* shape)
 {
-	return reinterpret_cast<const JPH::CylinderShape*>(shape)->GetRadius();
+	return AsCylinderShape(shape)->GetRadius();
 }
 
 float JPH_CylinderShape_GetHalfHeight(const JPH_CylinderShape* shape)
 {
-	return reinterpret_cast<const JPH::CylinderShape*>(shape)->GetHalfHeight();
+	return AsCylinderShape(shape)->GetHalfHeight();
 }
 
 /* TaperedCylinderShape */
@@ -2608,15 +2648,18 @@ JPH_TaperedCylinderShapeSettings* JPH_TaperedCylinderShapeSettings_Create(float 
 	auto settings = new JPH::TaperedCylinderShapeSettings(halfHeightOfTaperedCylinder, topRadius, bottomRadius, convexRadius, joltMaterial);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_TaperedCylinderShapeSettings*>(settings);
+	return ToTaperedCylinderShapeSettings(settings);
 }
 
 JPH_TaperedCylinderShape* JPH_TaperedCylinderShapeSettings_CreateShape(const JPH_TaperedCylinderShapeSettings* settings)
 {
-	const JPH::TaperedCylinderShapeSettings* joltSettings = reinterpret_cast<const JPH::TaperedCylinderShapeSettings*>(settings);
-	auto shape_res = joltSettings->Create();
+	auto shapeResult = AsTaperedCylinderShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_TaperedCylinderShape*>(shape);
@@ -2624,22 +2667,22 @@ JPH_TaperedCylinderShape* JPH_TaperedCylinderShapeSettings_CreateShape(const JPH
 
 float JPH_TaperedCylinderShape_GetTopRadius(const JPH_TaperedCylinderShape* shape)
 {
-	return reinterpret_cast<const JPH::TaperedCylinderShape*>(shape)->GetTopRadius();
+	return AsTaperedCylinderShape(shape)->GetTopRadius();
 }
 
 float JPH_TaperedCylinderShape_GetBottomRadius(const JPH_TaperedCylinderShape* shape)
 {
-	return reinterpret_cast<const JPH::TaperedCylinderShape*>(shape)->GetBottomRadius();
+	return AsTaperedCylinderShape(shape)->GetBottomRadius();
 }
 
 float JPH_TaperedCylinderShape_GetConvexRadius(const JPH_TaperedCylinderShape* shape)
 {
-	return reinterpret_cast<const JPH::TaperedCylinderShape*>(shape)->GetConvexRadius();
+	return AsTaperedCylinderShape(shape)->GetConvexRadius();
 }
 
 float JPH_TaperedCylinderShape_GetHalfHeight(const JPH_TaperedCylinderShape* shape)
 {
-	return reinterpret_cast<const JPH::TaperedCylinderShape*>(shape)->GetHalfHeight();
+	return AsTaperedCylinderShape(shape)->GetHalfHeight();
 }
 
 /* ConvexHullShape */
@@ -2656,15 +2699,18 @@ JPH_ConvexHullShapeSettings* JPH_ConvexHullShapeSettings_Create(const JPH_Vec3* 
 	auto settings = new JPH::ConvexHullShapeSettings(joltPoints, maxConvexRadius);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_ConvexHullShapeSettings*>(settings);
+	return ToConvexHullShapeSettings(settings);
 }
 
 JPH_ConvexHullShape* JPH_ConvexHullShapeSettings_CreateShape(const JPH_ConvexHullShapeSettings* settings)
 {
-	const JPH::ConvexHullShapeSettings* jolt_settings = reinterpret_cast<const JPH::ConvexHullShapeSettings*>(settings);
-	auto shape_res = jolt_settings->Create();
+	auto shapeResult = AsConvexHullShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_ConvexHullShape*>(shape);
@@ -2672,28 +2718,27 @@ JPH_ConvexHullShape* JPH_ConvexHullShapeSettings_CreateShape(const JPH_ConvexHul
 
 uint32_t JPH_ConvexHullShape_GetNumPoints(const JPH_ConvexHullShape* shape)
 {
-	return reinterpret_cast<const JPH::ConvexHullShape*>(shape)->GetNumPoints();
+	return AsConvexHullShape(shape)->GetNumPoints();
 }
 
 void JPH_ConvexHullShape_GetPoint(const JPH_ConvexHullShape* shape, uint32_t index, JPH_Vec3* result)
 {
-	auto point = reinterpret_cast<const JPH::ConvexHullShape*>(shape)->GetPoint(index);
-	FromJolt(point, result);
+	FromJolt(AsConvexHullShape(shape)->GetPoint(index), result);
 }
 
 uint32_t JPH_ConvexHullShape_GetNumFaces(const JPH_ConvexHullShape* shape)
 {
-	return reinterpret_cast<const JPH::ConvexHullShape*>(shape)->GetNumFaces();
+	return AsConvexHullShape(shape)->GetNumFaces();
 }
 
 uint32_t JPH_ConvexHullShape_GetNumVerticesInFace(const JPH_ConvexHullShape* shape, uint32_t faceIndex)
 {
-	return reinterpret_cast<const JPH::ConvexHullShape*>(shape)->GetNumVerticesInFace(faceIndex);
+	return AsConvexHullShape(shape)->GetNumVerticesInFace(faceIndex);
 }
 
 uint32_t JPH_ConvexHullShape_GetFaceVertices(const JPH_ConvexHullShape* shape, uint32_t faceIndex, uint32_t maxVertices, uint32_t* vertices)
 {
-	return reinterpret_cast<const JPH::ConvexHullShape*>(shape)->GetFaceVertices(faceIndex, maxVertices, vertices);
+	return AsConvexHullShape(shape)->GetFaceVertices(faceIndex, maxVertices, vertices);
 }
 
 /* MeshShapeSettings */
@@ -2783,13 +2828,13 @@ void JPH_MeshShapeSettings_Sanitize(JPH_MeshShapeSettings* settings)
 
 JPH_MeshShape* JPH_MeshShapeSettings_CreateShape(const JPH_MeshShapeSettings* settings)
 {
-	auto shape_res = AsMeshShapeSettings(settings)->Create();
-	if (!shape_res.IsValid())
+	auto shapeResult = AsMeshShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
 	{
 		return nullptr;
 	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_MeshShape*>(shape);
@@ -2897,15 +2942,18 @@ JPH_TaperedCapsuleShapeSettings* JPH_TaperedCapsuleShapeSettings_Create(float ha
 	auto settings = new JPH::TaperedCapsuleShapeSettings(halfHeightOfTaperedCylinder, topRadius, bottomRadius);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_TaperedCapsuleShapeSettings*>(settings);
+	return ToTaperedCapsuleShapeSettings(settings);
 }
 
 JPH_TaperedCapsuleShape* JPH_TaperedCapsuleShapeSettings_CreateShape(JPH_TaperedCapsuleShapeSettings* settings)
 {
-	const JPH::TaperedCapsuleShapeSettings* joltSettings = reinterpret_cast<const JPH::TaperedCapsuleShapeSettings*>(settings);
-	auto shape_res = joltSettings->Create();
+	auto shapeResult = AsTaperedCapsuleShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_TaperedCapsuleShape*>(shape);
@@ -2913,17 +2961,17 @@ JPH_TaperedCapsuleShape* JPH_TaperedCapsuleShapeSettings_CreateShape(JPH_Tapered
 
 float JPH_TaperedCapsuleShape_GetTopRadius(const JPH_TaperedCapsuleShape* shape)
 {
-	return reinterpret_cast<const JPH::TaperedCapsuleShape*>(shape)->GetTopRadius();
+	return AsTaperedCapsuleShape(shape)->GetTopRadius();
 }
 
 float JPH_TaperedCapsuleShape_GetBottomRadius(const JPH_TaperedCapsuleShape* shape)
 {
-	return reinterpret_cast<const JPH::TaperedCapsuleShape*>(shape)->GetBottomRadius();
+	return AsTaperedCapsuleShape(shape)->GetBottomRadius();
 }
 
 float JPH_TaperedCapsuleShape_GetHalfHeight(const JPH_TaperedCapsuleShape* shape)
 {
-	return reinterpret_cast<const JPH::TaperedCapsuleShape*>(shape)->GetHalfHeight();
+	return AsTaperedCapsuleShape(shape)->GetHalfHeight();
 }
 
 /* CompoundShape */
@@ -2947,30 +2995,28 @@ void JPH_CompoundShapeSettings_AddShape2(JPH_CompoundShapeSettings* settings, co
 
 uint32_t JPH_CompoundShape_GetNumSubShapes(const JPH_CompoundShape* shape)
 {
-	JPH_ASSERT(shape);
-	auto joltShape = reinterpret_cast<const JPH::CompoundShape*>(shape);
-	return joltShape->GetNumSubShapes();
+	return AsCompoundShape(shape)->GetNumSubShapes();
 }
 
 void JPH_CompoundShape_GetSubShape(const JPH_CompoundShape* shape, uint32_t index, const JPH_Shape** subShape, JPH_Vec3* positionCOM, JPH_Quat* rotation, uint32_t* userData)
 {
-	JPH_ASSERT(shape);
-	auto joltShape = reinterpret_cast<const JPH::CompoundShape*>(shape);
-	const JPH::CompoundShape::SubShape& sub = joltShape->GetSubShape(index);
-	if (subShape) *subShape = reinterpret_cast<const JPH_Shape*>(sub.mShape.GetPtr());
-	if (positionCOM) FromJolt(sub.GetPositionCOM(), positionCOM);
-	if (rotation) FromJolt(sub.GetRotation(), rotation);
-	if (userData) *userData = sub.mUserData;
+	const JPH::CompoundShape::SubShape& sub = AsCompoundShape(shape)->GetSubShape(index);
+	if (subShape) 
+		*subShape = ToShape(sub.mShape.GetPtr());
+	if (positionCOM) 
+		FromJolt(sub.GetPositionCOM(), positionCOM);
+	if (rotation) 
+		FromJolt(sub.GetRotation(), rotation);
+	if (userData) 
+		*userData = sub.mUserData;
 }
 
 uint32_t JPH_CompoundShape_GetSubShapeIndexFromID(const JPH_CompoundShape* shape, JPH_SubShapeID id, JPH_SubShapeID* remainder)
 {
-	JPH_ASSERT(shape);
-	auto joltShape = reinterpret_cast<const JPH::CompoundShape*>(shape);
 	auto joltSubShapeID = JPH::SubShapeID();
 	joltSubShapeID.SetValue(id);
 	JPH::SubShapeID joltRemainder = JPH::SubShapeID();
-	uint32_t index = joltShape->GetSubShapeIndexFromID(joltSubShapeID, joltRemainder);
+	uint32_t index = AsCompoundShape(shape)->GetSubShapeIndexFromID(joltSubShapeID, joltRemainder);
 	*remainder = joltRemainder.GetValue();
 	return index;
 }
@@ -2981,15 +3027,19 @@ JPH_StaticCompoundShapeSettings* JPH_StaticCompoundShapeSettings_Create(void)
 	auto settings = new JPH::StaticCompoundShapeSettings();
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_StaticCompoundShapeSettings*>(settings);
+	return ToStaticCompoundShapeSettings(settings);
 }
 
 JPH_StaticCompoundShape* JPH_StaticCompoundShape_Create(const JPH_StaticCompoundShapeSettings* settings)
 {
 	const JPH::StaticCompoundShapeSettings* jolt_settings = reinterpret_cast<const JPH::StaticCompoundShapeSettings*>(settings);
-	auto shape_res = jolt_settings->Create();
+	auto shapeResult = jolt_settings->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_StaticCompoundShape*>(shape);
@@ -3001,15 +3051,19 @@ JPH_CAPI JPH_MutableCompoundShapeSettings* JPH_MutableCompoundShapeSettings_Crea
 	auto settings = new JPH::MutableCompoundShapeSettings();
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_MutableCompoundShapeSettings*>(settings);
+	return ToMutableCompoundShapeSettings(settings);
 }
 
 JPH_MutableCompoundShape* JPH_MutableCompoundShape_Create(const JPH_MutableCompoundShapeSettings* settings)
 {
 	const JPH::MutableCompoundShapeSettings* jolt_settings = reinterpret_cast<const JPH::MutableCompoundShapeSettings*>(settings);
-	auto shape_res = jolt_settings->Create();
+	auto shapeResult = jolt_settings->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_MutableCompoundShape*>(shape);
@@ -3017,26 +3071,22 @@ JPH_MutableCompoundShape* JPH_MutableCompoundShape_Create(const JPH_MutableCompo
 
 uint32_t JPH_MutableCompoundShape_AddShape(JPH_MutableCompoundShape* shape, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* child, uint32_t userData, uint32_t index)
 {
-	auto joltShape = reinterpret_cast<JPH::MutableCompoundShape*>(shape);
-	return joltShape->AddShape(ToJolt(position), ToJolt(rotation), AsShape(child), userData, index);
+	return AsMutableCompoundShape(shape)->AddShape(ToJolt(position), ToJolt(rotation), AsShape(child), userData, index);
 }
 
 void JPH_MutableCompoundShape_RemoveShape(JPH_MutableCompoundShape* shape, uint32_t index)
 {
-	reinterpret_cast<JPH::MutableCompoundShape*>(shape)->RemoveShape(index);
+	AsMutableCompoundShape(shape)->RemoveShape(index);
 }
 
 void JPH_MutableCompoundShape_ModifyShape(JPH_MutableCompoundShape* shape, uint32_t index, const JPH_Vec3* position, const JPH_Quat* rotation)
 {
-	auto joltShape = reinterpret_cast<JPH::MutableCompoundShape*>(shape);
-	joltShape->ModifyShape(index, ToJolt(position), ToJolt(rotation));
+	AsMutableCompoundShape(shape)->ModifyShape(index, ToJolt(position), ToJolt(rotation));
 }
 
 void JPH_MutableCompoundShape_ModifyShape2(JPH_MutableCompoundShape* shape, uint32_t index, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* newShape)
 {
-	auto joltShape = reinterpret_cast<JPH::MutableCompoundShape*>(shape);
-	auto joltNewShape = reinterpret_cast<const JPH::Shape*>(newShape);
-	joltShape->ModifyShape(index, ToJolt(position), ToJolt(rotation), joltNewShape);
+	AsMutableCompoundShape(shape)->ModifyShape(index, ToJolt(position), ToJolt(rotation), AsShape(newShape));
 }
 
 void JPH_MutableCompoundShape_AdjustCenterOfMass(JPH_MutableCompoundShape* shape)
@@ -3045,9 +3095,9 @@ void JPH_MutableCompoundShape_AdjustCenterOfMass(JPH_MutableCompoundShape* shape
 }
 
 /* DecoratedShape */
-const JPH_Shape* JPH_DecoratedShape_GetInnerShape(const JPH_DecoratedShape* shape) {
-	auto joltShape = reinterpret_cast<const JPH::DecoratedShape*>(shape);
-	return reinterpret_cast<const JPH_Shape*>(joltShape->GetInnerShape());
+const JPH_Shape* JPH_DecoratedShape_GetInnerShape(const JPH_DecoratedShape* shape) 
+{
+	return ToShape(AsDecoratedShape(shape)->GetInnerShape());
 }
 
 /* RotatedTranslatedShape */
@@ -3060,7 +3110,7 @@ JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create(co
 	);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_RotatedTranslatedShapeSettings*>(settings);
+	return ToRotatedTranslatedShapeSettings(settings);
 }
 
 JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create2(const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* shape)
@@ -3072,15 +3122,19 @@ JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create2(c
 	);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_RotatedTranslatedShapeSettings*>(settings);
+	return ToRotatedTranslatedShapeSettings(settings);
 }
 
 JPH_RotatedTranslatedShape* JPH_RotatedTranslatedShapeSettings_CreateShape(const JPH_RotatedTranslatedShapeSettings* settings)
 {
-	const JPH::RotatedTranslatedShapeSettings* jolt_settings = reinterpret_cast<const JPH::RotatedTranslatedShapeSettings*>(settings);
-	auto shape_res = jolt_settings->Create();
+	auto shapeResult = AsRotatedTranslatedShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_RotatedTranslatedShape*>(shape);
@@ -3088,30 +3142,25 @@ JPH_RotatedTranslatedShape* JPH_RotatedTranslatedShapeSettings_CreateShape(const
 
 JPH_RotatedTranslatedShape* JPH_RotatedTranslatedShape_Create(const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* shape)
 {
-	auto jolt_shape = reinterpret_cast<const JPH::Shape*>(shape);
-
 	auto rotatedTranslatedShape = new JPH::RotatedTranslatedShape(
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
-		jolt_shape);
+		AsShape(shape)
+		);
 	rotatedTranslatedShape->AddRef();
 
-	return reinterpret_cast<JPH_RotatedTranslatedShape*>(rotatedTranslatedShape);
+	return ToRotatedTranslatedShape(rotatedTranslatedShape);
 }
 
 void JPH_RotatedTranslatedShape_GetPosition(const JPH_RotatedTranslatedShape* shape, JPH_Vec3* position)
 {
-	JPH_ASSERT(shape);
-	auto joltShape = reinterpret_cast<const JPH::RotatedTranslatedShape*>(shape);
-	JPH::Vec3 joltVector = joltShape->GetPosition();
+	JPH::Vec3 joltVector = AsRotatedTranslatedShape(shape)->GetPosition();
 	FromJolt(joltVector, position);
 }
 
 void JPH_RotatedTranslatedShape_GetRotation(const JPH_RotatedTranslatedShape* shape, JPH_Quat* rotation)
 {
-	JPH_ASSERT(shape);
-	auto joltShape = reinterpret_cast<const JPH::RotatedTranslatedShape*>(shape);
-	JPH::Quat joltQuat = joltShape->GetRotation();
+	JPH::Quat joltQuat = AsRotatedTranslatedShape(shape)->GetRotation();
 	FromJolt(joltQuat, rotation);
 }
 
@@ -3123,7 +3172,7 @@ JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create(const JPH_ShapeSettings*
 	);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_ScaledShapeSettings*>(settings);
+	return ToScaledShapeSettings(settings);
 }
 
 JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create2(const JPH_Shape* shape, const JPH_Vec3* scale)
@@ -3134,17 +3183,19 @@ JPH_ScaledShapeSettings* JPH_ScaledShapeSettings_Create2(const JPH_Shape* shape,
 	);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_ScaledShapeSettings*>(settings);
+	return ToScaledShapeSettings(settings);
 }
 
 JPH_ScaledShape* JPH_ScaledShapeSettings_CreateShape(const JPH_ScaledShapeSettings* settings)
 {
 	const JPH::ScaledShapeSettings* jolt_settings = reinterpret_cast<const JPH::ScaledShapeSettings*>(settings);
-	auto shape_res = jolt_settings->Create();
-	if (!shape_res.IsValid())
+	auto shapeResult = jolt_settings->Create();
+	if (!shapeResult.IsValid())
+	{
 		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_ScaledShape*>(shape);
@@ -3152,49 +3203,47 @@ JPH_ScaledShape* JPH_ScaledShapeSettings_CreateShape(const JPH_ScaledShapeSettin
 
 JPH_ScaledShape* JPH_ScaledShape_Create(const JPH_Shape* shape, const JPH_Vec3* scale)
 {
-	auto jolt_shape = reinterpret_cast<const JPH::Shape*>(shape);
-
-	auto scaledShape = new JPH::ScaledShape(jolt_shape, ToJolt(scale));
+	auto scaledShape = new JPH::ScaledShape(AsShape(shape), ToJolt(scale));
 	scaledShape->AddRef();
 
-	return reinterpret_cast<JPH_ScaledShape*>(scaledShape);
+	return ToScaledShape(scaledShape);
 }
 
 void JPH_ScaledShape_GetScale(const JPH_ScaledShape* shape, JPH_Vec3* result)
 {
-	JPH_ASSERT(shape);
-	auto joltShape = reinterpret_cast<const JPH::ScaledShape*>(shape);
-	JPH::Vec3 joltScale = joltShape->GetScale();
+	JPH::Vec3 joltScale = AsScaledShape(shape)->GetScale();
 	FromJolt(joltScale, result);
 }
 
 /* JPH_OffsetCenterOfMassShape */
 JPH_OffsetCenterOfMassShapeSettings* JPH_OffsetCenterOfMassShapeSettings_Create(const JPH_Vec3* offset, const JPH_ShapeSettings* shapeSettings)
 {
-	auto joltSettings = reinterpret_cast<const JPH::ShapeSettings*>(shapeSettings);
-
-	auto settings = new JPH::OffsetCenterOfMassShapeSettings(ToJolt(offset), joltSettings);
+	auto settings = new JPH::OffsetCenterOfMassShapeSettings(
+		ToJolt(offset),
+		AsShapeSettings(shapeSettings)
+	);
 	settings->AddRef();
 
-	return reinterpret_cast<JPH_OffsetCenterOfMassShapeSettings*>(settings);
+	return ToOffsetCenterOfMassShapeSettings(settings);
 }
 
 JPH_OffsetCenterOfMassShapeSettings* JPH_OffsetCenterOfMassShapeSettings_Create2(const JPH_Vec3* offset, const JPH_Shape* shape)
 {
-	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
-
-	auto rotatedTranslatedShape = new JPH::OffsetCenterOfMassShapeSettings(ToJolt(offset), joltShape);
+	auto rotatedTranslatedShape = new JPH::OffsetCenterOfMassShapeSettings(ToJolt(offset), AsShape(shape));
 	rotatedTranslatedShape->AddRef();
 
-	return reinterpret_cast<JPH_OffsetCenterOfMassShapeSettings*>(rotatedTranslatedShape);
+	return ToOffsetCenterOfMassShapeSettings(rotatedTranslatedShape);
 }
 
 JPH_OffsetCenterOfMassShape* JPH_OffsetCenterOfMassShapeSettings_CreateShape(const JPH_OffsetCenterOfMassShapeSettings* settings)
 {
-	const JPH::OffsetCenterOfMassShapeSettings* joltSettings = reinterpret_cast<const JPH::OffsetCenterOfMassShapeSettings*>(settings);
-	auto shape_res = joltSettings->Create();
+	auto shapeResult = AsOffsetCenterOfMassShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return reinterpret_cast<JPH_OffsetCenterOfMassShape*>(shape);
@@ -3202,17 +3251,15 @@ JPH_OffsetCenterOfMassShape* JPH_OffsetCenterOfMassShapeSettings_CreateShape(con
 
 JPH_OffsetCenterOfMassShape* JPH_OffsetCenterOfMassShape_Create(const JPH_Vec3* offset, const JPH_Shape* shape)
 {
-	auto joltShape = reinterpret_cast<const JPH::Shape*>(shape);
-
-	auto offsetCenterOfMassShape = new JPH::OffsetCenterOfMassShape(joltShape, ToJolt(offset));
+	auto offsetCenterOfMassShape = new JPH::OffsetCenterOfMassShape(AsShape(shape), ToJolt(offset));
 	offsetCenterOfMassShape->AddRef();
 
-	return reinterpret_cast<JPH_OffsetCenterOfMassShape*>(offsetCenterOfMassShape);
+	return ToOffsetCenterOfMassShape(offsetCenterOfMassShape);
 }
 
 void JPH_OffsetCenterOfMassShape_GetOffset(const JPH_OffsetCenterOfMassShape* shape, JPH_Vec3* result)
 {
-	FromJolt(reinterpret_cast<const JPH::OffsetCenterOfMassShape*>(shape)->GetOffset(), result);
+	FromJolt(AsOffsetCenterOfMassShape(shape)->GetOffset(), result);
 }
 
 /* EmptyShape */
@@ -3226,13 +3273,13 @@ JPH_EmptyShapeSettings* JPH_EmptyShapeSettings_Create(const JPH_Vec3* centerOfMa
 
 JPH_EmptyShape* JPH_EmptyShapeSettings_CreateShape(const JPH_EmptyShapeSettings* settings)
 {
-	auto shape_res = AsEmptyShapeSettings(settings)->Create();
-	if (!shape_res.IsValid())
+	auto shapeResult = AsEmptyShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
 	{
 		return nullptr;
 	}
 
-	auto shape = shape_res.Get().GetPtr();
+	auto shape = shapeResult.Get().GetPtr();
 	shape->AddRef();
 
 	return ToEmptyShape(static_cast<EmptyShape*>(shape));
