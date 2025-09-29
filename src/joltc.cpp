@@ -5800,6 +5800,16 @@ uint64_t JPH_BodyInterface_GetUserData(JPH_BodyInterface* bodyInterface, JPH_Bod
 	return AsBodyInterface(bodyInterface)->GetUserData(JPH::BodyID(bodyId));
 }
 
+void JPH_BodyInterface_SetIsSensor(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, bool value)
+{
+	AsBodyInterface(bodyInterface)->SetIsSensor(JPH::BodyID(bodyId), value);
+}
+
+bool JPH_BodyInterface_IsSensor(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId)
+{
+	return AsBodyInterface(bodyInterface)->IsSensor(JPH::BodyID(bodyId));
+}
+
 const JPH_PhysicsMaterial* JPH_BodyInterface_GetMaterial(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_SubShapeID subShapeID)
 {
 	auto joltSubShapeID = JPH::SubShapeID();

@@ -1828,6 +1828,9 @@ JPH_CAPI bool JPH_BodyInterface_GetUseManifoldReduction(JPH_BodyInterface* bodyI
 JPH_CAPI void JPH_BodyInterface_SetUserData(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, uint64_t inUserData);
 JPH_CAPI uint64_t JPH_BodyInterface_GetUserData(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId);
 
+JPH_CAPI void JPH_BodyInterface_SetIsSensor(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, bool value);
+JPH_CAPI bool JPH_BodyInterface_IsSensor(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId);
+
 JPH_CAPI const JPH_PhysicsMaterial* JPH_BodyInterface_GetMaterial(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_SubShapeID subShapeID);
 
 JPH_CAPI void JPH_BodyInterface_InvalidateContactCache(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId);
