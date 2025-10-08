@@ -5847,7 +5847,7 @@ void JPH_BodyLockInterface_LockWrite(const JPH_BodyLockInterface* lockInterface,
 	JPH_ASSERT(outLock != nullptr);
 	auto joltBodyLockInterface = reinterpret_cast<const JPH::BodyLockInterface*>(lockInterface);
 
-	::new (outLock) JPH::BodyLockRead(*joltBodyLockInterface, JPH::BodyID(bodyID));
+	::new (outLock) JPH::BodyLockWrite(*joltBodyLockInterface, JPH::BodyID(bodyID));
 }
 
 void JPH_BodyLockInterface_UnlockWrite(const JPH_BodyLockInterface* lockInterface, JPH_BodyLockWrite* ioLock)
