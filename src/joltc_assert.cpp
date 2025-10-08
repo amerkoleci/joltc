@@ -59,9 +59,6 @@ static_assert(JPH_INVALID_COLLISION_GROUP_ID == (int)JPH::CollisionGroup::cInval
 static_assert(JPH_INVALID_COLLISION_SUBGROUP_ID == (int)JPH::CollisionGroup::cInvalidSubGroup);
 
 static_assert(sizeof(JPH::Mat44) == sizeof(JPH_Mat4));
-#if defined(JPH_DOUBLE_PRECISION)
-static_assert(sizeof(JPH::DMat44) == sizeof(JPH_RMat4));
-#endif
 
 // EPhysicsUpdateError
 static_assert(sizeof(JPH_PhysicsUpdateError) == sizeof(JPH::EPhysicsUpdateError));

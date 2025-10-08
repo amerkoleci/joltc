@@ -252,16 +252,21 @@ static bool AssertFailedImpl(const char* inExpression, const char* inMessage, co
 #endif // JPH_ENABLE_ASSERTS
 
 // From Jolt conversion methods
+static inline JPH_Vec3 FromJolt(const Vec3& vec)
+{
+	return { vec.GetX(), vec.GetY(), vec.GetZ() };
+}
+
+static inline JPH_Vec4 FromJolt(const Vec4& vec)
+{
+	return { vec.GetX(), vec.GetY(), vec.GetZ(), vec.GetW() };
+}
+
 static inline void FromJolt(const Vec3& vec, JPH_Vec3* result)
 {
 	result->x = vec.GetX();
 	result->y = vec.GetY();
 	result->z = vec.GetZ();
-}
-
-static inline JPH_Vec3 FromJolt(const Vec3& vec)
-{
-	return { vec.GetX(), vec.GetY(), vec.GetZ() };
 }
 
 static inline void FromJolt(const Quat& quat, JPH_Quat* result)
@@ -309,25 +314,10 @@ static inline void FromJolt(const DMat44& matrix, JPH_RMat4* result)
 	Vec4 column2 = matrix.GetColumn4(2);
 	DVec3 translation = matrix.GetTranslation();
 
-	result->m11 = column0.GetX();
-	result->m21 = column0.GetY();
-	result->m31 = column0.GetZ();
-	result->m41 = column0.GetW();
-
-	result->m12 = column1.GetX();
-	result->m22 = column1.GetY();
-	result->m32 = column1.GetZ();
-	result->m42 = column1.GetW();
-
-	result->m13 = column2.GetX();
-	result->m23 = column2.GetY();
-	result->m33 = column2.GetZ();
-	result->m43 = column2.GetW();
-
-	result->m14 = translation.GetX();
-	result->m24 = translation.GetY();
-	result->m34 = translation.GetZ();
-	result->m44 = 1.0;
+	result->column[0] = FromJolt(column0);
+	result->column[1] = FromJolt(column1);
+	result->column[2] = FromJolt(column2);
+	result->column3 = FromJolt(translation);
 }
 #endif /* defined(JPH_DOUBLE_PRECISION) */
 
@@ -454,6 +444,11 @@ static inline JPH::Vec3 ToJolt(const JPH_Vec3* vec)
 	return JPH::Vec3(vec->x, vec->y, vec->z);
 }
 
+static inline JPH::Vec4 ToJolt(const JPH_Vec4& vec)
+{
+	return JPH::Vec4(vec.x, vec.y, vec.z, vec.w);
+}
+
 static inline JPH::Quat ToJolt(const JPH_Quat* quat)
 {
 	return JPH::Quat(quat->x, quat->y, quat->z, quat->w);
@@ -495,10 +490,10 @@ static inline JPH::RVec3 ToJolt(const JPH_RVec3* vec)
 static inline JPH::RMat44 ToJolt(const JPH_RMat4* matrix)
 {
 	JPH::RMat44 result{};
-	result.SetColumn4(0, JPH::Vec4(matrix->m11, matrix->m21, matrix->m31, matrix->m41));
-	result.SetColumn4(1, JPH::Vec4(matrix->m12, matrix->m22, matrix->m31, matrix->m42));
-	result.SetColumn4(2, JPH::Vec4(matrix->m13, matrix->m23, matrix->m33, matrix->m34));
-	result.SetTranslation(JPH::RVec3(matrix->m14, matrix->m24, matrix->m34));
+	result.SetColumn4(0, ToJolt(matrix->column[0]));
+	result.SetColumn4(1, ToJolt(matrix->column[1]));
+	result.SetColumn4(2, ToJolt(matrix->column[2]));
+	result.SetTranslation(ToJolt(matrix->column3));
 	return result;
 }
 #endif /* defined(JPH_DOUBLE_PRECISION) */

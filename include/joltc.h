@@ -459,10 +459,7 @@ typedef struct JPH_Plane {
 } JPH_Plane;
 
 typedef struct JPH_Mat4 {
-	float m11, m21, m31, m41;
-	float m12, m22, m32, m42;
-	float m13, m23, m33, m43;
-	float m14, m24, m34, m44;
+	JPH_Vec4 column[4];
 } JPH_Mat4;
 
 #if defined(JPH_DOUBLE_PRECISION)
@@ -473,10 +470,8 @@ typedef struct JPH_RVec3 {
 } JPH_RVec3;
 
 typedef struct JPH_RMat4 {
-	float m11, m12, m13; double m14;
-	float m21, m22, m23; double m24;
-	float m31, m32, m33; double m34;
-	float m41, m42, m43; double m44;
+	JPH_Vec4 column[3];
+	JPH_RVec3 column3;
 } JPH_RMat4;
 #else
 typedef JPH_Vec3 JPH_RVec3;
