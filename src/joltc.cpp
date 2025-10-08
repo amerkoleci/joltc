@@ -2813,6 +2813,14 @@ JPH_HeightFieldShapeSettings* JPH_HeightFieldShapeSettings_Create(const float* s
 	return ToHeightFieldShapeSettings(settings);
 }
 
+uint32_t JPH_HeightFieldShapeSettings_GetBlockSize(JPH_HeightFieldShapeSettings* settings) {
+	return AsHeightFieldShapeSettings(settings)->mBlockSize;
+}
+
+void JPH_HeightFieldShapeSettings_SetBlockSize(JPH_HeightFieldShapeSettings* settings, uint32_t mBlockSize) {
+	AsHeightFieldShapeSettings(settings)->mBlockSize = mBlockSize;
+}
+
 JPH_HeightFieldShape* JPH_HeightFieldShapeSettings_CreateShape(JPH_HeightFieldShapeSettings* settings)
 {
 	auto shapeResult = AsHeightFieldShapeSettings(settings)->Create();
