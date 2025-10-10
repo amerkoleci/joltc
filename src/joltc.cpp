@@ -2805,34 +2805,12 @@ uint32_t JPH_MeshShape_GetTriangleUserData(const JPH_MeshShape* shape, JPH_SubSh
 }
 
 /* HeightFieldShapeSettings */
-JPH_HeightFieldShapeSettings* JPH_HeightFieldShapeSettings_Create(const float* samples, const JPH_Vec3* offset, const JPH_Vec3* scale, uint32_t sampleCount)
+JPH_HeightFieldShapeSettings* JPH_HeightFieldShapeSettings_Create(const float* samples, const JPH_Vec3* offset, const JPH_Vec3* scale, uint32_t sampleCount, const uint8_t* materialIndices)
 {
-	auto settings = new JPH::HeightFieldShapeSettings(samples, ToJolt(offset), ToJolt(scale), sampleCount);
+	auto settings = new JPH::HeightFieldShapeSettings(samples, ToJolt(offset), ToJolt(scale), sampleCount, materialIndices);
 	settings->AddRef();
 
 	return ToHeightFieldShapeSettings(settings);
-}
-
-uint32_t JPH_HeightFieldShapeSettings_GetBlockSize(JPH_HeightFieldShapeSettings* settings) {
-	return AsHeightFieldShapeSettings(settings)->mBlockSize;
-}
-
-void JPH_HeightFieldShapeSettings_SetBlockSize(JPH_HeightFieldShapeSettings* settings, uint32_t mBlockSize) {
-	AsHeightFieldShapeSettings(settings)->mBlockSize = mBlockSize;
-}
-
-JPH_HeightFieldShape* JPH_HeightFieldShapeSettings_CreateShape(JPH_HeightFieldShapeSettings* settings)
-{
-	auto shapeResult = AsHeightFieldShapeSettings(settings)->Create();
-	if (!shapeResult.IsValid())
-	{
-		return nullptr;
-	}
-
-	auto shape = shapeResult.Get().GetPtr();
-	shape->AddRef();
-
-	return reinterpret_cast<JPH_HeightFieldShape*>(shape);
 }
 
 void JPH_HeightFieldShapeSettings_DetermineMinAndMaxSample(const JPH_HeightFieldShapeSettings* settings, float* pOutMinValue, float* pOutMaxValue, float* pOutQuantizationScale)
@@ -2850,6 +2828,100 @@ void JPH_HeightFieldShapeSettings_DetermineMinAndMaxSample(const JPH_HeightField
 uint32_t JPH_HeightFieldShapeSettings_CalculateBitsPerSampleForError(const JPH_HeightFieldShapeSettings* settings, float maxError)
 {
 	return AsHeightFieldShapeSettings(settings)->CalculateBitsPerSampleForError(maxError);
+}
+
+void JPH_HeightFieldShapeSettings_GetOffset(const JPH_HeightFieldShapeSettings* shape, JPH_Vec3* result)
+{
+	FromJolt(AsHeightFieldShapeSettings(shape)->mOffset, result);
+}
+
+void JPH_HeightFieldShapeSettings_SetOffset(JPH_HeightFieldShapeSettings* settings, const JPH_Vec3* value)
+{
+	AsHeightFieldShapeSettings(settings)->mOffset = ToJolt(value);
+}
+
+void JPH_HeightFieldShapeSettings_GetScale(const JPH_HeightFieldShapeSettings* shape, JPH_Vec3* result)
+{
+	FromJolt(AsHeightFieldShapeSettings(shape)->mScale, result);
+}
+
+JPH_CAPI void JPH_HeightFieldShapeSettings_SetScale(JPH_HeightFieldShapeSettings* settings, const JPH_Vec3* value)
+{
+	AsHeightFieldShapeSettings(settings)->mScale = ToJolt(value);
+}
+
+uint32_t JPH_HeightFieldShapeSettings_GetSampleCount(const JPH_HeightFieldShapeSettings* settings)
+{
+	return AsHeightFieldShapeSettings(settings)->mSampleCount;
+}
+
+void JPH_HeightFieldShapeSettings_SetSampleCount(JPH_HeightFieldShapeSettings* settings, uint32_t value)
+{
+	AsHeightFieldShapeSettings(settings)->mSampleCount = value;
+}
+
+float JPH_HeightFieldShapeSettings_GetMinHeightValue(const JPH_HeightFieldShapeSettings* settings)
+{
+	return AsHeightFieldShapeSettings(settings)->mMinHeightValue;
+}
+
+void JPH_HeightFieldShapeSettings_SetMinHeightValue(JPH_HeightFieldShapeSettings* settings, float value)
+{
+	AsHeightFieldShapeSettings(settings)->mMinHeightValue = value;
+}
+
+float JPH_HeightFieldShapeSettings_GetMaxHeightValue(const JPH_HeightFieldShapeSettings* settings)
+{
+	return AsHeightFieldShapeSettings(settings)->mMaxHeightValue;
+}
+
+void JPH_HeightFieldShapeSettings_SetMaxHeightValue(JPH_HeightFieldShapeSettings* settings, float value)
+{
+	AsHeightFieldShapeSettings(settings)->mMaxHeightValue = value;
+}
+
+uint32_t JPH_HeightFieldShapeSettings_GetBlockSize(const JPH_HeightFieldShapeSettings* settings)
+{
+	return AsHeightFieldShapeSettings(settings)->mBlockSize;
+}
+
+void JPH_HeightFieldShapeSettings_SetBlockSize(JPH_HeightFieldShapeSettings* settings, uint32_t value) 
+{
+	AsHeightFieldShapeSettings(settings)->mBlockSize = value;
+}
+
+uint32_t JPH_HeightFieldShapeSettings_GetBitsPerSample(const JPH_HeightFieldShapeSettings* settings)
+{
+	return AsHeightFieldShapeSettings(settings)->mBitsPerSample;
+}
+
+void JPH_HeightFieldShapeSettings_SetBitsPerSample(JPH_HeightFieldShapeSettings* settings, uint32_t value)
+{
+	AsHeightFieldShapeSettings(settings)->mBitsPerSample = value;
+}
+
+float JPH_HeightFieldShapeSettings_GetActiveEdgeCosThresholdAngle(const JPH_HeightFieldShapeSettings* settings)
+{
+	return AsHeightFieldShapeSettings(settings)->mActiveEdgeCosThresholdAngle;
+}
+
+void JPH_HeightFieldShapeSettings_SetActiveEdgeCosThresholdAngle(JPH_HeightFieldShapeSettings* settings, float value)
+{
+	AsHeightFieldShapeSettings(settings)->mActiveEdgeCosThresholdAngle = value;
+}
+
+JPH_HeightFieldShape* JPH_HeightFieldShapeSettings_CreateShape(JPH_HeightFieldShapeSettings* settings)
+{
+	auto shapeResult = AsHeightFieldShapeSettings(settings)->Create();
+	if (!shapeResult.IsValid())
+	{
+		return nullptr;
+	}
+
+	auto shape = shapeResult.Get().GetPtr();
+	shape->AddRef();
+
+	return reinterpret_cast<JPH_HeightFieldShape*>(shape);
 }
 
 uint32_t JPH_HeightFieldShape_GetSampleCount(const JPH_HeightFieldShape* shape)
