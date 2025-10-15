@@ -1116,6 +1116,8 @@ JPH_CAPI void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JP
 JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
 
+JPH_CAPI void JPH_PhysicsSystem_ActivateBodiesInAABox(JPH_PhysicsSystem* system, const JPH_AABox* box, JPH_ObjectLayer layer);
+
 JPH_CAPI void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, const JPH_BodyDrawFilter* bodyFilter /* = nullptr */);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraints(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraintLimits(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
@@ -1760,7 +1762,6 @@ JPH_CAPI JPH_BodyID JPH_BodyInterface_CreateAndAddSoftBody(JPH_BodyInterface* bo
 JPH_CAPI void JPH_BodyInterface_AddBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, JPH_Activation activationMode);
 JPH_CAPI void JPH_BodyInterface_RemoveBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID);
 JPH_CAPI void JPH_BodyInterface_RemoveAndDestroyBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID);
-JPH_CAPI bool JPH_BodyInterface_IsActive(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID);
 JPH_CAPI bool JPH_BodyInterface_IsAdded(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID);
 JPH_CAPI JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID);
 
@@ -1795,8 +1796,13 @@ JPH_CAPI const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* bodyInte
 JPH_CAPI void JPH_BodyInterface_SetShape(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, const JPH_Shape* shape, bool updateMassProperties, JPH_Activation activationMode);
 JPH_CAPI void JPH_BodyInterface_NotifyShapeChanged(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_Vec3* previousCenterOfMass, bool updateMassProperties, JPH_Activation activationMode);
 
-JPH_CAPI void JPH_BodyInterface_ActivateBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId);
-JPH_CAPI void JPH_BodyInterface_DeactivateBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId);
+JPH_CAPI void JPH_BodyInterface_ActivateBody(JPH_BodyInterface* bodyInterface, const JPH_BodyID bodyId);
+JPH_CAPI void JPH_BodyInterface_ActivateBodies(JPH_BodyInterface* bodyInterface, const JPH_BodyID* bodyIDs, uint32_t count);
+JPH_CAPI void JPH_BodyInterface_ActivateBodiesInAABox(JPH_BodyInterface* bodyInterface, const JPH_AABox* box, const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter, const JPH_ObjectLayerFilter* objectLayerFilter);
+JPH_CAPI void JPH_BodyInterface_DeactivateBody(JPH_BodyInterface* bodyInterface, const JPH_BodyID bodyId);
+JPH_CAPI void JPH_BodyInterface_DeactivateBodies(JPH_BodyInterface* bodyInterface, const JPH_BodyID* bodyIDs, uint32_t count);
+JPH_CAPI bool JPH_BodyInterface_IsActive(const JPH_BodyInterface* bodyInterface, const JPH_BodyID bodyID);
+JPH_CAPI void JPH_BodyInterface_ResetSleepTimer(JPH_BodyInterface* bodyInterface, const JPH_BodyID bodyID);
 
 JPH_CAPI JPH_ObjectLayer JPH_BodyInterface_GetObjectLayer(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId);
 JPH_CAPI void JPH_BodyInterface_SetObjectLayer(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyId, JPH_ObjectLayer layer);
@@ -1910,30 +1916,30 @@ JPH_CAPI void JPH_ShapeCastSettings_Init(JPH_ShapeCastSettings* settings);
 JPH_CAPI bool JPH_BroadPhaseQuery_CastRay(const JPH_BroadPhaseQuery* query,
 	const JPH_Vec3* origin, const JPH_Vec3* direction,
 	JPH_RayCastBodyCollectorCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter);
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter);
 
 JPH_CAPI bool JPH_BroadPhaseQuery_CastRay2(const JPH_BroadPhaseQuery* query,
 	const JPH_Vec3* origin, const JPH_Vec3* direction,
 	JPH_CollisionCollectorType collectorType,
 	JPH_RayCastBodyResultCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter);
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter);
 
 JPH_CAPI bool JPH_BroadPhaseQuery_CollideAABox(const JPH_BroadPhaseQuery* query,
 	const JPH_AABox* box, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter);
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter);
 
 JPH_CAPI bool JPH_BroadPhaseQuery_CollideSphere(const JPH_BroadPhaseQuery* query,
 	const JPH_Vec3* center, float radius, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter);
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter);
 
 JPH_CAPI bool JPH_BroadPhaseQuery_CollidePoint(const JPH_BroadPhaseQuery* query,
 	const JPH_Vec3* point, JPH_CollideShapeBodyCollectorCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter);
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter);
 
 //--------------------------------------------------------------------------------------------------
 // JPH_NarrowPhaseQuery
@@ -1941,16 +1947,16 @@ JPH_CAPI bool JPH_BroadPhaseQuery_CollidePoint(const JPH_BroadPhaseQuery* query,
 JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
 	JPH_RayCastResult* hit,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
 	const JPH_RayCastSettings* rayCastSettings,
 	JPH_CastRayCollectorCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter);
 
@@ -1959,16 +1965,16 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 	const JPH_RayCastSettings* rayCastSettings,
 	JPH_CollisionCollectorType collectorType,
 	JPH_CastRayResultCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
 	JPH_CollidePointCollectorCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter);
 
@@ -1976,8 +1982,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* que
 	const JPH_RVec3* point,
 	JPH_CollisionCollectorType collectorType,
 	JPH_CollidePointResultCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter);
 
@@ -1986,8 +1992,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* quer
 	const JPH_CollideShapeSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollideShapeCollectorCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter);
 
@@ -1997,8 +2003,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* que
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
 	JPH_CollideShapeResultCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter);
 
@@ -2008,8 +2014,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	const JPH_ShapeCastSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CastShapeCollectorCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter);
 
@@ -2020,8 +2026,8 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
 	JPH_CastShapeResultCallback* callback, void* userData,
-	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
-	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	const JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter);
 
