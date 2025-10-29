@@ -134,6 +134,18 @@ int main(void)
 	// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
 	JPH_PhysicsSystem_OptimizeBroadPhase(system);
 
+	JPH_VehicleEngineSettings vehicleSettings;
+	JPH_VehicleEngineSettings_Init(&vehicleSettings);
+
+	auto lc = vehicleSettings.normalizedTorque;
+	auto mx = JPH_LinearCurve_GetMaxX(lc);
+	std::cout << "Max: " << mx << std::endl;
+	auto c = JPH_LinearCurve_GetPointCount(lc);
+	for (int p = 0; p < c; p++) {
+		auto v = JPH_LinearCurve_GetPoint(lc, p);
+		std::cout << "P: " << p << " X=" << v.x << " Y=" << v.y << std::endl;
+	}
+
 	// Now we're ready to simulate the body, keep simulating until it goes to sleep
 	uint32_t step = 0;
 	while (JPH_BodyInterface_IsActive(bodyInterface, sphereId))
@@ -147,7 +159,7 @@ int main(void)
 
 		JPH_BodyInterface_GetCenterOfMassPosition(bodyInterface, sphereId, &position);
 		JPH_BodyInterface_GetLinearVelocity(bodyInterface, sphereId, &velocity);
-		std::cout << "Step " << step << ": Position = (" << position.x << ", " << position.y << ", " << position.z << "), Velocity = (" << velocity.x << ", " << velocity.y << ", " << velocity.z << ")" << std::endl;
+		// std::cout << "Step " << step << ": Position = (" << position.x << ", " << position.y << ", " << position.z << "), Velocity = (" << velocity.x << ", " << velocity.y << ", " << velocity.z << ")" << std::endl;
 
 		// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
 		const int cCollisionSteps = 1;

@@ -73,6 +73,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
+#include "Jolt/Core/LinearCurve.h"
 
 #include <iostream>
 #include <cstdarg>
@@ -207,6 +208,8 @@ DEF_MAP_DECL(VehicleCollisionTesterRay, JPH_VehicleCollisionTesterRay)
 DEF_MAP_DECL(VehicleCollisionTesterCastSphere, JPH_VehicleCollisionTesterCastSphere)
 DEF_MAP_DECL(VehicleCollisionTesterCastCylinder, JPH_VehicleCollisionTesterCastCylinder)
 DEF_MAP_DECL(VehicleConstraint, JPH_VehicleConstraint)
+
+DEF_MAP_DECL(LinearCurve, JPH_LinearCurve)
 
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
@@ -9570,12 +9573,13 @@ void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings)
 {
 	JPH_ASSERT(settings);
 
-	JPH::VehicleEngineSettings joltSettings{};
-	settings->maxTorque = joltSettings.mMaxTorque;
-	settings->minRPM = joltSettings.mMinRPM;
-	settings->maxRPM = joltSettings.mMaxRPM;
-	settings->inertia = joltSettings.mInertia;
-	settings->angularDamping = joltSettings.mAngularDamping;
+	JPH::VehicleEngineSettings* joltSettings = new JPH::VehicleEngineSettings();
+	settings->maxTorque = joltSettings->mMaxTorque;
+	settings->minRPM = joltSettings->mMinRPM;
+	settings->maxRPM = joltSettings->mMaxRPM;
+	settings->inertia = joltSettings->mInertia;
+	settings->angularDamping = joltSettings->mAngularDamping;
+	settings->normalizedTorque = ToLinearCurve(&joltSettings->mNormalizedTorque);
 }
 
 static void JPH_VehicleEngineSettings_FromJolt(JPH_VehicleEngineSettings* settings, const VehicleEngineSettings& joltSettings)
@@ -9587,6 +9591,8 @@ static void JPH_VehicleEngineSettings_FromJolt(JPH_VehicleEngineSettings* settin
 	settings->maxRPM = joltSettings.mMaxRPM;
 	settings->inertia = joltSettings.mInertia;
 	settings->angularDamping = joltSettings.mAngularDamping;
+
+	settings->normalizedTorque = const_cast<JPH_LinearCurve*>(reinterpret_cast<const JPH_LinearCurve *>(&joltSettings.mNormalizedTorque));
 }
 
 static void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings, const JPH_VehicleEngineSettings* settings)
@@ -9599,6 +9605,7 @@ static void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings
 	joltSettings->mMaxRPM = settings->maxRPM;
 	joltSettings->mInertia = settings->inertia;
 	joltSettings->mAngularDamping = settings->angularDamping;
+	joltSettings->mNormalizedTorque = *AsLinearCurve(settings->normalizedTorque);
 }
 
 /* VehicleDifferentialSettings */
@@ -10060,6 +10067,35 @@ void JPH_WheelSettingsWV_SetMaxSteerAngle(JPH_WheelSettingsWV* settings, float v
 	AsWheelSettingsWV(settings)->mMaxSteerAngle = value;
 }
 
+JPH_LinearCurve* JPH_WheelSettingsWV_GetLongitudinalFriction(JPH_WheelSettingsWV* settings)
+{
+	JPH_ASSERT(settings);
+	return &ToLinearCurve(AsWheelSettingsWV(settings)->mLongitudinalFriction);
+}
+
+void JPH_WheelSettingsWV_SetLongitudinalFriction(JPH_WheelSettingsWV* settings, const JPH_LinearCurve* value)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(value);
+
+	AsWheelSettingsWV(settings)->mLongitudinalFriction = *AsLinearCurve(value);
+}
+
+JPH_LinearCurve* JPH_WheelSettingsWV_GetLateralFriction(JPH_WheelSettingsWV* settings)
+{
+	JPH_ASSERT(settings);
+
+	return &ToLinearCurve(AsWheelSettingsWV(settings)->mLateralFriction);
+}
+
+void JPH_WheelSettingsWV_SetLateralFriction(JPH_WheelSettingsWV* settings, const JPH_LinearCurve* value)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(value);
+
+	AsWheelSettingsWV(settings)->mLateralFriction = *AsLinearCurve(value);
+}
+
 float JPH_WheelSettingsWV_GetMaxBrakeTorque(const JPH_WheelSettingsWV* settings)
 {
 	return AsWheelSettingsWV(settings)->mMaxBrakeTorque;
@@ -10510,5 +10546,76 @@ void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* c
 {
 	AsMotorcycleController(controller)->SetLeanSmoothingFactor(value);
 }
+
+/* LinearCurve */
+JPH_LinearCurve* JPH_LinearCurve_Create(void)
+{
+	JPH::LinearCurve* curve = new JPH::LinearCurve();
+	return ToLinearCurve(curve);
+}
+
+void JPH_LinearCurve_Destroy(JPH_LinearCurve* curve)
+{
+	JPH_ASSERT(curve);
+	delete AsLinearCurve(curve);
+}
+
+void JPH_LinearCurve_Clear(JPH_LinearCurve* curve)
+{
+	JPH_ASSERT(curve);
+	AsLinearCurve(curve)->Clear();
+}
+
+void JPH_LinearCurve_Reserve(JPH_LinearCurve* curve, uint32_t numPoints)
+{
+	JPH_ASSERT(curve);
+	AsLinearCurve(curve)->Reserve(numPoints);
+}
+
+void JPH_LinearCurve_AddPoint(JPH_LinearCurve* curve, float x, float y)
+{
+	JPH_ASSERT(curve);
+	AsLinearCurve(curve)->AddPoint(x, y);
+}
+
+void JPH_LinearCurve_Sort(JPH_LinearCurve* curve)
+{
+	JPH_ASSERT(curve);
+	AsLinearCurve(curve)->Sort();
+}
+
+float JPH_LinearCurve_GetMinX(const JPH_LinearCurve* curve)
+{
+	JPH_ASSERT(curve);
+	return AsLinearCurve(curve)->GetMinX();
+}
+
+float JPH_LinearCurve_GetMaxX(const JPH_LinearCurve* curve)
+{
+	JPH_ASSERT(curve);
+	return AsLinearCurve(curve)->GetMaxX();
+}
+
+float JPH_LinearCurve_GetValue(const JPH_LinearCurve* curve, float x)
+{
+	JPH_ASSERT(curve);
+	return AsLinearCurve(curve)->GetValue(x);
+}
+
+
+uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve) {
+	JPH_ASSERT(curve);
+	return static_cast<uint32_t>(AsLinearCurve(curve)->mPoints.size());
+}
+
+JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve *curve, uint32_t index) {
+	JPH_ASSERT(curve);
+	auto point =  AsLinearCurve(curve)->mPoints[index];
+	return JPH_Point {
+		.x = point.mX,
+		.y = point.mY,
+	};
+}
+
 
 JPH_SUPPRESS_WARNING_POP
