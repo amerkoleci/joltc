@@ -9573,13 +9573,12 @@ void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings)
 {
 	JPH_ASSERT(settings);
 
-	JPH::VehicleEngineSettings* joltSettings = new JPH::VehicleEngineSettings();
-	settings->maxTorque = joltSettings->mMaxTorque;
-	settings->minRPM = joltSettings->mMinRPM;
-	settings->maxRPM = joltSettings->mMaxRPM;
-	settings->inertia = joltSettings->mInertia;
-	settings->angularDamping = joltSettings->mAngularDamping;
-	settings->normalizedTorque = ToLinearCurve(&joltSettings->mNormalizedTorque);
+	JPH::VehicleEngineSettings joltSettings{};
+	settings->maxTorque = joltSettings.mMaxTorque;
+	settings->minRPM = joltSettings.mMinRPM;
+	settings->maxRPM = joltSettings.mMaxRPM;
+	settings->inertia = joltSettings.mInertia;
+	settings->angularDamping = joltSettings.mAngularDamping;
 }
 
 static void JPH_VehicleEngineSettings_FromJolt(JPH_VehicleEngineSettings* settings, const VehicleEngineSettings& joltSettings)
@@ -9591,8 +9590,6 @@ static void JPH_VehicleEngineSettings_FromJolt(JPH_VehicleEngineSettings* settin
 	settings->maxRPM = joltSettings.mMaxRPM;
 	settings->inertia = joltSettings.mInertia;
 	settings->angularDamping = joltSettings.mAngularDamping;
-
-	settings->normalizedTorque = const_cast<JPH_LinearCurve*>(reinterpret_cast<const JPH_LinearCurve *>(&joltSettings.mNormalizedTorque));
 }
 
 static void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings, const JPH_VehicleEngineSettings* settings)
@@ -9605,7 +9602,6 @@ static void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings
 	joltSettings->mMaxRPM = settings->maxRPM;
 	joltSettings->mInertia = settings->inertia;
 	joltSettings->mAngularDamping = settings->angularDamping;
-	joltSettings->mNormalizedTorque = *AsLinearCurve(settings->normalizedTorque);
 }
 
 /* VehicleDifferentialSettings */
