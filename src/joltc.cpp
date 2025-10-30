@@ -1998,6 +1998,13 @@ void JPH_ShapeSettings_SetUserData(JPH_ShapeSettings* settings, uint64_t userDat
 
 
 /* Shape */
+#ifdef JPH_DEBUG_RENDERER
+void JPH_Shape_Draw(const JPH_Shape* shape, JPH_DebugRenderer* renderer, JPH_RMat4* centerOfMassTransform, JPH_Vec3* scale, JPH_Color color, bool useMaterialColors, bool drawWireframe)
+{
+    AsShape(shape)->Draw(reinterpret_cast<DebugRenderer*>(renderer), ToJolt(centerOfMassTransform), ToJolt(scale), JPH::Color(color), useMaterialColors, drawWireframe);
+}
+#endif
+
 void JPH_Shape_Destroy(JPH_Shape* shape)
 {
 	AsShape(shape)->Release();
