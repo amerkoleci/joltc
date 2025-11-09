@@ -1252,7 +1252,7 @@ JPH_CAPI uint64_t JPH_ShapeSettings_GetUserData(const JPH_ShapeSettings* setting
 JPH_CAPI void JPH_ShapeSettings_SetUserData(JPH_ShapeSettings* settings, uint64_t userData);
 
 /* Shape */
-JPH_CAPI void JPH_Shape_Draw(const JPH_Shape* shape, JPH_DebugRenderer* renderer, JPH_RMat4* centerOfMassTransform, JPH_Vec3* scale, JPH_Color color, bool useMaterialColors, bool drawWireframe);
+JPH_CAPI void JPH_Shape_Draw(const JPH_Shape* shape, JPH_DebugRenderer* renderer, const JPH_RMat4* centerOfMassTransform, const JPH_Vec3* scale, JPH_Color color, bool useMaterialColors, bool drawWireframe);
 JPH_CAPI void JPH_Shape_Destroy(JPH_Shape* shape);
 JPH_CAPI JPH_ShapeType JPH_Shape_GetType(const JPH_Shape* shape);
 JPH_CAPI JPH_ShapeSubType JPH_Shape_GetSubType(const JPH_Shape* shape);

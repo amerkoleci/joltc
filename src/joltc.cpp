@@ -1999,9 +1999,15 @@ void JPH_ShapeSettings_SetUserData(JPH_ShapeSettings* settings, uint64_t userDat
 
 /* Shape */
 #ifdef JPH_DEBUG_RENDERER
-void JPH_Shape_Draw(const JPH_Shape* shape, JPH_DebugRenderer* renderer, JPH_RMat4* centerOfMassTransform, JPH_Vec3* scale, JPH_Color color, bool useMaterialColors, bool drawWireframe)
+void JPH_Shape_Draw(const JPH_Shape* shape, JPH_DebugRenderer* renderer, const JPH_RMat4* centerOfMassTransform, const JPH_Vec3* scale, JPH_Color color, bool useMaterialColors, bool drawWireframe)
 {
-    AsShape(shape)->Draw(reinterpret_cast<DebugRenderer*>(renderer), ToJolt(centerOfMassTransform), ToJolt(scale), JPH::Color(color), useMaterialColors, drawWireframe);
+    AsShape(shape)->Draw(
+		reinterpret_cast<DebugRenderer*>(renderer), 
+		ToJolt(centerOfMassTransform), 
+		ToJolt(scale), 
+		JPH::Color(color), 
+		useMaterialColors, 
+		drawWireframe);
 }
 #endif
 
@@ -5952,61 +5958,82 @@ void JPH_BodyLockInterface_UnlockWrite(const JPH_BodyLockInterface* lockInterfac
 	reinterpret_cast<const JPH::BodyLockWrite*>(ioLock)->~BodyLockWrite();
 }
 
+struct JPH_BodyLockMultiRead final
+{
+	Array<BodyID> bodyIDs;
+	JPH::BodyLockMultiRead* joltLock = nullptr;
+};
+
 JPH_BodyLockMultiRead* JPH_BodyLockInterface_LockMultiRead(const JPH_BodyLockInterface* lockInterface, const JPH_BodyID* bodyIDs, uint32_t count)
 {
 	auto joltBodyLockInterface = AsBodyLockInterface(lockInterface);
-	Array<BodyID> joltBodyIDs;
+	JPH_BodyLockMultiRead* read = new JPH_BodyLockMultiRead();
+	read->bodyIDs.reserve(count);
 
 	for (uint32_t i = 0; i < count; ++i)
 	{
-		joltBodyIDs.push_back(JPH::BodyID(bodyIDs[i]));
+		read->bodyIDs.push_back(JPH::BodyID(bodyIDs[i]));
 	}
 
-	auto joltLock = new JPH::BodyLockMultiRead(*joltBodyLockInterface, joltBodyIDs.data(), count);
-	return reinterpret_cast<JPH_BodyLockMultiRead*>(joltLock);
+	read->joltLock = new JPH::BodyLockMultiRead(*joltBodyLockInterface, read->bodyIDs.data(), count);
+	return read;
 }
 
 void JPH_BodyLockMultiRead_Destroy(JPH_BodyLockMultiRead* ioLock)
 {
 	if (ioLock)
 	{
-		delete reinterpret_cast<JPH::BodyLockMultiRead*>(ioLock);
+		ioLock->bodyIDs.clear();
+		delete ioLock->joltLock;
+		delete ioLock;
 	}
 }
 
 const JPH_Body* JPH_BodyLockMultiRead_GetBody(JPH_BodyLockMultiRead* ioLock, uint32_t bodyIndex)
 {
-	auto joltLock = reinterpret_cast<JPH::BodyLockMultiRead*>(ioLock);
-	auto joltBody = joltLock->GetBody(bodyIndex);
+	JPH_ASSERT(ioLock);
+
+	auto joltBody = ioLock->joltLock->GetBody(bodyIndex);
 	return reinterpret_cast<const JPH_Body*>(joltBody);
 }
+
+struct JPH_BodyLockMultiWrite final
+{
+	Array<BodyID> bodyIDs;
+	JPH::BodyLockMultiWrite* joltLock = nullptr;
+};
 
 JPH_BodyLockMultiWrite* JPH_BodyLockInterface_LockMultiWrite(const JPH_BodyLockInterface* lockInterface, const JPH_BodyID* bodyIDs, uint32_t count)
 {
 	auto joltBodyLockInterface = AsBodyLockInterface(lockInterface);
-	Array<BodyID> joltBodyIDs;
+	
+	JPH_BodyLockMultiWrite* write = new JPH_BodyLockMultiWrite();
+	write->bodyIDs.reserve(count);
 
 	for (uint32_t i = 0; i < count; ++i)
 	{
-		joltBodyIDs.push_back(JPH::BodyID(bodyIDs[i]));
+		write->bodyIDs.push_back(JPH::BodyID(bodyIDs[i]));
 	}
 
-	auto joltLock = new JPH::BodyLockMultiWrite(*joltBodyLockInterface, joltBodyIDs.data(), count);
-	return reinterpret_cast<JPH_BodyLockMultiWrite*>(joltLock);
+	write->joltLock = new JPH::BodyLockMultiWrite(*joltBodyLockInterface, write->bodyIDs.data(), count);
+	return write;
 }
 
 void JPH_BodyLockMultiWrite_Destroy(JPH_BodyLockMultiWrite* ioLock)
 {
 	if (ioLock)
 	{
-		delete reinterpret_cast<JPH::BodyLockMultiWrite*>(ioLock);
+		ioLock->bodyIDs.clear();
+		delete ioLock->joltLock;
+		delete ioLock;
 	}
 }
 
 JPH_Body* JPH_BodyLockMultiWrite_GetBody(JPH_BodyLockMultiWrite* ioLock, uint32_t bodyIndex)
 {
-	auto joltLock = reinterpret_cast<JPH::BodyLockMultiWrite*>(ioLock);
-	auto joltBody = joltLock->GetBody(bodyIndex);
+	JPH_ASSERT(ioLock);
+
+	auto joltBody = ioLock->joltLock->GetBody(bodyIndex);
 	return reinterpret_cast<JPH_Body*>(joltBody);
 }
 
