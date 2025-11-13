@@ -989,8 +989,17 @@ typedef struct JPH_JobSystemConfig {
 
 typedef struct JPH_JobSystem JPH_JobSystem;
 
-/* (uint32_t wheelIndex, float &longitudinalImpulse, float &lateralImpulse, float suspensionImpulse, float longitudinalFriction, float lateralFriction, float longitudinalSlip, float lateralSlip, float deltaTime) */
-typedef void (JPH_API_CALL *JPH_TireMaxImpulseCallback)(uint32_t ,float* ,float* ,float ,float ,float ,float ,float ,float );
+/* Calculate max tire impulses by combining friction, slip, and suspension impulse. Note that the actual applied impulse may be lower (e.g. when the vehicle is stationary on a horizontal surface the actual impulse applied will be 0) */
+typedef void (JPH_API_CALL* JPH_TireMaxImpulseCallback)(
+	uint32_t wheelIndex, 
+	float* outLongitudinalImpulse,
+	float* outLateralImpulse, 
+	float suspensionImpulse,
+	float longitudinalFriction,
+	float lateralFriction,
+	float longitudinalSlip,
+	float lateralSlip,
+	float deltaTime);
 
 JPH_CAPI JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPoolConfig* config);
 JPH_CAPI JPH_JobSystem* JPH_JobSystemCallback_Create(const JPH_JobSystemConfig* config);

@@ -10274,7 +10274,8 @@ float JPH_WheeledVehicleController_GetWheelSpeedAtClutch(const JPH_WheeledVehicl
 	return AsWheeledVehicleController(controller)->GetWheelSpeedAtClutch();
 }
 
-void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleController *controller, JPH_TireMaxImpulseCallback tireMaxImpulseCallback) {
+void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleController* controller, JPH_TireMaxImpulseCallback tireMaxImpulseCallback) 
+{
 	AsWheeledVehicleController(controller)->SetTireMaxImpulseCallback([tireMaxImpulseCallback](
 		int wheelIndex,
 		float &outLongitudinalImpulse,
@@ -10284,7 +10285,8 @@ void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleCo
 		float inLateralFriction,
 		float inLongitudinalSlip,
 		float inLateralSlip,
-		float deltaTime){
+		float deltaTime)
+		{
 			tireMaxImpulseCallback(
 				static_cast<uint32_t>(wheelIndex),
 				&outLongitudinalImpulse,
@@ -10295,7 +10297,8 @@ void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleCo
 				inLongitudinalSlip,
 				inLateralSlip,
 				deltaTime);
-		});
+		}
+	);
 }
 
 /* WheelSettingsTV - WheelTV - TrackedVehicleController */
