@@ -989,6 +989,9 @@ typedef struct JPH_JobSystemConfig {
 
 typedef struct JPH_JobSystem JPH_JobSystem;
 
+/* (uint32_t wheelIndex, float &longitudinalImpulse, float &lateralImpulse, float suspensionImpulse, float longitudinalFriction, float lateralFriction, float longitudinalSlip, float lateralSlip, float deltaTime) */
+typedef void (JPH_API_CALL *JPH_TireMaxImpulseCallback)(uint32_t ,float* ,float* ,float ,float ,float ,float ,float ,float );
+
 JPH_CAPI JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPoolConfig* config);
 JPH_CAPI JPH_JobSystem* JPH_JobSystemCallback_Create(const JPH_JobSystemConfig* config);
 JPH_CAPI void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem);
@@ -2829,6 +2832,7 @@ JPH_CAPI float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehic
 JPH_CAPI void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* controller, float handBrakeInput);
 JPH_CAPI float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* controller);
 JPH_CAPI float JPH_WheeledVehicleController_GetWheelSpeedAtClutch(const JPH_WheeledVehicleController* controller);
+JPH_CAPI void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleController* controller, JPH_TireMaxImpulseCallback tireMaxImpulseCallback);
 
 /* WheelSettingsTV - WheelTV - TrackedVehicleController */
 /* TODO: Add VehicleTrack and VehicleTrackSettings */
