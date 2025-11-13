@@ -76,6 +76,8 @@ typedef struct JPH_PhysicsStepListener					JPH_PhysicsStepListener;
 typedef struct JPH_PhysicsSystem						JPH_PhysicsSystem;
 typedef struct JPH_PhysicsMaterial						JPH_PhysicsMaterial;
 
+typedef struct JPH_LinearCurve							JPH_LinearCurve;
+
 /* ShapeSettings */
 typedef struct JPH_ShapeSettings						JPH_ShapeSettings;
 typedef struct JPH_ConvexShapeSettings					JPH_ConvexShapeSettings;
@@ -2888,5 +2890,23 @@ JPH_CAPI float JPH_MotorcycleController_GetLeanSpringIntegrationCoefficientDecay
 JPH_CAPI void JPH_MotorcycleController_SetLeanSpringIntegrationCoefficientDecay(JPH_MotorcycleController* controller, float value);
 JPH_CAPI float JPH_MotorcycleController_GetLeanSmoothingFactor(const JPH_MotorcycleController* controller);
 JPH_CAPI void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* controller, float value);
+
+/* LinearCurve */
+typedef struct JPH_Point {
+	float x;
+	float y;
+} JPH_Point;
+
+JPH_CAPI JPH_LinearCurve* JPH_LinearCurve_Create(void);
+JPH_CAPI void JPH_LinearCurve_Destroy(JPH_LinearCurve* curve);
+JPH_CAPI void JPH_LinearCurve_Clear(JPH_LinearCurve* curve);
+JPH_CAPI void JPH_LinearCurve_Reserve(JPH_LinearCurve* curve, uint32_t numPoints);
+JPH_CAPI void JPH_LinearCurve_AddPoint(JPH_LinearCurve* curve, float x, float y);
+JPH_CAPI void JPH_LinearCurve_Sort(JPH_LinearCurve* curve);
+JPH_CAPI float JPH_LinearCurve_GetMinX(const JPH_LinearCurve* curve);
+JPH_CAPI float JPH_LinearCurve_GetMaxX(const JPH_LinearCurve* curve);
+JPH_CAPI float JPH_LinearCurve_GetValue(const JPH_LinearCurve* curve, float x);
+JPH_CAPI uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve);
+JPH_CAPI JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index);
 
 #endif /* JOLT_C_H_ */

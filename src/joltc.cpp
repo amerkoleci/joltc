@@ -73,6 +73,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
+#include "Jolt/Core/LinearCurve.h"
 
 #include <iostream>
 #include <cstdarg>
@@ -207,6 +208,8 @@ DEF_MAP_DECL(VehicleCollisionTesterRay, JPH_VehicleCollisionTesterRay)
 DEF_MAP_DECL(VehicleCollisionTesterCastSphere, JPH_VehicleCollisionTesterCastSphere)
 DEF_MAP_DECL(VehicleCollisionTesterCastCylinder, JPH_VehicleCollisionTesterCastCylinder)
 DEF_MAP_DECL(VehicleConstraint, JPH_VehicleConstraint)
+
+DEF_MAP_DECL(LinearCurve, JPH_LinearCurve)
 
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
@@ -10543,6 +10546,67 @@ float JPH_MotorcycleController_GetLeanSmoothingFactor(const JPH_MotorcycleContro
 void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* controller, float value)
 {
 	AsMotorcycleController(controller)->SetLeanSmoothingFactor(value);
+}
+
+/* LinearCurve */
+
+JPH_LinearCurve* JPH_LinearCurve_Create()
+{
+	JPH::LinearCurve* curve = new JPH::LinearCurve();
+	return ToLinearCurve(curve);
+}
+
+void JPH_LinearCurve_Destroy(JPH_LinearCurve* curve)
+{
+	delete AsLinearCurve(curve);
+}
+
+void JPH_LinearCurve_Clear(JPH_LinearCurve* curve)
+{
+	AsLinearCurve(curve)->Clear();
+}
+
+void JPH_LinearCurve_Reserve(JPH_LinearCurve* curve, uint32_t numPoints)
+{
+	AsLinearCurve(curve)->Reserve(numPoints);
+}
+
+void JPH_LinearCurve_AddPoint(JPH_LinearCurve* curve, float x, float y)
+{
+	AsLinearCurve(curve)->AddPoint(x, y);
+}
+
+void JPH_LinearCurve_Sort(JPH_LinearCurve* curve)
+{
+	AsLinearCurve(curve)->Sort();
+}
+
+float JPH_LinearCurve_GetMinX(const JPH_LinearCurve* curve)
+{
+	JPH_ASSERT(curve);
+	return AsLinearCurve(curve)->GetMinX();
+}
+
+float JPH_LinearCurve_GetMaxX(const JPH_LinearCurve* curve)
+{
+	return AsLinearCurve(curve)->GetMaxX();
+}
+
+float JPH_LinearCurve_GetValue(const JPH_LinearCurve* curve, float x)
+{
+	return AsLinearCurve(curve)->GetValue(x);
+}
+
+uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve) {
+	return static_cast<uint32_t>(AsLinearCurve(curve)->mPoints.size());
+}
+
+JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve *curve, uint32_t index) {
+	auto point =  AsLinearCurve(curve)->mPoints[index];
+	return JPH_Point {
+		.x = point.mX,
+		.y = point.mY,
+	};
 }
 
 JPH_SUPPRESS_WARNING_POP
