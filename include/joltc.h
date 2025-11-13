@@ -464,6 +464,11 @@ typedef struct JPH_Mat4 {
 	JPH_Vec4 column[4];
 } JPH_Mat4;
 
+typedef struct JPH_Point {
+	float x;
+	float y;
+} JPH_Point;
+
 #if defined(JPH_DOUBLE_PRECISION)
 typedef struct JPH_RVec3 {
 	double x;
@@ -2829,7 +2834,6 @@ JPH_CAPI void JPH_WheeledVehicleControllerSettings_GetDifferential(const JPH_Whe
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferential(JPH_WheeledVehicleControllerSettings* settings, uint32_t index, const JPH_VehicleDifferentialSettings* value);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentials(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleDifferentialSettings* values, uint32_t count);
 
-
 JPH_CAPI float JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(const JPH_WheeledVehicleControllerSettings* settings);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(JPH_WheeledVehicleControllerSettings* settings, float value);
 
@@ -2905,11 +2909,6 @@ JPH_CAPI float JPH_MotorcycleController_GetLeanSmoothingFactor(const JPH_Motorcy
 JPH_CAPI void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* controller, float value);
 
 /* LinearCurve */
-typedef struct JPH_Point {
-	float x;
-	float y;
-} JPH_Point;
-
 JPH_CAPI JPH_LinearCurve* JPH_LinearCurve_Create(void);
 JPH_CAPI void JPH_LinearCurve_Destroy(JPH_LinearCurve* curve);
 JPH_CAPI void JPH_LinearCurve_Clear(JPH_LinearCurve* curve);
