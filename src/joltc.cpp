@@ -10097,6 +10097,26 @@ void JPH_WheelSettingsWV_SetMaxSteerAngle(JPH_WheelSettingsWV* settings, float v
 	AsWheelSettingsWV(settings)->mMaxSteerAngle = value;
 }
 
+const JPH_LinearCurve * JPH_WheelSettingsWV_GetLongitudinalFriction(const JPH_WheelSettingsWV *settings)
+{
+	return &ToLinearCurve(AsWheelSettingsWV(settings)->mLongitudinalFriction);
+}
+
+void JPH_WheelSettingsWV_SetLongitudinalFriction(JPH_WheelSettingsWV *settings, const JPH_LinearCurve *value)
+{
+	AsWheelSettingsWV(settings)->mLongitudinalFriction = *AsLinearCurve(value);
+}
+
+const JPH_LinearCurve * JPH_WheelSettingsWV_GetLateralFriction(const JPH_WheelSettingsWV *settings)
+{
+	return &ToLinearCurve(AsWheelSettingsWV(settings)->mLateralFriction);
+}
+
+void JPH_WheelSettingsWV_SetLateralFriction(JPH_WheelSettingsWV *settings, const JPH_LinearCurve *value)
+{
+	AsWheelSettingsWV(settings)->mLateralFriction = *AsLinearCurve(value);
+}
+
 float JPH_WheelSettingsWV_GetMaxBrakeTorque(const JPH_WheelSettingsWV* settings)
 {
 	return AsWheelSettingsWV(settings)->mMaxBrakeTorque;
