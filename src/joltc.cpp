@@ -10664,8 +10664,8 @@ JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index)
 	JPH_ASSERT(curve);
 	auto point =  AsLinearCurve(curve)->mPoints[index];
 	return JPH_Point {
-		.x = point.mX,
-		.y = point.mY,
+		point.mX,
+		point.mY,
 	};
 }
 
@@ -10674,13 +10674,14 @@ void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, 
 	JPH_ASSERT(curve);
 	auto joltPoints = AsLinearCurve(curve)->mPoints;
 	*count = static_cast<uint32_t>(joltPoints.size());
-	if (points) {
+	if (points)
+	{
 		for (int i = 0; i < joltPoints.size(); ++i)
 		{
 			auto point = joltPoints[i];
 			points[i] = JPH_Point {
-				.x = point.mX,
-				.y = point.mY,
+				point.mX,
+				point.mY,
 			};
 		}
 	}
