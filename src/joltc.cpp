@@ -10653,18 +10653,37 @@ float JPH_LinearCurve_GetValue(const JPH_LinearCurve* curve, float x)
 	return AsLinearCurve(curve)->GetValue(x);
 }
 
-uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve) {
+uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve)
+{
 	JPH_ASSERT(curve);
 	return static_cast<uint32_t>(AsLinearCurve(curve)->mPoints.size());
 }
 
-JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve *curve, uint32_t index) {
+JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index)
+{
 	JPH_ASSERT(curve);
 	auto point =  AsLinearCurve(curve)->mPoints[index];
 	return JPH_Point {
 		.x = point.mX,
 		.y = point.mY,
 	};
+}
+
+void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, uint32_t* count)
+{
+	JPH_ASSERT(curve);
+	auto joltPoints = AsLinearCurve(curve)->mPoints;
+	*count = static_cast<uint32_t>(joltPoints.size());
+	if (points) {
+		for (int i = 0; i < joltPoints.size(); ++i)
+		{
+			auto point = joltPoints[i];
+			points[i] = JPH_Point {
+				.x = point.mX,
+				.y = point.mY,
+			};
+		}
+	}
 }
 
 JPH_SUPPRESS_WARNING_POP
