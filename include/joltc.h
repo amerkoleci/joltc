@@ -76,6 +76,8 @@ typedef struct JPH_PhysicsStepListener					JPH_PhysicsStepListener;
 typedef struct JPH_PhysicsSystem						JPH_PhysicsSystem;
 typedef struct JPH_PhysicsMaterial						JPH_PhysicsMaterial;
 
+typedef struct JPH_LinearCurve							JPH_LinearCurve;
+
 /* ShapeSettings */
 typedef struct JPH_ShapeSettings						JPH_ShapeSettings;
 typedef struct JPH_ConvexShapeSettings					JPH_ConvexShapeSettings;
@@ -461,6 +463,11 @@ typedef struct JPH_Plane {
 typedef struct JPH_Mat4 {
 	JPH_Vec4 column[4];
 } JPH_Mat4;
+
+typedef struct JPH_Point {
+	float x;
+	float y;
+} JPH_Point;
 
 #if defined(JPH_DOUBLE_PRECISION)
 typedef struct JPH_RVec3 {
@@ -2801,10 +2808,10 @@ JPH_CAPI float JPH_WheelSettingsWV_GetAngularDamping(const JPH_WheelSettingsWV* 
 JPH_CAPI void JPH_WheelSettingsWV_SetAngularDamping(JPH_WheelSettingsWV* settings, float value);
 JPH_CAPI float JPH_WheelSettingsWV_GetMaxSteerAngle(const JPH_WheelSettingsWV* settings);
 JPH_CAPI void JPH_WheelSettingsWV_SetMaxSteerAngle(JPH_WheelSettingsWV* settings, float value);
-//JPH_CAPI JPH_LinearCurve* JPH_WheelSettingsWV_GetLongitudinalFriction(const JPH_WheelSettingsWV* settings);
-//JPH_CAPI void JPH_WheelSettingsWV_SetLongitudinalFriction(JPH_WheelSettingsWV* settings, const JPH_LinearCurve* value);
-//JPH_CAPI JPH_LinearCurve* JPH_WheelSettingsWV_GetLateralFriction(const JPH_WheelSettingsWV* settings);
-//JPH_CAPI void JPH_WheelSettingsWV_SetLateralFriction(JPH_WheelSettingsWV* settings, const JPH_LinearCurve* value);
+JPH_CAPI const JPH_LinearCurve* JPH_WheelSettingsWV_GetLongitudinalFriction(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelSettingsWV_SetLongitudinalFriction(JPH_WheelSettingsWV* settings, const JPH_LinearCurve* value);
+JPH_CAPI const JPH_LinearCurve* JPH_WheelSettingsWV_GetLateralFriction(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelSettingsWV_SetLateralFriction(JPH_WheelSettingsWV* settings, const JPH_LinearCurve* value);
 JPH_CAPI float JPH_WheelSettingsWV_GetMaxBrakeTorque(const JPH_WheelSettingsWV* settings);
 JPH_CAPI void JPH_WheelSettingsWV_SetMaxBrakeTorque(JPH_WheelSettingsWV* settings, float value);
 JPH_CAPI float JPH_WheelSettingsWV_GetMaxHandBrakeTorque(const JPH_WheelSettingsWV* settings);
@@ -2826,7 +2833,6 @@ JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentialsCount(JPH_Whe
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_GetDifferential(const JPH_WheeledVehicleControllerSettings* settings, uint32_t index, JPH_VehicleDifferentialSettings* result);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferential(JPH_WheeledVehicleControllerSettings* settings, uint32_t index, const JPH_VehicleDifferentialSettings* value);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentials(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleDifferentialSettings* values, uint32_t count);
-
 
 JPH_CAPI float JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(const JPH_WheeledVehicleControllerSettings* settings);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(JPH_WheeledVehicleControllerSettings* settings, float value);
@@ -2901,5 +2907,19 @@ JPH_CAPI float JPH_MotorcycleController_GetLeanSpringIntegrationCoefficientDecay
 JPH_CAPI void JPH_MotorcycleController_SetLeanSpringIntegrationCoefficientDecay(JPH_MotorcycleController* controller, float value);
 JPH_CAPI float JPH_MotorcycleController_GetLeanSmoothingFactor(const JPH_MotorcycleController* controller);
 JPH_CAPI void JPH_MotorcycleController_SetLeanSmoothingFactor(JPH_MotorcycleController* controller, float value);
+
+/* LinearCurve */
+JPH_CAPI JPH_LinearCurve* JPH_LinearCurve_Create(void);
+JPH_CAPI void JPH_LinearCurve_Destroy(JPH_LinearCurve* curve);
+JPH_CAPI void JPH_LinearCurve_Clear(JPH_LinearCurve* curve);
+JPH_CAPI void JPH_LinearCurve_Reserve(JPH_LinearCurve* curve, uint32_t numPoints);
+JPH_CAPI void JPH_LinearCurve_AddPoint(JPH_LinearCurve* curve, float x, float y);
+JPH_CAPI void JPH_LinearCurve_Sort(JPH_LinearCurve* curve);
+JPH_CAPI float JPH_LinearCurve_GetMinX(const JPH_LinearCurve* curve);
+JPH_CAPI float JPH_LinearCurve_GetMaxX(const JPH_LinearCurve* curve);
+JPH_CAPI float JPH_LinearCurve_GetValue(const JPH_LinearCurve* curve, float x);
+JPH_CAPI uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve);
+JPH_CAPI JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index);
+JPH_CAPI void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, uint32_t* count);
 
 #endif /* JOLT_C_H_ */
