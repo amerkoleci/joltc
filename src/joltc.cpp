@@ -10605,26 +10605,33 @@ JPH_LinearCurve* JPH_LinearCurve_Create()
 
 void JPH_LinearCurve_Destroy(JPH_LinearCurve* curve)
 {
-	delete AsLinearCurve(curve);
+	if (curve)
+	{
+		delete AsLinearCurve(curve);
+	}
 }
 
 void JPH_LinearCurve_Clear(JPH_LinearCurve* curve)
 {
+	JPH_ASSERT(curve);
 	AsLinearCurve(curve)->Clear();
 }
 
 void JPH_LinearCurve_Reserve(JPH_LinearCurve* curve, uint32_t numPoints)
 {
+	JPH_ASSERT(curve);
 	AsLinearCurve(curve)->Reserve(numPoints);
 }
 
 void JPH_LinearCurve_AddPoint(JPH_LinearCurve* curve, float x, float y)
 {
+	JPH_ASSERT(curve);
 	AsLinearCurve(curve)->AddPoint(x, y);
 }
 
 void JPH_LinearCurve_Sort(JPH_LinearCurve* curve)
 {
+	JPH_ASSERT(curve);
 	AsLinearCurve(curve)->Sort();
 }
 
@@ -10636,19 +10643,23 @@ float JPH_LinearCurve_GetMinX(const JPH_LinearCurve* curve)
 
 float JPH_LinearCurve_GetMaxX(const JPH_LinearCurve* curve)
 {
+	JPH_ASSERT(curve);
 	return AsLinearCurve(curve)->GetMaxX();
 }
 
 float JPH_LinearCurve_GetValue(const JPH_LinearCurve* curve, float x)
 {
+	JPH_ASSERT(curve);
 	return AsLinearCurve(curve)->GetValue(x);
 }
 
 uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve) {
+	JPH_ASSERT(curve);
 	return static_cast<uint32_t>(AsLinearCurve(curve)->mPoints.size());
 }
 
 JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve *curve, uint32_t index) {
+	JPH_ASSERT(curve);
 	auto point =  AsLinearCurve(curve)->mPoints[index];
 	return JPH_Point {
 		.x = point.mX,
