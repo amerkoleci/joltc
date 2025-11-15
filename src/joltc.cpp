@@ -9615,6 +9615,17 @@ void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings)
 	settings->maxRPM = joltSettings.mMaxRPM;
 	settings->inertia = joltSettings.mInertia;
 	settings->angularDamping = joltSettings.mAngularDamping;
+
+	// Copy default normalized torque to JPH_VehicleEngineSettings->normalizedTorque
+	auto joltNormalizedTorque = joltSettings.mNormalizedTorque;
+	auto pointCount = joltNormalizedTorque.mPoints.size();
+	auto normalizedTorque = JPH_LinearCurve_Create();
+	JPH_LinearCurve_Reserve(normalizedTorque, pointCount);
+	for (int i = 0; i < pointCount; ++i) {
+		auto point = joltNormalizedTorque.mPoints[i];
+		JPH_LinearCurve_AddPoint(normalizedTorque, point.mX, point.mY);
+	}
+	settings->normalizedTorque = normalizedTorque;
 }
 
 static void JPH_VehicleEngineSettings_FromJolt(JPH_VehicleEngineSettings* settings, const VehicleEngineSettings& joltSettings)
@@ -9626,6 +9637,7 @@ static void JPH_VehicleEngineSettings_FromJolt(JPH_VehicleEngineSettings* settin
 	settings->maxRPM = joltSettings.mMaxRPM;
 	settings->inertia = joltSettings.mInertia;
 	settings->angularDamping = joltSettings.mAngularDamping;
+	settings->normalizedTorque = ToLinearCurve(&joltSettings.mNormalizedTorque);
 }
 
 static void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings, const JPH_VehicleEngineSettings* settings)
@@ -9638,6 +9650,7 @@ static void JPH_VehicleEngineSettings_ToJolt(VehicleEngineSettings* joltSettings
 	joltSettings->mMaxRPM = settings->maxRPM;
 	joltSettings->mInertia = settings->inertia;
 	joltSettings->mAngularDamping = settings->angularDamping;
+	joltSettings->mNormalizedTorque = AsLinearCurve(*settings->normalizedTorque);
 }
 
 /* VehicleEngine */
