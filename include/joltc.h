@@ -2655,7 +2655,7 @@ typedef struct JPH_VehicleEngineSettings {
 	float					maxTorque;
 	float					minRPM;
 	float					maxRPM;
-	//LinearCurve			normalizedTorque;
+	const JPH_LinearCurve*	normalizedTorque;
 	float					inertia;
 	float					angularDamping;
 } JPH_VehicleEngineSettings;
