@@ -70,6 +70,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Body/BodyLockMulti.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
+#include "Jolt/Skeleton/SkeletonMapper.h"
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
@@ -175,6 +176,9 @@ DEF_MAP_DECL(GearConstraint, JPH_GearConstraint)
 DEF_MAP_DECL(Character, JPH_Character)
 DEF_MAP_DECL(CharacterVirtual, JPH_CharacterVirtual)
 DEF_MAP_DECL(Skeleton, JPH_Skeleton)
+DEF_MAP_DECL(SkeletonPose, JPH_SkeletonPose)
+DEF_MAP_DECL(SkeletalAnimation, JPH_SkeletalAnimation)
+DEF_MAP_DECL(SkeletonMapper, JPH_SkeletonMapper)
 DEF_MAP_DECL(RagdollSettings, JPH_RagdollSettings)
 DEF_MAP_DECL(Ragdoll, JPH_Ragdoll)
 DEF_MAP_DECL(GroupFilter, JPH_GroupFilter)
@@ -9197,7 +9201,7 @@ bool JPH_Skeleton_AreJointsCorrectlyOrdered(const JPH_Skeleton* skeleton)
 	return AsSkeleton(skeleton)->AreJointsCorrectlyOrdered();
 }
 
-/* Ragdoll */
+/* RagdollSettings */
 JPH_RagdollSettings* JPH_RagdollSettings_Create(void)
 {
 	auto settings = new JPH::RagdollSettings();
@@ -9228,15 +9232,10 @@ bool JPH_RagdollSettings_Stabilize(JPH_RagdollSettings* settings)
 
 void JPH_RagdollSettings_DisableParentChildCollisions(JPH_RagdollSettings* settings, const JPH_Mat4* jointMatrices, float minSeparationDistance)
 {
-	if (jointMatrices)
-	{
-		auto joltJointMatrices = ToJolt(jointMatrices);
-		AsRagdollSettings(settings)->DisableParentChildCollisions(&joltJointMatrices, minSeparationDistance);
-	}
-	else
-	{
-		AsRagdollSettings(settings)->DisableParentChildCollisions(nullptr, minSeparationDistance);
-	}
+	AsRagdollSettings(settings)->DisableParentChildCollisions(
+		jointMatrices ? reinterpret_cast<const JPH::Mat44*>(jointMatrices) : nullptr,
+		minSeparationDistance
+	);
 }
 
 void JPH_RagdollSettings_CalculateBodyIndexToConstraintIndex(JPH_RagdollSettings* settings)
@@ -9254,6 +9253,83 @@ void JPH_RagdollSettings_CalculateConstraintIndexToBodyIdxPair(JPH_RagdollSettin
 	AsRagdollSettings(settings)->CalculateConstraintIndexToBodyIdxPair();
 }
 
+void JPH_RagdollSettings_ResizeParts(JPH_RagdollSettings* settings, int count)
+{
+	AsRagdollSettings(settings)->mParts.resize(count);
+}
+
+int JPH_RagdollSettings_GetPartCount(const JPH_RagdollSettings* settings)
+{
+	return (int)AsRagdollSettings(settings)->mParts.size();
+}
+
+void JPH_RagdollSettings_SetPartShape(JPH_RagdollSettings* settings, int partIndex, const JPH_Shape* shape)
+{
+	AsRagdollSettings(settings)->mParts[partIndex].SetShape(AsShape(shape));
+}
+
+void JPH_RagdollSettings_SetPartPosition(JPH_RagdollSettings* settings, int partIndex, const JPH_RVec3* position)
+{
+	AsRagdollSettings(settings)->mParts[partIndex].mPosition = ToJolt(position);
+}
+
+void JPH_RagdollSettings_SetPartRotation(JPH_RagdollSettings* settings, int partIndex, const JPH_Quat* rotation)
+{
+	AsRagdollSettings(settings)->mParts[partIndex].mRotation = ToJolt(rotation);
+}
+
+void JPH_RagdollSettings_SetPartMotionType(JPH_RagdollSettings* settings, int partIndex, JPH_MotionType motionType)
+{
+	AsRagdollSettings(settings)->mParts[partIndex].mMotionType = static_cast<EMotionType>(motionType);
+}
+
+void JPH_RagdollSettings_SetPartObjectLayer(JPH_RagdollSettings* settings, int partIndex, JPH_ObjectLayer layer)
+{
+	AsRagdollSettings(settings)->mParts[partIndex].mObjectLayer = layer;
+}
+
+void JPH_RagdollSettings_SetPartMassProperties(JPH_RagdollSettings* settings, int partIndex, float mass)
+{
+	AsRagdollSettings(settings)->mParts[partIndex].mMassPropertiesOverride.mMass = mass;
+	AsRagdollSettings(settings)->mParts[partIndex].mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
+}
+
+void JPH_RagdollSettings_SetPartToParent(JPH_RagdollSettings* settings, int partIndex, const JPH_SwingTwistConstraintSettings* constraintSettings)
+{
+	if (constraintSettings == nullptr)
+	{
+		AsRagdollSettings(settings)->mParts[partIndex].mToParent = nullptr;
+		return;
+	}
+
+	SwingTwistConstraintSettings* joltSettings = new SwingTwistConstraintSettings();
+	joltSettings->mSpace = static_cast<EConstraintSpace>(constraintSettings->space);
+	joltSettings->mPosition1 = ToJolt(&constraintSettings->position1);
+	joltSettings->mTwistAxis1 = ToJolt(&constraintSettings->twistAxis1);
+	joltSettings->mPlaneAxis1 = ToJolt(&constraintSettings->planeAxis1);
+	joltSettings->mPosition2 = ToJolt(&constraintSettings->position2);
+	joltSettings->mTwistAxis2 = ToJolt(&constraintSettings->twistAxis2);
+	joltSettings->mPlaneAxis2 = ToJolt(&constraintSettings->planeAxis2);
+	joltSettings->mSwingType = static_cast<ESwingType>(constraintSettings->swingType);
+	joltSettings->mNormalHalfConeAngle = constraintSettings->normalHalfConeAngle;
+	joltSettings->mPlaneHalfConeAngle = constraintSettings->planeHalfConeAngle;
+	joltSettings->mTwistMinAngle = constraintSettings->twistMinAngle;
+	joltSettings->mTwistMaxAngle = constraintSettings->twistMaxAngle;
+	joltSettings->mMaxFrictionTorque = constraintSettings->maxFrictionTorque;
+
+	// Copy motor settings
+	joltSettings->mSwingMotorSettings.mSpringSettings.mFrequency = constraintSettings->swingMotorSettings.springSettings.frequencyOrStiffness;
+	joltSettings->mSwingMotorSettings.mSpringSettings.mDamping = constraintSettings->swingMotorSettings.springSettings.damping;
+	joltSettings->mSwingMotorSettings.mMinForceLimit = constraintSettings->swingMotorSettings.minForceLimit;
+	joltSettings->mSwingMotorSettings.mMaxForceLimit = constraintSettings->swingMotorSettings.maxForceLimit;
+	joltSettings->mTwistMotorSettings.mSpringSettings.mFrequency = constraintSettings->twistMotorSettings.springSettings.frequencyOrStiffness;
+	joltSettings->mTwistMotorSettings.mSpringSettings.mDamping = constraintSettings->twistMotorSettings.springSettings.damping;
+	joltSettings->mTwistMotorSettings.mMinForceLimit = constraintSettings->twistMotorSettings.minForceLimit;
+	joltSettings->mTwistMotorSettings.mMaxForceLimit = constraintSettings->twistMotorSettings.maxForceLimit;
+
+	AsRagdollSettings(settings)->mParts[partIndex].mToParent = joltSettings;
+}
+
 JPH_Ragdoll* JPH_RagdollSettings_CreateRagdoll(JPH_RagdollSettings* settings, JPH_PhysicsSystem* system, JPH_CollisionGroupID collisionGroup, uint64_t userData)
 {
 	Ragdoll* ragdoll = AsRagdollSettings(settings)->CreateRagdoll(collisionGroup, userData, system->physicsSystem);
@@ -9262,6 +9338,7 @@ JPH_Ragdoll* JPH_RagdollSettings_CreateRagdoll(JPH_RagdollSettings* settings, JP
 	return ToRagdoll(ragdoll);
 }
 
+/* Ragdoll */
 void JPH_Ragdoll_Destroy(JPH_Ragdoll* ragdoll)
 {
 	if (ragdoll)
@@ -9293,6 +9370,310 @@ bool JPH_Ragdoll_IsActive(const JPH_Ragdoll* ragdoll, bool lockBodies /* = true 
 void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll)
 {
 	AsRagdoll(ragdoll)->ResetWarmStart();
+}
+
+void JPH_Ragdoll_SetPose(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->SetPose(*AsSkeletonPose(pose), lockBodies);
+}
+
+void JPH_Ragdoll_SetPose2(JPH_Ragdoll* ragdoll, const JPH_RVec3* rootOffset, const JPH_Mat4* jointMatrices, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->SetPose(ToJolt(rootOffset), reinterpret_cast<const JPH::Mat44*>(jointMatrices), lockBodies);
+}
+
+void JPH_Ragdoll_GetPose(const JPH_Ragdoll* ragdoll, JPH_SkeletonPose* outPose, bool lockBodies)
+{
+	const_cast<JPH::Ragdoll*>(AsRagdoll(ragdoll))->GetPose(*AsSkeletonPose(outPose), lockBodies);
+}
+
+void JPH_Ragdoll_GetPose2(const JPH_Ragdoll* ragdoll, JPH_RVec3* outRootOffset, JPH_Mat4* outJointMatrices, bool lockBodies)
+{
+	JPH::RVec3 rootOffset;
+	const_cast<JPH::Ragdoll*>(AsRagdoll(ragdoll))->GetPose(rootOffset, reinterpret_cast<JPH::Mat44*>(outJointMatrices), lockBodies);
+	if (outRootOffset)
+		FromJolt(rootOffset, outRootOffset);
+}
+
+void JPH_Ragdoll_DriveToPoseUsingMotors(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose)
+{
+	AsRagdoll(ragdoll)->DriveToPoseUsingMotors(*AsSkeletonPose(pose));
+}
+
+void JPH_Ragdoll_DriveToPoseUsingKinematics(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose, float deltaTime, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->DriveToPoseUsingKinematics(*AsSkeletonPose(pose), deltaTime, lockBodies);
+}
+
+int JPH_Ragdoll_GetBodyCount(const JPH_Ragdoll* ragdoll)
+{
+	return (int)AsRagdoll(ragdoll)->GetBodyCount();
+}
+
+JPH_BodyID JPH_Ragdoll_GetBodyID(const JPH_Ragdoll* ragdoll, int bodyIndex)
+{
+	return AsRagdoll(ragdoll)->GetBodyID(bodyIndex).GetIndexAndSequenceNumber();
+}
+
+int JPH_Ragdoll_GetConstraintCount(const JPH_Ragdoll* ragdoll)
+{
+	return (int)AsRagdoll(ragdoll)->GetConstraintCount();
+}
+
+JPH_TwoBodyConstraint* JPH_Ragdoll_GetConstraint(JPH_Ragdoll* ragdoll, int constraintIndex)
+{
+	return ToTwoBodyConstraint(AsRagdoll(ragdoll)->GetConstraint(constraintIndex));
+}
+
+void JPH_Ragdoll_GetRootTransform(const JPH_Ragdoll* ragdoll, JPH_RVec3* outPosition, JPH_Quat* outRotation, bool lockBodies)
+{
+	JPH::RVec3 position;
+	JPH::Quat rotation;
+	const_cast<JPH::Ragdoll*>(AsRagdoll(ragdoll))->GetRootTransform(position, rotation, lockBodies);
+	if (outPosition)
+		FromJolt(position, outPosition);
+	if (outRotation)
+		FromJolt(rotation, outRotation);
+}
+
+const JPH_RagdollSettings* JPH_Ragdoll_GetRagdollSettings(const JPH_Ragdoll* ragdoll)
+{
+	return ToRagdollSettings(AsRagdoll(ragdoll)->GetRagdollSettings());
+}
+
+/* SkeletonPose */
+JPH_SkeletonPose* JPH_SkeletonPose_Create(void)
+{
+	auto pose = new JPH::SkeletonPose();
+	return ToSkeletonPose(pose);
+}
+
+void JPH_SkeletonPose_Destroy(JPH_SkeletonPose* pose)
+{
+	if (pose)
+		delete AsSkeletonPose(pose);
+}
+
+void JPH_SkeletonPose_SetSkeleton(JPH_SkeletonPose* pose, const JPH_Skeleton* skeleton)
+{
+	AsSkeletonPose(pose)->SetSkeleton(AsSkeleton(skeleton));
+}
+
+const JPH_Skeleton* JPH_SkeletonPose_GetSkeleton(const JPH_SkeletonPose* pose)
+{
+	return ToSkeleton(AsSkeletonPose(pose)->GetSkeleton());
+}
+
+void JPH_SkeletonPose_SetRootOffset(JPH_SkeletonPose* pose, const JPH_RVec3* offset)
+{
+	AsSkeletonPose(pose)->SetRootOffset(ToJolt(offset));
+}
+
+void JPH_SkeletonPose_GetRootOffset(const JPH_SkeletonPose* pose, JPH_RVec3* result)
+{
+	FromJolt(AsSkeletonPose(pose)->GetRootOffset(), result);
+}
+
+int JPH_SkeletonPose_GetJointCount(const JPH_SkeletonPose* pose)
+{
+	return (int)AsSkeletonPose(pose)->GetJointCount();
+}
+
+void JPH_SkeletonPose_GetJointState(const JPH_SkeletonPose* pose, int index, JPH_Vec3* outTranslation, JPH_Quat* outRotation)
+{
+	const auto& joint = AsSkeletonPose(pose)->GetJoint(index);
+	if (outTranslation)
+		FromJolt(joint.mTranslation, outTranslation);
+	if (outRotation)
+		FromJolt(joint.mRotation, outRotation);
+}
+
+void JPH_SkeletonPose_SetJointState(JPH_SkeletonPose* pose, int index, const JPH_Vec3* translation, const JPH_Quat* rotation)
+{
+	auto& joint = AsSkeletonPose(pose)->GetJoint(index);
+	if (translation)
+		joint.mTranslation = ToJolt(translation);
+	if (rotation)
+		joint.mRotation = ToJolt(rotation);
+}
+
+void JPH_SkeletonPose_GetJointMatrix(const JPH_SkeletonPose* pose, int index, JPH_Mat4* result)
+{
+	FromJolt(AsSkeletonPose(pose)->GetJointMatrix(index), result);
+}
+
+void JPH_SkeletonPose_SetJointMatrix(JPH_SkeletonPose* pose, int index, const JPH_Mat4* matrix)
+{
+	AsSkeletonPose(pose)->GetJointMatrix(index) = ToJolt(matrix);
+}
+
+void JPH_SkeletonPose_GetJointMatrices(const JPH_SkeletonPose* pose, JPH_Mat4* outMatrices, int count)
+{
+	const auto& matrices = AsSkeletonPose(pose)->GetJointMatrices();
+	int copyCount = (int)matrices.size() < count ? (int)matrices.size() : count;
+	for (int i = 0; i < copyCount; i++)
+		FromJolt(matrices[i], &outMatrices[i]);
+}
+
+void JPH_SkeletonPose_SetJointMatrices(JPH_SkeletonPose* pose, const JPH_Mat4* matrices, int count)
+{
+	auto& poseMatrices = AsSkeletonPose(pose)->GetJointMatrices();
+	int copyCount = (int)poseMatrices.size() < count ? (int)poseMatrices.size() : count;
+	for (int i = 0; i < copyCount; i++)
+		poseMatrices[i] = ToJolt(&matrices[i]);
+}
+
+void JPH_SkeletonPose_CalculateJointMatrices(JPH_SkeletonPose* pose)
+{
+	AsSkeletonPose(pose)->CalculateJointMatrices();
+}
+
+void JPH_SkeletonPose_CalculateJointStates(JPH_SkeletonPose* pose)
+{
+	AsSkeletonPose(pose)->CalculateJointStates();
+}
+
+void JPH_SkeletonPose_CalculateLocalSpaceJointMatrices(const JPH_SkeletonPose* pose, JPH_Mat4* outMatrices)
+{
+	int count = (int)AsSkeletonPose(pose)->GetJointCount();
+	JPH::Array<JPH::Mat44> matrices(count);
+	AsSkeletonPose(pose)->CalculateLocalSpaceJointMatrices(matrices.data());
+	for (int i = 0; i < count; i++)
+		FromJolt(matrices[i], &outMatrices[i]);
+}
+
+/* SkeletalAnimation */
+JPH_SkeletalAnimation* JPH_SkeletalAnimation_Create(void)
+{
+	auto animation = new JPH::SkeletalAnimation();
+	animation->AddRef();
+	return ToSkeletalAnimation(animation);
+}
+
+void JPH_SkeletalAnimation_Destroy(JPH_SkeletalAnimation* animation)
+{
+	if (animation)
+		AsSkeletalAnimation(animation)->Release();
+}
+
+float JPH_SkeletalAnimation_GetDuration(const JPH_SkeletalAnimation* animation)
+{
+	return AsSkeletalAnimation(animation)->GetDuration();
+}
+
+bool JPH_SkeletalAnimation_IsLooping(const JPH_SkeletalAnimation* animation)
+{
+	return AsSkeletalAnimation(animation)->IsLooping();
+}
+
+void JPH_SkeletalAnimation_SetIsLooping(JPH_SkeletalAnimation* animation, bool looping)
+{
+	AsSkeletalAnimation(animation)->SetIsLooping(looping);
+}
+
+void JPH_SkeletalAnimation_ScaleJoints(JPH_SkeletalAnimation* animation, float scale)
+{
+	AsSkeletalAnimation(animation)->ScaleJoints(scale);
+}
+
+void JPH_SkeletalAnimation_Sample(const JPH_SkeletalAnimation* animation, float time, JPH_SkeletonPose* pose)
+{
+	AsSkeletalAnimation(animation)->Sample(time, *AsSkeletonPose(pose));
+}
+
+int JPH_SkeletalAnimation_GetAnimatedJointCount(const JPH_SkeletalAnimation* animation)
+{
+	return (int)AsSkeletalAnimation(animation)->GetAnimatedJoints().size();
+}
+
+void JPH_SkeletalAnimation_AddAnimatedJoint(JPH_SkeletalAnimation* animation, const char* jointName)
+{
+	auto& joints = AsSkeletalAnimation(animation)->GetAnimatedJoints();
+	joints.push_back(JPH::SkeletalAnimation::AnimatedJoint());
+	joints.back().mJointName = jointName;
+}
+
+void JPH_SkeletalAnimation_AddKeyframe(JPH_SkeletalAnimation* animation, int jointIndex, float time, const JPH_Vec3* translation, const JPH_Quat* rotation)
+{
+	auto& joints = AsSkeletalAnimation(animation)->GetAnimatedJoints();
+	if (jointIndex >= 0 && jointIndex < (int)joints.size())
+	{
+		JPH::SkeletalAnimation::Keyframe keyframe;
+		keyframe.mTime = time;
+		if (translation)
+			keyframe.mTranslation = ToJolt(translation);
+		if (rotation)
+			keyframe.mRotation = ToJolt(rotation);
+		joints[jointIndex].mKeyframes.push_back(keyframe);
+	}
+}
+
+/* SkeletonMapper */
+JPH_SkeletonMapper* JPH_SkeletonMapper_Create(void)
+{
+	auto mapper = new JPH::SkeletonMapper();
+	mapper->AddRef();
+	return ToSkeletonMapper(mapper);
+}
+
+void JPH_SkeletonMapper_Destroy(JPH_SkeletonMapper* mapper)
+{
+	if (mapper)
+		AsSkeletonMapper(mapper)->Release();
+}
+
+void JPH_SkeletonMapper_Initialize(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton1, const JPH_Mat4* neutralPose1, const JPH_Skeleton* skeleton2, const JPH_Mat4* neutralPose2)
+{
+	AsSkeletonMapper(mapper)->Initialize(
+		AsSkeleton(skeleton1), reinterpret_cast<const JPH::Mat44*>(neutralPose1),
+		AsSkeleton(skeleton2), reinterpret_cast<const JPH::Mat44*>(neutralPose2));
+}
+
+void JPH_SkeletonMapper_LockAllTranslations(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton2, const JPH_Mat4* neutralPose2)
+{
+	AsSkeletonMapper(mapper)->LockAllTranslations(
+		AsSkeleton(skeleton2), reinterpret_cast<const JPH::Mat44*>(neutralPose2));
+}
+
+void JPH_SkeletonMapper_LockTranslations(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton2, const bool* lockedTranslations, const JPH_Mat4* neutralPose2)
+{
+	AsSkeletonMapper(mapper)->LockTranslations(
+		AsSkeleton(skeleton2), lockedTranslations, reinterpret_cast<const JPH::Mat44*>(neutralPose2));
+}
+
+void JPH_SkeletonMapper_Map(const JPH_SkeletonMapper* mapper, const JPH_Mat4* pose1ModelSpace, const JPH_Mat4* pose2LocalSpace, JPH_Mat4* outPose2ModelSpace)
+{
+	const auto& mappings = AsSkeletonMapper(mapper)->GetMappings();
+	if (mappings.empty())
+		return;
+
+	AsSkeletonMapper(mapper)->Map(
+		reinterpret_cast<const JPH::Mat44*>(pose1ModelSpace),
+		reinterpret_cast<const JPH::Mat44*>(pose2LocalSpace),
+		reinterpret_cast<JPH::Mat44*>(outPose2ModelSpace)
+	);
+}
+
+void JPH_SkeletonMapper_MapReverse(const JPH_SkeletonMapper* mapper, const JPH_Mat4* pose2ModelSpace, JPH_Mat4* outPose1ModelSpace)
+{
+	const auto& mappings = AsSkeletonMapper(mapper)->GetMappings();
+	if (mappings.empty())
+		return;
+
+	AsSkeletonMapper(mapper)->MapReverse(
+		reinterpret_cast<const JPH::Mat44*>(pose2ModelSpace),
+		reinterpret_cast<JPH::Mat44*>(outPose1ModelSpace)
+	);
+}
+
+int JPH_SkeletonMapper_GetMappedJointIndex(const JPH_SkeletonMapper* mapper, int joint1Index)
+{
+	return AsSkeletonMapper(mapper)->GetMappedJointIdx(joint1Index);
+}
+
+bool JPH_SkeletonMapper_IsJointTranslationLocked(const JPH_SkeletonMapper* mapper, int joint2Index)
+{
+	return AsSkeletonMapper(mapper)->IsJointTranslationLocked(joint2Index);
 }
 
 /* CollisionEstimationResult */
