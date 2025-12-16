@@ -330,6 +330,12 @@ static inline void FromJolt(const DMat44& matrix, JPH_RMat4* result)
 }
 #endif /* defined(JPH_DOUBLE_PRECISION) */
 
+static inline void FromJolt(const LinearCurve::Point& jolt, JPH_Point* result)
+{
+	result->x = jolt.mX;
+	result->y = jolt.mY;
+}
+
 static inline void FromJolt(const MassProperties& jolt, JPH_MassProperties* result)
 {
 	result->mass = jolt.mMass;
@@ -11154,14 +11160,13 @@ uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve)
 	return static_cast<uint32_t>(AsLinearCurve(curve)->mPoints.size());
 }
 
-JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index)
+void JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index, JPH_Point* result)
 {
 	JPH_ASSERT(curve);
+	JPH_ASSERT(result);
+
 	auto point =  AsLinearCurve(curve)->mPoints[index];
-	return JPH_Point {
-		point.mX,
-		point.mY,
-	};
+	FromJolt(point, result);
 }
 
 void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, uint32_t* count)

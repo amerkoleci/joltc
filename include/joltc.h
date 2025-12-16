@@ -3013,7 +3013,7 @@ JPH_CAPI float JPH_LinearCurve_GetMinX(const JPH_LinearCurve* curve);
 JPH_CAPI float JPH_LinearCurve_GetMaxX(const JPH_LinearCurve* curve);
 JPH_CAPI float JPH_LinearCurve_GetValue(const JPH_LinearCurve* curve, float x);
 JPH_CAPI uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve);
-JPH_CAPI JPH_Point JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index);
+JPH_CAPI void JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index, JPH_Point* result);
 JPH_CAPI void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, uint32_t* count);
 
 #endif /* JOLT_C_H_ */
