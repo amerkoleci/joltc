@@ -10771,9 +10771,9 @@ float JPH_WheeledVehicleController_GetWheelSpeedAtClutch(const JPH_WheeledVehicl
 	return AsWheeledVehicleController(controller)->GetWheelSpeedAtClutch();
 }
 
-void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleController* controller, JPH_TireMaxImpulseCallback tireMaxImpulseCallback) 
+void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleController* controller, JPH_TireMaxImpulseCallback tireMaxImpulseCallback, void* userData)
 {
-	AsWheeledVehicleController(controller)->SetTireMaxImpulseCallback([tireMaxImpulseCallback](
+	AsWheeledVehicleController(controller)->SetTireMaxImpulseCallback([tireMaxImpulseCallback, userData](
 		int wheelIndex,
 		float &outLongitudinalImpulse,
 		float &outLateralImpulse,
@@ -10785,6 +10785,7 @@ void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleCo
 		float deltaTime)
 		{
 			tireMaxImpulseCallback(
+				userData,
 				static_cast<uint32_t>(wheelIndex),
 				&outLongitudinalImpulse,
 				&outLateralImpulse,

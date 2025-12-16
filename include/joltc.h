@@ -1001,6 +1001,7 @@ typedef struct JPH_JobSystem JPH_JobSystem;
 
 /* Calculate max tire impulses by combining friction, slip, and suspension impulse. Note that the actual applied impulse may be lower (e.g. when the vehicle is stationary on a horizontal surface the actual impulse applied will be 0) */
 typedef void (JPH_API_CALL* JPH_TireMaxImpulseCallback)(
+	void* userData,
 	uint32_t wheelIndex, 
 	float* outLongitudinalImpulse,
 	float* outLateralImpulse, 
@@ -2936,7 +2937,7 @@ JPH_CAPI float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehic
 JPH_CAPI void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* controller, float handBrakeInput);
 JPH_CAPI float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* controller);
 JPH_CAPI float JPH_WheeledVehicleController_GetWheelSpeedAtClutch(const JPH_WheeledVehicleController* controller);
-JPH_CAPI void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleController* controller, JPH_TireMaxImpulseCallback tireMaxImpulseCallback);
+JPH_CAPI void JPH_WheeledVehicleController_SetTireMaxImpulseCallback(JPH_WheeledVehicleController* controller, JPH_TireMaxImpulseCallback tireMaxImpulseCallback, void* userData);
 JPH_CAPI const JPH_VehicleEngine* JPH_WheeledVehicleController_GetEngine(const JPH_WheeledVehicleController* controller);
 JPH_CAPI const JPH_VehicleTransmission* JPH_WheeledVehicleController_GetTransmission(const JPH_WheeledVehicleController* controller);
 
