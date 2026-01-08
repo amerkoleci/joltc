@@ -2942,7 +2942,40 @@ JPH_CAPI const JPH_VehicleEngine* JPH_WheeledVehicleController_GetEngine(const J
 JPH_CAPI const JPH_VehicleTransmission* JPH_WheeledVehicleController_GetTransmission(const JPH_WheeledVehicleController* controller);
 
 /* WheelSettingsTV - WheelTV - TrackedVehicleController */
-/* TODO: Add VehicleTrack and VehicleTrackSettings */
+/* WheelSettingsTV - WheelTV - TrackedVehicleController */
+
+/* VehicleTrack */
+typedef struct JPH_VehicleTrackSettings JPH_VehicleTrackSettings;
+typedef struct JPH_VehicleTrack JPH_VehicleTrack;
+
+typedef enum JPH_TrackSide {
+	JPH_TrackSide_Left = 0,
+	JPH_TrackSide_Right = 1,
+} JPH_TrackSide;
+
+typedef struct JPH_VehicleTrackSettings {
+	uint32_t					drivenWheel;
+	const uint32_t*				wheels;
+	uint32_t					wheelsCount;
+	float						inertia;
+	float						angularDamping;
+	float						maxBrakeTorque;
+	float						differentialRatio;
+} JPH_VehicleTrackSettings;
+
+JPH_CAPI void JPH_VehicleTrackSettings_Init(JPH_VehicleTrackSettings* settings);
+
+JPH_CAPI float JPH_VehicleTrack_GetAngularVelocity(const JPH_VehicleTrack* track);
+JPH_CAPI void JPH_VehicleTrack_SetAngularVelocity(JPH_VehicleTrack* track, float velocity);
+JPH_CAPI uint32_t JPH_VehicleTrack_GetDrivenWheel(const JPH_VehicleTrack* track);
+JPH_CAPI float JPH_VehicleTrack_GetInertia(const JPH_VehicleTrack* track);
+JPH_CAPI float JPH_VehicleTrack_GetAngularDamping(const JPH_VehicleTrack* track);
+JPH_CAPI float JPH_VehicleTrack_GetMaxBrakeTorque(const JPH_VehicleTrack* track);
+JPH_CAPI float JPH_VehicleTrack_GetDifferentialRatio(const JPH_VehicleTrack* track);
+
+JPH_CAPI const JPH_VehicleTrack* JPH_TrackedVehicleController_GetTrack(const JPH_TrackedVehicleController* controller, JPH_TrackSide side);
+
+/* WheelSettingsTV */
 JPH_CAPI JPH_WheelSettingsTV* JPH_WheelSettingsTV_Create(void);
 JPH_CAPI float JPH_WheelSettingsTV_GetLongitudinalFriction(const JPH_WheelSettingsTV* settings);
 JPH_CAPI void JPH_WheelSettingsTV_SetLongitudinalFriction(JPH_WheelSettingsTV* settings, float value);
