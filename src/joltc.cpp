@@ -74,6 +74,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
+#include "Jolt/Physics/Vehicle/VehicleTrack.h"
 #include "Jolt/Core/LinearCurve.h"
 
 #include <iostream>
@@ -205,6 +206,8 @@ DEF_MAP_DECL(WheelSettingsTV, JPH_WheelSettingsTV)
 DEF_MAP_DECL(WheelTV, JPH_WheelTV)
 DEF_MAP_DECL(TrackedVehicleControllerSettings, JPH_TrackedVehicleControllerSettings)
 DEF_MAP_DECL(TrackedVehicleController, JPH_TrackedVehicleController)
+DEF_MAP_DECL(VehicleTrackSettings, JPH_VehicleTrackSettings)
+DEF_MAP_DECL(VehicleTrack, JPH_VehicleTrack)
 
 DEF_MAP_DECL(VehicleEngine, JPH_VehicleEngine)
 DEF_MAP_DECL(VehicleTransmission, JPH_VehicleTransmission)
@@ -10950,6 +10953,58 @@ const JPH_VehicleEngine* JPH_TrackedVehicleController_GetEngine(const JPH_Tracke
 const JPH_VehicleTransmission* JPH_TrackedVehicleController_GetTransmission(const JPH_TrackedVehicleController* controller)
 {
 	return ToVehicleTransmission(&AsTrackedVehicleController(controller)->GetTransmission());
+}
+
+/* VehicleTrack */
+void JPH_VehicleTrackSettings_Init(JPH_VehicleTrackSettings* settings)
+{
+	settings->drivenWheel = 0;
+	settings->wheels = nullptr;
+	settings->wheelsCount = 0;
+	settings->inertia = 10.0f;
+	settings->angularDamping = 0.5f;
+	settings->maxBrakeTorque = 15000.0f;
+	settings->differentialRatio = 6.0f;
+}
+
+float JPH_VehicleTrack_GetAngularVelocity(const JPH_VehicleTrack* track)
+{
+	return AsVehicleTrack(track)->mAngularVelocity;
+}
+
+void JPH_VehicleTrack_SetAngularVelocity(JPH_VehicleTrack* track, float velocity)
+{
+	AsVehicleTrack(track)->mAngularVelocity = velocity;
+}
+
+uint32_t JPH_VehicleTrack_GetDrivenWheel(const JPH_VehicleTrack* track)
+{
+	return AsVehicleTrack(track)->mDrivenWheel;
+}
+
+float JPH_VehicleTrack_GetInertia(const JPH_VehicleTrack* track)
+{
+	return AsVehicleTrack(track)->mInertia;
+}
+
+float JPH_VehicleTrack_GetAngularDamping(const JPH_VehicleTrack* track)
+{
+	return AsVehicleTrack(track)->mAngularDamping;
+}
+
+float JPH_VehicleTrack_GetMaxBrakeTorque(const JPH_VehicleTrack* track)
+{
+	return AsVehicleTrack(track)->mMaxBrakeTorque;
+}
+
+float JPH_VehicleTrack_GetDifferentialRatio(const JPH_VehicleTrack* track)
+{
+	return AsVehicleTrack(track)->mDifferentialRatio;
+}
+
+const JPH_VehicleTrack* JPH_TrackedVehicleController_GetTrack(const JPH_TrackedVehicleController* controller, JPH_TrackSide side)
+{
+	return ToVehicleTrack(&AsTrackedVehicleController(controller)->GetTracks()[static_cast<int>(side)]);
 }
 
 /* MotorcycleController */
