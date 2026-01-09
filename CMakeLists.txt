@@ -381,6 +381,12 @@ if (JPH_SAMPLES)
 	add_subdirectory(samples)
 endif ()
 
+# Tests
+option(JPH_TESTS "Build tests" ${JPH_MASTER_PROJECT})
+if (JPH_TESTS)
+	add_subdirectory(tests)
+endif ()
+
 if (JPH_BUILD_SHARED)
 	message(STATUS "  Library         SHARED")
 else ()
