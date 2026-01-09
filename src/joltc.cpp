@@ -3898,6 +3898,8 @@ void JPH_FixedConstraintSettings_ToJolt(FixedConstraintSettings* joltSettings, c
 
 void JPH_FixedConstraintSettings_Init(JPH_FixedConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_FixedConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -3978,6 +3980,8 @@ void JPH_DistanceConstraintSettings_ToJolt(DistanceConstraintSettings* joltSetti
 
 void JPH_DistanceConstraintSettings_Init(JPH_DistanceConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_DistanceConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -4073,6 +4077,8 @@ void JPH_PointConstraintSettings_ToJolt(PointConstraintSettings* joltSettings, c
 
 void JPH_PointConstraintSettings_Init(JPH_PointConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_PointConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -4177,6 +4183,8 @@ void JPH_HingeConstraintSettings_ToJolt(HingeConstraintSettings* joltSettings, c
 
 void JPH_HingeConstraintSettings_Init(JPH_HingeConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_HingeConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -4395,6 +4403,8 @@ void JPH_SliderConstraintSettings_ToJolt(SliderConstraintSettings* joltSettings,
 
 void JPH_SliderConstraintSettings_Init(JPH_SliderConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_SliderConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -4581,6 +4591,8 @@ void JPH_ConeConstraintSettings_ToJolt(ConeConstraintSettings* joltSettings, con
 
 void JPH_ConeConstraintSettings_Init(JPH_ConeConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_ConeConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -4686,6 +4698,8 @@ void JPH_SwingTwistConstraintSettings_ToJolt(SwingTwistConstraintSettings* joltS
 
 void JPH_SwingTwistConstraintSettings_Init(JPH_SwingTwistConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_SwingTwistConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -4819,6 +4833,8 @@ void JPH_SixDOFConstraintSettings_ToJolt(SixDOFConstraintSettings* joltSettings,
 
 void JPH_SixDOFConstraintSettings_Init(JPH_SixDOFConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_SixDOFConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -5055,6 +5071,8 @@ void JPH_GearConstraintSettings_ToJolt(GearConstraintSettings* joltSettings, con
 
 JPH_CAPI void JPH_GearConstraintSettings_Init(JPH_GearConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_GearConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -6108,6 +6126,8 @@ static inline JPH_CollideShapeSettings FromJolt(const JPH::CollideShapeSettings&
 
 void JPH_CollideShapeSettings_Init(JPH_CollideShapeSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_CollideShapeSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -6155,6 +6175,8 @@ static inline JPH_ShapeCastSettings FromJolt(const ShapeCastSettings& joltSettin
 
 void JPH_ShapeCastSettings_Init(JPH_ShapeCastSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_ShapeCastSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -7751,6 +7773,8 @@ uint64_t JPH_CharacterBase_GetGroundUserData(JPH_CharacterBase* character)
 /* CharacterSettings */
 void JPH_CharacterSettings_Init(JPH_CharacterSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_CharacterSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -7918,6 +7942,8 @@ void JPH_Character_SetLayer(JPH_Character* character, JPH_ObjectLayer value, boo
 /* CharacterVirtualSettings */
 void JPH_CharacterVirtualSettings_Init(JPH_CharacterVirtualSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_CharacterVirtualSettings));
+
 	// Copy defaults from jolt 
 	JPH::CharacterVirtualSettings joltSettings;
 	JPH_CharacterBaseSettings_Init(joltSettings, &settings->base);
@@ -9986,6 +10012,8 @@ bool JPH_Wheel_HasHitHardPoint(const JPH_Wheel* wheel)
 /* VehicleAntiRollBar */
 JPH_CAPI void JPH_VehicleAntiRollBar_Init(JPH_VehicleAntiRollBar* antiRollBar)
 {
+	memset(antiRollBar, 0, sizeof(JPH_VehicleAntiRollBar));
+
 	JPH_ASSERT(antiRollBar);
 
 	JPH::VehicleAntiRollBar joltAntiRollBar{};
@@ -9997,6 +10025,8 @@ JPH_CAPI void JPH_VehicleAntiRollBar_Init(JPH_VehicleAntiRollBar* antiRollBar)
 /* VehicleEngineSettings */
 void JPH_VehicleEngineSettings_Init(JPH_VehicleEngineSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_VehicleEngineSettings));
+
 	JPH_ASSERT(settings);
 
 	JPH::VehicleEngineSettings joltSettings{};
@@ -10087,6 +10117,8 @@ bool JPH_VehicleEngine_AllowSleep(const JPH_VehicleEngine* engine)
 /* VehicleDifferentialSettings */
 void JPH_VehicleDifferentialSettings_Init(JPH_VehicleDifferentialSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_VehicleDifferentialSettings));
+
 	JPH_ASSERT(settings);
 
 	VehicleDifferentialSettings joltSettings{};
@@ -10373,6 +10405,8 @@ void JPH_VehicleConstraintSettings_FromJolt(JPH_VehicleConstraintSettings* setti
 
 void JPH_VehicleConstraintSettings_Init(JPH_VehicleConstraintSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_VehicleConstraintSettings));
+
 	JPH_ASSERT(settings);
 
 	// Copy defaults from jolt 
@@ -10958,6 +10992,8 @@ const JPH_VehicleTransmission* JPH_TrackedVehicleController_GetTransmission(cons
 /* VehicleTrack */
 void JPH_VehicleTrackSettings_Init(JPH_VehicleTrackSettings* settings)
 {
+	memset(settings, 0, sizeof(JPH_VehicleTrackSettings));
+
 	settings->drivenWheel = 0;
 	settings->wheels = nullptr;
 	settings->wheelsCount = 0;
