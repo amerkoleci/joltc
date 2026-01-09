@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
-project(joltc CXX)
+project(joltc CXX C)
 
 # Use solution folders to organize projects
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -379,6 +379,12 @@ endif()
  
 if (JPH_SAMPLES)
 	add_subdirectory(samples)
+endif ()
+
+# Tests
+option(JPH_TESTS "Build tests" ${JPH_MASTER_PROJECT})
+if (JPH_TESTS)
+	add_subdirectory(tests)
 endif ()
 
 if (JPH_BUILD_SHARED)
