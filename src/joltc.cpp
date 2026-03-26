@@ -764,19 +764,25 @@ bool JPH_Init()
 
 	JPH::RegisterDefaultAllocator();
 
-	// TODO
 	JPH::Trace = TraceImpl;
 	JPH_IF_ENABLE_ASSERTS(JPH::AssertFailed = AssertFailedImpl;)
 
-		// Create a factory
-		JPH::Factory::sInstance = new JPH::Factory();
+	// Create a factory
+	JPH::Factory::sInstance = new JPH::Factory();
 
 	// Register all Jolt physics types
 	JPH::RegisterTypes();
-
-	// Init temp allocator
+	
+#if defined(__SANITIZE_THREAD__) || defined(ENABLE_SANITIZER)
+	// ThreadSanitizer does not understand Jolt's lock-free 8MB bump allocator
+	// and will flag cross-frame memory reuse as data races.
+	// We fall back to standard malloc/free which TSan can track perfectly.
+	s_TempAllocator = new TempAllocatorMalloc(); 
+#else
+	// High-performance lock-free allocator for production
 	s_TempAllocator = new TempAllocatorImplWithMallocFallback(8 * 1024 * 1024); 
-	// s_TempAllocator = new TempAllocatorMalloc(); 
+#endif
+
 	s_initialized = true;
 
 	return true;
