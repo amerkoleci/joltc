@@ -1049,6 +1049,9 @@ JPH_CAPI JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterMas
 JPH_CAPI JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterTable_Create(
 	JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface, uint32_t numBroadPhaseLayers,
 	JPH_ObjectLayerPairFilter* objectLayerPairFilter, uint32_t numObjectLayers);
+JPH_CAPI void JPH_BroadPhaseLayerInterfaceTable_Destroy(JPH_BroadPhaseLayerInterface* bpInterface);
+JPH_CAPI void JPH_ObjectLayerPairFilterTable_Destroy(JPH_ObjectLayerPairFilter* filter);
+JPH_CAPI void JPH_ObjectVsBroadPhaseLayerFilterTable_Destroy(JPH_ObjectVsBroadPhaseLayerFilter* filter);
 
 JPH_CAPI void JPH_DrawSettings_InitDefault(JPH_DrawSettings* settings);
 

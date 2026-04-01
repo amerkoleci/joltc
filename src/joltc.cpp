@@ -942,6 +942,24 @@ JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterTable_Create
 	return reinterpret_cast<JPH_ObjectVsBroadPhaseLayerFilter*>(filter);
 }
 
+void JPH_BroadPhaseLayerInterfaceTable_Destroy(JPH_BroadPhaseLayerInterface* bpInterface)
+{
+    if (bpInterface)
+        delete reinterpret_cast<JPH::BroadPhaseLayerInterfaceTable*>(bpInterface);
+}
+
+void JPH_ObjectLayerPairFilterTable_Destroy(JPH_ObjectLayerPairFilter* filter)
+{
+    if (filter)
+        delete reinterpret_cast<JPH::ObjectLayerPairFilterTable*>(filter);
+}
+
+void JPH_ObjectVsBroadPhaseLayerFilterTable_Destroy(JPH_ObjectVsBroadPhaseLayerFilter* filter)
+{
+    if (filter)
+        delete reinterpret_cast<JPH::ObjectVsBroadPhaseLayerFilterTable*>(filter);
+}
+
 void JPH_DrawSettings_InitDefault(JPH_DrawSettings* settings)
 {
 	JPH_ASSERT(settings);
