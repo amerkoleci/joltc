@@ -1771,6 +1771,13 @@ void JPH_Vec3_DivideScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result)
 	FromJolt(joltVec / scalar, result);
 }
 
+void JPH_Vec3_GetNormalizedPerpendicular(const JPH_Vec3* v, JPH_Vec3* result)
+{
+	JPH_ASSERT(v && result);
+	JPH::Vec3 joltVec = ToJolt(v);
+	FromJolt(joltVec.GetNormalizedPerpendicular(), result);
+}
+
 void JPH_Vec3_DotProduct(const JPH_Vec3* v1, const JPH_Vec3* v2, float* result)
 {
 	JPH_ASSERT(v1 && v2 && result);
