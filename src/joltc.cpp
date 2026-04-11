@@ -113,6 +113,7 @@ using namespace JPH;
 DEF_MAP_DECL(ContactManifold, JPH_ContactManifold)
 DEF_MAP_DECL(BodyCreationSettings, JPH_BodyCreationSettings)
 DEF_MAP_DECL(SoftBodyCreationSettings, JPH_SoftBodyCreationSettings)
+DEF_MAP_DECL(SoftBodySharedSettings, JPH_SoftBodySharedSettings)
 DEF_MAP_DECL(Body, JPH_Body)
 DEF_MAP_DECL(BodyInterface, JPH_BodyInterface)
 DEF_MAP_DECL(BodyLockInterface, JPH_BodyLockInterface)
@@ -3745,6 +3746,44 @@ void JPH_BodyCreationSettings_SetMassPropertiesOverride(JPH_BodyCreationSettings
 	AsBodyCreationSettings(settings)->mMassPropertiesOverride = ToJolt(massProperties);
 }
 
+/* JPH_SoftBodySharedSettings */
+JPH_SoftBodySharedSettings* JPH_SoftBodySharedSettings_Create(void) 
+{
+    auto settings = new JPH::SoftBodySharedSettings();
+    settings->AddRef();
+    return ToSoftBodySharedSettings(settings);
+}
+
+void JPH_SoftBodySharedSettings_Destroy(JPH_SoftBodySharedSettings* settings) 
+{
+    if (settings) 
+	{
+		AsSoftBodySharedSettings(settings)->Release();
+	}
+}
+
+void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, const JPH_Vec3* position, float invMass) 
+{
+    JPH::SoftBodySharedSettings::Vertex v;
+    v.mPosition = JPH::Float3(position->x, position->y, position->z);
+    v.mInvMass = invMass;
+    AsSoftBodySharedSettings(settings)->mVertices.push_back(v);
+}
+
+void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, uint32_t vertex1, uint32_t vertex2, uint32_t vertex3) 
+{
+    JPH::SoftBodySharedSettings::Face f;
+    f.mVertex[0] = vertex1;
+    f.mVertex[1] = vertex2;
+    f.mVertex[2] = vertex3;
+    AsSoftBodySharedSettings(settings)->mFaces.push_back(f);
+}
+
+void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* settings) {
+    // Calculates normals, edge constraints, etc.
+    AsSoftBodySharedSettings(settings)->Optimize(); 
+}
+
 /* JPH_SoftBodyCreationSettings */
 JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void)
 {
@@ -3758,6 +3797,11 @@ void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings* settings
 	{
 		delete AsSoftBodyCreationSettings(settings);
 	}
+}
+
+void JPH_SoftBodyCreationSettings_SetSharedSettings(JPH_SoftBodyCreationSettings* settings, const JPH_SoftBodySharedSettings* sharedSettings) 
+{
+    AsSoftBodyCreationSettings(settings)->mSettings = AsSoftBodySharedSettings(sharedSettings);
 }
 
 /* JPH_ConstraintSettings */

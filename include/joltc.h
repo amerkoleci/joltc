@@ -125,6 +125,7 @@ typedef struct JPH_EmptyShape							JPH_EmptyShape;
 
 typedef struct JPH_BodyCreationSettings					JPH_BodyCreationSettings;
 typedef struct JPH_SoftBodyCreationSettings				JPH_SoftBodyCreationSettings;
+typedef struct JPH_SoftBodySharedSettings 				JPH_SoftBodySharedSettings;
 typedef struct JPH_BodyInterface						JPH_BodyInterface;
 typedef struct JPH_BodyLockInterface					JPH_BodyLockInterface;
 typedef struct JPH_BroadPhaseQuery						JPH_BroadPhaseQuery;
@@ -1588,9 +1589,17 @@ JPH_CAPI void JPH_BodyCreationSettings_SetInertiaMultiplier(JPH_BodyCreationSett
 JPH_CAPI void JPH_BodyCreationSettings_GetMassPropertiesOverride(const JPH_BodyCreationSettings* settings, JPH_MassProperties* result);
 JPH_CAPI void JPH_BodyCreationSettings_SetMassPropertiesOverride(JPH_BodyCreationSettings* settings, const JPH_MassProperties* massProperties);
 
+/* JPH_SoftBodySharedSettings */
+JPH_CAPI JPH_SoftBodySharedSettings* JPH_SoftBodySharedSettings_Create(void);
+JPH_CAPI void JPH_SoftBodySharedSettings_Destroy(JPH_SoftBodySharedSettings* settings);
+JPH_CAPI void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, const JPH_Vec3* position, float invMass);
+JPH_CAPI void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, uint32_t vertex1, uint32_t vertex2, uint32_t vertex3);
+JPH_CAPI void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* settings);
+
 /* JPH_SoftBodyCreationSettings */
 JPH_CAPI JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void);
 JPH_CAPI void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings* settings);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetSharedSettings(JPH_SoftBodyCreationSettings* settings, const JPH_SoftBodySharedSettings* sharedSettings);
 
 /* JPH_Constraint */
 JPH_CAPI void JPH_Constraint_Destroy(JPH_Constraint* constraint);
