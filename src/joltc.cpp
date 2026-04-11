@@ -3750,6 +3750,9 @@ void JPH_BodyCreationSettings_SetMassPropertiesOverride(JPH_BodyCreationSettings
 JPH_SoftBodySharedSettings* JPH_SoftBodySharedSettings_Create(void) 
 {
     auto settings = new JPH::SoftBodySharedSettings();
+	// Soft bodies require at least one material to be present in the array 
+    // to resolve face collisions, otherwise Jolt reads out of bounds during initialization.
+    settings->mMaterials.push_back(JPH::PhysicsMaterial::sDefault);
     settings->AddRef();
     return ToSoftBodySharedSettings(settings);
 }
