@@ -1600,6 +1600,14 @@ JPH_CAPI void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* se
 JPH_CAPI JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void);
 JPH_CAPI void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings* settings);
 JPH_CAPI void JPH_SoftBodyCreationSettings_SetSharedSettings(JPH_SoftBodyCreationSettings* settings, const JPH_SoftBodySharedSettings* sharedSettings);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetVertexRadius(JPH_SoftBodyCreationSettings* settings, float radius);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetUserData(JPH_SoftBodyCreationSettings* settings, uint64_t userData);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetCollisionGroup(JPH_SoftBodyCreationSettings* settings, const JPH_CollisionGroup* group);
+
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetPosition(JPH_SoftBodyCreationSettings* settings, const JPH_RVec3* value);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetRotation(JPH_SoftBodyCreationSettings* settings, const JPH_Quat* value);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetObjectLayer(JPH_SoftBodyCreationSettings* settings, JPH_ObjectLayer value);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetAllowSleeping(JPH_SoftBodyCreationSettings* settings, bool value);
 
 /* JPH_Constraint */
 JPH_CAPI void JPH_Constraint_Destroy(JPH_Constraint* constraint);

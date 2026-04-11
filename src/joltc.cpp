@@ -3750,8 +3750,7 @@ void JPH_BodyCreationSettings_SetMassPropertiesOverride(JPH_BodyCreationSettings
 JPH_SoftBodySharedSettings* JPH_SoftBodySharedSettings_Create(void) 
 {
     auto settings = new JPH::SoftBodySharedSettings();
-	// Soft bodies require at least one material to be present in the array 
-    // to resolve face collisions, otherwise Jolt reads out of bounds during initialization.
+    // Jolt requires at least one material to resolve face collisions
     settings->mMaterials.push_back(JPH::PhysicsMaterial::sDefault);
     settings->AddRef();
     return ToSoftBodySharedSettings(settings);
@@ -3768,8 +3767,9 @@ void JPH_SoftBodySharedSettings_Destroy(JPH_SoftBodySharedSettings* settings)
 void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, const JPH_Vec3* position, float invMass) 
 {
     JPH::SoftBodySharedSettings::Vertex v;
-    v.mPosition = JPH::Float3(position->x, position->y, position->z);
-	v.mVelocity = JPH::Float3(0, 0, 0);
+    // Jolt soft body vertices are always Float3 even in Double Precision mode
+    v.mPosition = JPH::Float3((float)position->x, (float)position->y, (float)position->z);
+    v.mVelocity = JPH::Float3(0, 0, 0); // Zero out to avoid explosion
     v.mInvMass = invMass;
     AsSoftBodySharedSettings(settings)->mVertices.push_back(v);
 }
@@ -3784,9 +3784,21 @@ void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, ui
     AsSoftBodySharedSettings(settings)->mFaces.push_back(f);
 }
 
-void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* settings) {
-    // Calculates normals, edge constraints, etc.
-    AsSoftBodySharedSettings(settings)->Optimize(); 
+void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* settings) 
+{
+    auto joltSettings = AsSoftBodySharedSettings(settings);
+    
+    // Create default attributes (zero compliance = stiff edges)
+    JPH::Array<JPH::SoftBodySharedSettings::VertexAttributes> attributes;
+    attributes.resize(joltSettings->mVertices.size());
+
+    // Generate internal constraints (springs)
+    // This is required for the simulation to even start.
+    joltSettings->CreateConstraints(attributes.data(), (JPH::uint)attributes.size(), 
+                                    JPH::SoftBodySharedSettings::EBendType::Distance);
+    
+    // Build spatial collision tree
+    joltSettings->Optimize();
 }
 
 /* JPH_SoftBodyCreationSettings */
@@ -3807,6 +3819,41 @@ void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings* settings
 void JPH_SoftBodyCreationSettings_SetSharedSettings(JPH_SoftBodyCreationSettings* settings, const JPH_SoftBodySharedSettings* sharedSettings) 
 {
     AsSoftBodyCreationSettings(settings)->mSettings = AsSoftBodySharedSettings(sharedSettings);
+}
+
+void JPH_SoftBodyCreationSettings_SetVertexRadius(JPH_SoftBodyCreationSettings* settings, float radius) 
+{
+    AsSoftBodyCreationSettings(settings)->mVertexRadius = radius;
+}
+
+void JPH_SoftBodyCreationSettings_SetUserData(JPH_SoftBodyCreationSettings* settings, uint64_t userData) 
+{
+    AsSoftBodyCreationSettings(settings)->mUserData = userData;
+}
+
+void JPH_SoftBodyCreationSettings_SetCollisionGroup(JPH_SoftBodyCreationSettings* settings, const JPH_CollisionGroup* group) 
+{
+    AsSoftBodyCreationSettings(settings)->mCollisionGroup = ToJolt(group);
+}
+
+void JPH_SoftBodyCreationSettings_SetPosition(JPH_SoftBodyCreationSettings* settings, const JPH_RVec3* value)
+{
+    AsSoftBodyCreationSettings(settings)->mPosition = ToJolt(value);
+}
+
+void JPH_SoftBodyCreationSettings_SetRotation(JPH_SoftBodyCreationSettings* settings, const JPH_Quat* value)
+{
+    AsSoftBodyCreationSettings(settings)->mRotation = ToJolt(value);
+}
+
+void JPH_SoftBodyCreationSettings_SetObjectLayer(JPH_SoftBodyCreationSettings* settings, JPH_ObjectLayer value)
+{
+    AsSoftBodyCreationSettings(settings)->mObjectLayer = static_cast<JPH::ObjectLayer>(value);
+}
+
+void JPH_SoftBodyCreationSettings_SetAllowSleeping(JPH_SoftBodyCreationSettings* settings, bool value)
+{
+    AsSoftBodyCreationSettings(settings)->mAllowSleeping = value;
 }
 
 /* JPH_ConstraintSettings */
