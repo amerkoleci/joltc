@@ -3766,6 +3766,7 @@ void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, 
 {
     JPH::SoftBodySharedSettings::Vertex v;
     v.mPosition = JPH::Float3(position->x, position->y, position->z);
+	v.mVelocity = JPH::Float3(0, 0, 0);
     v.mInvMass = invMass;
     AsSoftBodySharedSettings(settings)->mVertices.push_back(v);
 }
@@ -3776,6 +3777,7 @@ void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, ui
     f.mVertex[0] = vertex1;
     f.mVertex[1] = vertex2;
     f.mVertex[2] = vertex3;
+	f.mMaterialIndex = 0;
     AsSoftBodySharedSettings(settings)->mFaces.push_back(f);
 }
 
