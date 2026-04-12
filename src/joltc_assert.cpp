@@ -26,6 +26,8 @@ __pragma(warning(push, 0))
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Body/BodyActivationListener.h"
 #include "Jolt/Physics/Body/AllowedDOFs.h"
+#include <Jolt/Physics/SoftBody/SoftBodySharedSettings.h>
+#include <Jolt/Physics/SoftBody/SoftBodyCreationSettings.h>
 #include "Jolt/Physics/Constraints/SixDOFConstraint.h"
 #include "Jolt/Physics/Character/CharacterBase.h"
 #include "Jolt/Physics/Character/CharacterID.h"
@@ -214,6 +216,14 @@ static_assert(JPH_CollectFacesMode_NoFaces == (int)JPH::ECollectFacesMode::NoFac
 
 static_assert(sizeof(JPH::SubShapeIDPair) == sizeof(JPH_SubShapeIDPair));
 static_assert(alignof(JPH::SubShapeIDPair) == alignof(JPH_SubShapeIDPair));
+
+// EBendType
+static_assert((int)JPH_SoftBodyBendType_None == (int)JPH::SoftBodySharedSettings::EBendType::None);
+static_assert((int)JPH_SoftBodyBendType_Distance == (int)JPH::SoftBodySharedSettings::EBendType::Distance);
+static_assert((int)JPH_SoftBodyBendType_Dihedral == (int)JPH::SoftBodySharedSettings::EBendType::Dihedral);
+
+static_assert(sizeof(JPH::BodyCreationSettings) == 288 || sizeof(JPH::BodyCreationSettings) == 256); // Depends on Double Precision
+static_assert(sizeof(JPH::SoftBodyCreationSettings) == 160 || sizeof(JPH::SoftBodyCreationSettings) == 144);
 
 #ifdef JPH_DEBUG_RENDERER
 

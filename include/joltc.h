@@ -391,6 +391,13 @@ typedef enum JPH_SoftBodyConstraintColor
 	_JPH_SoftBodyConstraintColor_Force32 = 0x7FFFFFFF
 } JPH_SoftBodyConstraintColor;
 
+typedef enum JPH_SoftBodyBendType 
+{
+    JPH_SoftBodyBendType_None,
+    JPH_SoftBodyBendType_Distance,
+    JPH_SoftBodyBendType_Dihedral
+} JPH_SoftBodyBendType;
+
 typedef enum JPH_BodyManager_ShapeColor
 {
 	JPH_BodyManager_ShapeColor_InstanceColor,				///< Random color per instance
@@ -1594,7 +1601,13 @@ JPH_CAPI JPH_SoftBodySharedSettings* JPH_SoftBodySharedSettings_Create(void);
 JPH_CAPI void JPH_SoftBodySharedSettings_Destroy(JPH_SoftBodySharedSettings* settings);
 JPH_CAPI void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, const JPH_Vec3* position, float invMass);
 JPH_CAPI void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, uint32_t vertex1, uint32_t vertex2, uint32_t vertex3);
+JPH_CAPI void JPH_SoftBodySharedSettings_CreateConstraints(JPH_SoftBodySharedSettings* settings, float compliance, JPH_SoftBodyBendType bendType);
 JPH_CAPI void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* settings);
+/* NOTE: Must be called BEFORE CreateConstraints for correct mass-participation math. */
+JPH_CAPI void JPH_SoftBodySharedSettings_AddPinnedVertex(JPH_SoftBodySharedSettings* settings, uint32_t index);
+JPH_CAPI uint32_t JPH_SoftBodySharedSettings_GetVertexCount(const JPH_SoftBodySharedSettings* settings);
+/* Vertex data access (verification/retrieval) */
+JPH_CAPI void JPH_SoftBodySharedSettings_GetVertexPosition(const JPH_SoftBodySharedSettings* settings, uint32_t index, JPH_Vec3* outPos);
 
 /* JPH_SoftBodyCreationSettings */
 JPH_CAPI JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void);
@@ -1608,6 +1621,17 @@ JPH_CAPI void JPH_SoftBodyCreationSettings_SetPosition(JPH_SoftBodyCreationSetti
 JPH_CAPI void JPH_SoftBodyCreationSettings_SetRotation(JPH_SoftBodyCreationSettings* settings, const JPH_Quat* value);
 JPH_CAPI void JPH_SoftBodyCreationSettings_SetObjectLayer(JPH_SoftBodyCreationSettings* settings, JPH_ObjectLayer value);
 JPH_CAPI void JPH_SoftBodyCreationSettings_SetAllowSleeping(JPH_SoftBodyCreationSettings* settings, bool value);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetPressure(JPH_SoftBodyCreationSettings* settings, float pressure);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetLinearDamping(JPH_SoftBodyCreationSettings* settings, float damping);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetNumIterations(JPH_SoftBodyCreationSettings* settings, uint32_t iterations);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetMaxLinearVelocity(JPH_SoftBodyCreationSettings* settings, float max_vel);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetGravityFactor(JPH_SoftBodyCreationSettings* settings, float gravityFactor);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetFriction(JPH_SoftBodyCreationSettings* settings, float friction);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetRestitution(JPH_SoftBodyCreationSettings* settings, float restitution);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetMakeRotationIdentity(JPH_SoftBodyCreationSettings* settings, bool value);
+JPH_CAPI float JPH_SoftBodyCreationSettings_GetVertexRadius(const JPH_SoftBodyCreationSettings* settings);
+JPH_CAPI bool JPH_SoftBodyCreationSettings_GetMakeRotationIdentity(const JPH_SoftBodyCreationSettings* settings);
+
 
 /* JPH_Constraint */
 JPH_CAPI void JPH_Constraint_Destroy(JPH_Constraint* constraint);
@@ -2177,6 +2201,9 @@ JPH_CAPI void JPH_Body_SetUserData(JPH_Body* body, uint64_t userData);
 JPH_CAPI uint64_t JPH_Body_GetUserData(JPH_Body* body);
 
 JPH_CAPI JPH_Body* JPH_Body_GetFixedToWorldBody(void);
+
+JPH_CAPI uint32_t JPH_Body_GetSoftBodyVertexCount(const JPH_Body* body);
+JPH_CAPI void     JPH_Body_GetSoftBodyVertexPosition(const JPH_Body* body, uint32_t index, JPH_Vec3* outPos);
 
 /* JPH_BroadPhaseLayerFilter_Procs */
 typedef struct JPH_BroadPhaseLayerFilter_Procs {
