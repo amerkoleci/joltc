@@ -7750,7 +7750,7 @@ void JPH_Body_GetSoftBodyVertexPosition(const JPH_Body* body, uint32_t index, JP
     outPos->z = (float)worldPos.GetZ();
 }
 
-void JPH_Body_GetSoftBodyVertexPositions(const JPH_Body* body, JPH_Vec3* outPositions, uint32_t* outCount) 
+void JPH_Body_GetSoftBodyVertexPositions(const JPH_Body* body, JPH_Vec3* outPositions, uint32_t capacity, uint32_t* outCount) 
 {
     if (!body || !outPositions || !AsBody(body)->IsSoftBody()) {
         if (outCount) *outCount = 0;
@@ -7761,23 +7761,18 @@ void JPH_Body_GetSoftBodyVertexPositions(const JPH_Body* body, JPH_Vec3* outPosi
     auto* mp = static_cast<const JPH::SoftBodyMotionProperties*>(jBody->GetMotionProperties());
     const JPH::Array<JPH::SoftBodyVertex>& vertices = mp->GetVertices();
     const uint32_t numVertices = (uint32_t)vertices.size();
+    const uint32_t writeCount = (capacity < numVertices) ? capacity : numVertices;
 
-    // Cache the Center of Mass transform to avoid re-calculating inside the loop
     JPH::RMat44 com_transform = jBody->GetCenterOfMassTransform();
 
-    for (uint32_t i = 0; i < numVertices; ++i) {
-        // Transform local vertex to world space
-        // Note: Jolt soft body vertices are local to the COM
+    for (uint32_t i = 0; i < writeCount; ++i) {
         JPH::RVec3 worldPos = com_transform * vertices[i].mPosition;
-
         outPositions[i].x = (float)worldPos.GetX();
         outPositions[i].y = (float)worldPos.GetY();
         outPositions[i].z = (float)worldPos.GetZ();
     }
 
-    if (outCount) {
-        *outCount = numVertices;
-    }
+    if (outCount) *outCount = numVertices; // always report true count, not writeCount
 }
 
 /* Contact Listener */
