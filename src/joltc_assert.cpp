@@ -225,8 +225,15 @@ static_assert((int)JPH_SoftBodyBendType_Dihedral == (int)JPH::SoftBodySharedSett
 
 #if defined(_M_X64) || defined(__x86_64__) || defined(__aarch64__)
     // 64-bit Platform Sizes
-    static_assert(sizeof(JPH::BodyCreationSettings) == 288 || sizeof(JPH::BodyCreationSettings) == 256);
-    static_assert(sizeof(JPH::SoftBodyCreationSettings) == 160 || sizeof(JPH::SoftBodyCreationSettings) == 144);
+    static_assert(
+        sizeof(JPH::BodyCreationSettings) == 288 || 
+        sizeof(JPH::BodyCreationSettings) == 256
+    );
+    static_assert(
+        sizeof(JPH::SoftBodyCreationSettings) == 160 || 
+        sizeof(JPH::SoftBodyCreationSettings) == 144 || 
+        sizeof(JPH::SoftBodyCreationSettings) == 128
+    );
 #endif
 
 #ifdef JPH_DEBUG_RENDERER
