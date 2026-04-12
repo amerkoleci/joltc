@@ -3828,6 +3828,51 @@ uint32_t JPH_SoftBodySharedSettings_GetVertexCount(const JPH_SoftBodySharedSetti
     return settings ? (uint32_t)AsSoftBodySharedSettings(settings)->mVertices.size() : 0;
 }
 
+void JPH_SoftBodySharedSettings_AddVertices(
+    JPH_SoftBodySharedSettings* settings,
+    const JPH_Vec3* positions,
+    const float* invMasses,
+    uint32_t count)
+{
+    if (!settings || !positions || count == 0) return;
+
+    auto* s = AsSoftBodySharedSettings(settings);
+    
+    // Performance: Allocate memory once for the entire batch
+    s->mVertices.reserve(s->mVertices.size() + count);
+
+    for (uint32_t i = 0; i < count; i++) {
+        JPH::SoftBodySharedSettings::Vertex v;
+        // Jolt Soft Body vertices are always Float3
+        v.mPosition = JPH::Float3(positions[i].x, positions[i].y, positions[i].z);
+        v.mVelocity = JPH::Float3(0, 0, 0);
+        v.mInvMass  = invMasses ? invMasses[i] : 1.0f;
+        s->mVertices.push_back(v);
+    }
+}
+
+void JPH_SoftBodySharedSettings_AddFaces(
+    JPH_SoftBodySharedSettings* settings,
+    const uint32_t* indices,
+    uint32_t face_count)
+{
+    if (!settings || !indices || face_count == 0) return;
+
+    auto* s = AsSoftBodySharedSettings(settings);
+    
+    // Performance: Avoid per-face reallocations
+    s->mFaces.reserve(s->mFaces.size() + face_count);
+
+    for (uint32_t i = 0; i < face_count; i++) {
+        JPH::SoftBodySharedSettings::Face f;
+        f.mVertex[0]    = indices[i * 3 + 0];
+        f.mVertex[1]    = indices[i * 3 + 1];
+        f.mVertex[2]    = indices[i * 3 + 2];
+        f.mMaterialIndex = 0;
+        s->mFaces.push_back(f);
+    }
+}
+
 /* JPH_SoftBodyCreationSettings */
 JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void)
 {
@@ -7703,6 +7748,36 @@ void JPH_Body_GetSoftBodyVertexPosition(const JPH_Body* body, uint32_t index, JP
     outPos->x = (float)worldPos.GetX();
     outPos->y = (float)worldPos.GetY();
     outPos->z = (float)worldPos.GetZ();
+}
+
+void JPH_Body_GetSoftBodyVertexPositions(const JPH_Body* body, JPH_Vec3* outPositions, uint32_t* outCount) 
+{
+    if (!body || !outPositions || !AsBody(body)->IsSoftBody()) {
+        if (outCount) *outCount = 0;
+        return;
+    }
+
+    const JPH::Body* jBody = AsBody(body);
+    auto* mp = static_cast<const JPH::SoftBodyMotionProperties*>(jBody->GetMotionProperties());
+    const JPH::Array<JPH::SoftBodyVertex>& vertices = mp->GetVertices();
+    const uint32_t numVertices = (uint32_t)vertices.size();
+
+    // Cache the Center of Mass transform to avoid re-calculating inside the loop
+    JPH::RMat44 com_transform = jBody->GetCenterOfMassTransform();
+
+    for (uint32_t i = 0; i < numVertices; ++i) {
+        // Transform local vertex to world space
+        // Note: Jolt soft body vertices are local to the COM
+        JPH::RVec3 worldPos = com_transform * vertices[i].mPosition;
+
+        outPositions[i].x = (float)worldPos.GetX();
+        outPositions[i].y = (float)worldPos.GetY();
+        outPositions[i].z = (float)worldPos.GetZ();
+    }
+
+    if (outCount) {
+        *outCount = numVertices;
+    }
 }
 
 /* Contact Listener */

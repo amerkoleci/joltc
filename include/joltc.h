@@ -1608,6 +1608,15 @@ JPH_CAPI void JPH_SoftBodySharedSettings_AddPinnedVertex(JPH_SoftBodySharedSetti
 JPH_CAPI uint32_t JPH_SoftBodySharedSettings_GetVertexCount(const JPH_SoftBodySharedSettings* settings);
 /* Vertex data access (verification/retrieval) */
 JPH_CAPI void JPH_SoftBodySharedSettings_GetVertexPosition(const JPH_SoftBodySharedSettings* settings, uint32_t index, JPH_Vec3* outPos);
+JPH_CAPI void JPH_SoftBodySharedSettings_AddVertices(
+    JPH_SoftBodySharedSettings* settings,
+    const JPH_Vec3* positions,
+    const float* invMasses,
+    uint32_t count);
+JPH_CAPI void JPH_SoftBodySharedSettings_AddFaces(
+    JPH_SoftBodySharedSettings* settings,
+    const uint32_t* indices,
+    uint32_t face_count);
 
 /* JPH_SoftBodyCreationSettings */
 JPH_CAPI JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void);
@@ -2204,6 +2213,7 @@ JPH_CAPI JPH_Body* JPH_Body_GetFixedToWorldBody(void);
 
 JPH_CAPI uint32_t JPH_Body_GetSoftBodyVertexCount(const JPH_Body* body);
 JPH_CAPI void     JPH_Body_GetSoftBodyVertexPosition(const JPH_Body* body, uint32_t index, JPH_Vec3* outPos);
+JPH_CAPI void 	  JPH_Body_GetSoftBodyVertexPositions(const JPH_Body* body, JPH_Vec3* outPositions, uint32_t* outCount);
 
 /* JPH_BroadPhaseLayerFilter_Procs */
 typedef struct JPH_BroadPhaseLayerFilter_Procs {
