@@ -74,12 +74,14 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
-#include <Jolt/Physics/SoftBody/SoftBodyMotionProperties.h>
+#include "Jolt/Physics/SoftBody/SoftBodyMotionProperties.h"
+#include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 #include "Jolt/Physics/Vehicle/VehicleTrack.h"
 #include "Jolt/Core/LinearCurve.h"
 
 #include <cstdio>
 #include <cstdarg>
+#include <algorithm>
 
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
