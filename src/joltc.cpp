@@ -74,11 +74,14 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
+#include "Jolt/Physics/SoftBody/SoftBodyMotionProperties.h"
+#include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 #include "Jolt/Physics/Vehicle/VehicleTrack.h"
 #include "Jolt/Core/LinearCurve.h"
 
-#include <iostream>
+#include <cstdio>
 #include <cstdarg>
+#include <algorithm>
 
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
@@ -113,6 +116,7 @@ using namespace JPH;
 DEF_MAP_DECL(ContactManifold, JPH_ContactManifold)
 DEF_MAP_DECL(BodyCreationSettings, JPH_BodyCreationSettings)
 DEF_MAP_DECL(SoftBodyCreationSettings, JPH_SoftBodyCreationSettings)
+DEF_MAP_DECL(SoftBodySharedSettings, JPH_SoftBodySharedSettings)
 DEF_MAP_DECL(Body, JPH_Body)
 DEF_MAP_DECL(BodyInterface, JPH_BodyInterface)
 DEF_MAP_DECL(BodyLockInterface, JPH_BodyLockInterface)
@@ -228,18 +232,20 @@ static void TraceImpl(const char* fmt, ...)
 	// Format the message
 	va_list list;
 	va_start(list, fmt);
-	char buffer[1024];
-	vsnprintf(buffer, sizeof(buffer), fmt, list);
-	va_end(list);
-
+	
 	// Print to the TTY
 	if (s_TraceFunc)
 	{
+		char buffer[1024];
+		vsnprintf(buffer, sizeof(buffer), fmt, list);
+		va_end(list);
 		s_TraceFunc(buffer);
 	}
 	else
 	{
-		std::cout << buffer << std::endl;
+		vfprintf(stdout, fmt, list);
+        printf("\n");
+        fflush(stdout);
 	}
 }
 
@@ -255,7 +261,7 @@ static bool AssertFailedImpl(const char* inExpression, const char* inMessage, co
 	}
 
 	// Print to the TTY
-	std::cout << inFile << ":" << inLine << ": (" << inExpression << ") " << (inMessage != nullptr ? inMessage : "") << std::endl;
+	fprintf(stderr, "%s:%u: (%s) %s\n", inFile, inLine, inExpression, (inMessage != nullptr) ? inMessage : "");
 
 	// Breakpoint
 	return true;
@@ -584,6 +590,24 @@ static inline void ToJolt(ContactSettings& jolt, const JPH_ContactSettings* sett
 	jolt.mRelativeAngularSurfaceVelocity = ToJolt(settings->relativeAngularSurfaceVelocity);
 }
 
+static void ToJolt(JPH::VehicleTrackSettings& joltTrack, const JPH_VehicleTrackSettings* track)
+{
+	joltTrack.mDrivenWheel = track->drivenWheel;
+	joltTrack.mInertia = track->inertia;
+	joltTrack.mAngularDamping = track->angularDamping;
+	joltTrack.mMaxBrakeTorque = track->maxBrakeTorque;
+	joltTrack.mDifferentialRatio = track->differentialRatio;
+
+	joltTrack.mWheels.clear();
+	if (track->wheels && track->wheelsCount > 0)
+	{
+		for (uint32_t i = 0; i < track->wheelsCount; ++i)
+		{
+			joltTrack.mWheels.push_back(track->wheels[i]);
+		}
+	}
+}
+
 void JPH_MassProperties_DecomposePrincipalMomentsOfInertia(JPH_MassProperties* properties, JPH_Mat4* rotation, JPH_Vec3* diagonal)
 {
 	JPH::Mat44 joltRotation;
@@ -744,18 +768,25 @@ bool JPH_Init()
 
 	JPH::RegisterDefaultAllocator();
 
-	// TODO
 	JPH::Trace = TraceImpl;
 	JPH_IF_ENABLE_ASSERTS(JPH::AssertFailed = AssertFailedImpl;)
 
-		// Create a factory
-		JPH::Factory::sInstance = new JPH::Factory();
+	// Create a factory
+	JPH::Factory::sInstance = new JPH::Factory();
 
 	// Register all Jolt physics types
 	JPH::RegisterTypes();
+	
+#if defined(__SANITIZE_THREAD__) || defined(ENABLE_SANITIZER)
+	// ThreadSanitizer does not understand Jolt's lock-free 8MB bump allocator
+	// and will flag cross-frame memory reuse as data races.
+	// We fall back to standard malloc/free which TSan can track perfectly.
+	s_TempAllocator = new TempAllocatorMalloc(); 
+#else
+	// High-performance lock-free allocator for production
+	s_TempAllocator = new TempAllocatorImplWithMallocFallback(8 * 1024 * 1024); 
+#endif
 
-	// Init temp allocator
-	s_TempAllocator = new TempAllocatorImplWithMallocFallback(8 * 1024 * 1024);
 	s_initialized = true;
 
 	return true;
@@ -913,6 +944,24 @@ JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterTable_Create
 
 	auto filter = new JPH::ObjectVsBroadPhaseLayerFilterTable(*joltBroadPhaseLayerInterface, numBroadPhaseLayers, *joltObjectLayerPairFilter, numObjectLayers);
 	return reinterpret_cast<JPH_ObjectVsBroadPhaseLayerFilter*>(filter);
+}
+
+void JPH_BroadPhaseLayerInterfaceTable_Destroy(JPH_BroadPhaseLayerInterface* bpInterface)
+{
+    if (bpInterface)
+        delete reinterpret_cast<JPH::BroadPhaseLayerInterfaceTable*>(bpInterface);
+}
+
+void JPH_ObjectLayerPairFilterTable_Destroy(JPH_ObjectLayerPairFilter* filter)
+{
+    if (filter)
+        delete reinterpret_cast<JPH::ObjectLayerPairFilterTable*>(filter);
+}
+
+void JPH_ObjectVsBroadPhaseLayerFilterTable_Destroy(JPH_ObjectVsBroadPhaseLayerFilter* filter)
+{
+    if (filter)
+        delete reinterpret_cast<JPH::ObjectVsBroadPhaseLayerFilterTable*>(filter);
 }
 
 void JPH_DrawSettings_InitDefault(JPH_DrawSettings* settings)
@@ -1724,6 +1773,13 @@ void JPH_Vec3_DivideScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result)
 	JPH_ASSERT(scalar != 0.0f);
 	JPH::Vec3 joltVec = ToJolt(v);
 	FromJolt(joltVec / scalar, result);
+}
+
+void JPH_Vec3_GetNormalizedPerpendicular(const JPH_Vec3* v, JPH_Vec3* result)
+{
+	JPH_ASSERT(v && result);
+	JPH::Vec3 joltVec = ToJolt(v);
+	FromJolt(joltVec.GetNormalizedPerpendicular(), result);
 }
 
 void JPH_Vec3_DotProduct(const JPH_Vec3* v1, const JPH_Vec3* v2, float* result)
@@ -3693,6 +3749,132 @@ void JPH_BodyCreationSettings_SetMassPropertiesOverride(JPH_BodyCreationSettings
 	AsBodyCreationSettings(settings)->mMassPropertiesOverride = ToJolt(massProperties);
 }
 
+/* JPH_SoftBodySharedSettings */
+JPH_SoftBodySharedSettings* JPH_SoftBodySharedSettings_Create(void) 
+{
+    auto settings = new JPH::SoftBodySharedSettings();
+    // Jolt requires at least one material to resolve face collisions
+    settings->mMaterials.push_back(JPH::PhysicsMaterial::sDefault);
+    settings->AddRef();
+    return ToSoftBodySharedSettings(settings);
+}
+
+void JPH_SoftBodySharedSettings_Destroy(JPH_SoftBodySharedSettings* settings) 
+{
+    if (settings) 
+	{
+		AsSoftBodySharedSettings(settings)->Release();
+	}
+}
+
+void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, const JPH_Vec3* position, float invMass) 
+{
+    JPH::SoftBodySharedSettings::Vertex v;
+    // Jolt soft body vertices are always Float3 even in Double Precision mode
+    v.mPosition = JPH::Float3((float)position->x, (float)position->y, (float)position->z);
+    v.mVelocity = JPH::Float3(0, 0, 0); // Zero out to avoid explosion
+    v.mInvMass = invMass;
+    AsSoftBodySharedSettings(settings)->mVertices.push_back(v);
+}
+
+void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, uint32_t vertex1, uint32_t vertex2, uint32_t vertex3) 
+{
+    JPH::SoftBodySharedSettings::Face f;
+    f.mVertex[0] = vertex1;
+    f.mVertex[1] = vertex2;
+    f.mVertex[2] = vertex3;
+	f.mMaterialIndex = 0;
+    AsSoftBodySharedSettings(settings)->mFaces.push_back(f);
+}
+
+void JPH_SoftBodySharedSettings_CreateConstraints(JPH_SoftBodySharedSettings* settings, float compliance, JPH_SoftBodyBendType bendType) 
+{
+    auto* joltSettings = AsSoftBodySharedSettings(settings);
+    JPH::Array<JPH::SoftBodySharedSettings::VertexAttributes> attributes;
+    attributes.resize(joltSettings->mVertices.size());
+
+    for (auto &attr : attributes) {
+        attr.mCompliance = compliance; 
+        attr.mShearCompliance = compliance; 
+    }
+
+    joltSettings->CreateConstraints(attributes.data(), (JPH::uint)attributes.size(), 
+                                    static_cast<JPH::SoftBodySharedSettings::EBendType>(bendType));
+}
+
+void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* settings) 
+{
+    AsSoftBodySharedSettings(settings)->Optimize();
+}
+
+void JPH_SoftBodySharedSettings_AddPinnedVertex(JPH_SoftBodySharedSettings* settings, uint32_t index)
+{
+    auto* joltSettings = AsSoftBodySharedSettings(settings);
+    if (index < joltSettings->mVertices.size()) {
+        // Setting Inverse Mass to 0 pins the vertex in space relative to center of mass
+        joltSettings->mVertices[index].mInvMass = 0.0f;
+    }
+}
+
+void JPH_SoftBodySharedSettings_GetVertexPosition(const JPH_SoftBodySharedSettings* settings, uint32_t index, JPH_Vec3* outPos)
+{
+    auto* joltSettings = AsSoftBodySharedSettings(settings);
+    if (index < joltSettings->mVertices.size()) {
+        const auto& v = joltSettings->mVertices[index].mPosition;
+        outPos->x = v.x; outPos->y = v.y; outPos->z = v.z;
+    }
+}
+
+uint32_t JPH_SoftBodySharedSettings_GetVertexCount(const JPH_SoftBodySharedSettings* settings) 
+{
+    return settings ? (uint32_t)AsSoftBodySharedSettings(settings)->mVertices.size() : 0;
+}
+
+void JPH_SoftBodySharedSettings_AddVertices(
+    JPH_SoftBodySharedSettings* settings,
+    const JPH_Vec3* positions,
+    const float* invMasses,
+    uint32_t count)
+{
+    if (!settings || !positions || count == 0) return;
+
+    auto* s = AsSoftBodySharedSettings(settings);
+    
+    // Performance: Allocate memory once for the entire batch
+    s->mVertices.reserve(s->mVertices.size() + count);
+
+    for (uint32_t i = 0; i < count; i++) {
+        JPH::SoftBodySharedSettings::Vertex v;
+        // Jolt Soft Body vertices are always Float3
+        v.mPosition = JPH::Float3(positions[i].x, positions[i].y, positions[i].z);
+        v.mVelocity = JPH::Float3(0, 0, 0);
+        v.mInvMass  = invMasses ? invMasses[i] : 1.0f;
+        s->mVertices.push_back(v);
+    }
+}
+
+void JPH_SoftBodySharedSettings_AddFaces(
+    JPH_SoftBodySharedSettings* settings,
+    const uint32_t* indices,
+    uint32_t face_count)
+{
+    if (!settings || !indices || face_count == 0) return;
+
+    auto* s = AsSoftBodySharedSettings(settings);
+    
+    // Performance: Avoid per-face reallocations
+    s->mFaces.reserve(s->mFaces.size() + face_count);
+
+    for (uint32_t i = 0; i < face_count; i++) {
+        JPH::SoftBodySharedSettings::Face f;
+        f.mVertex[0]    = indices[i * 3 + 0];
+        f.mVertex[1]    = indices[i * 3 + 1];
+        f.mVertex[2]    = indices[i * 3 + 2];
+        f.mMaterialIndex = 0;
+        s->mFaces.push_back(f);
+    }
+}
+
 /* JPH_SoftBodyCreationSettings */
 JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void)
 {
@@ -3706,6 +3888,96 @@ void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings* settings
 	{
 		delete AsSoftBodyCreationSettings(settings);
 	}
+}
+
+void JPH_SoftBodyCreationSettings_SetSharedSettings(JPH_SoftBodyCreationSettings* settings, const JPH_SoftBodySharedSettings* sharedSettings) 
+{
+    AsSoftBodyCreationSettings(settings)->mSettings = AsSoftBodySharedSettings(sharedSettings);
+}
+
+void JPH_SoftBodyCreationSettings_SetVertexRadius(JPH_SoftBodyCreationSettings* settings, float radius) 
+{
+    AsSoftBodyCreationSettings(settings)->mVertexRadius = radius;
+}
+
+void JPH_SoftBodyCreationSettings_SetUserData(JPH_SoftBodyCreationSettings* settings, uint64_t userData) 
+{
+    AsSoftBodyCreationSettings(settings)->mUserData = userData;
+}
+
+void JPH_SoftBodyCreationSettings_SetCollisionGroup(JPH_SoftBodyCreationSettings* settings, const JPH_CollisionGroup* group) 
+{
+    AsSoftBodyCreationSettings(settings)->mCollisionGroup = ToJolt(group);
+}
+
+void JPH_SoftBodyCreationSettings_SetPosition(JPH_SoftBodyCreationSettings* settings, const JPH_RVec3* value)
+{
+    AsSoftBodyCreationSettings(settings)->mPosition = ToJolt(value);
+}
+
+void JPH_SoftBodyCreationSettings_SetRotation(JPH_SoftBodyCreationSettings* settings, const JPH_Quat* value)
+{
+    AsSoftBodyCreationSettings(settings)->mRotation = ToJolt(value);
+}
+
+void JPH_SoftBodyCreationSettings_SetObjectLayer(JPH_SoftBodyCreationSettings* settings, JPH_ObjectLayer value)
+{
+    AsSoftBodyCreationSettings(settings)->mObjectLayer = static_cast<JPH::ObjectLayer>(value);
+}
+
+void JPH_SoftBodyCreationSettings_SetAllowSleeping(JPH_SoftBodyCreationSettings* settings, bool value)
+{
+    AsSoftBodyCreationSettings(settings)->mAllowSleeping = value;
+}
+
+void JPH_SoftBodyCreationSettings_SetPressure(JPH_SoftBodyCreationSettings* settings, float pressure) 
+{
+    AsSoftBodyCreationSettings(settings)->mPressure = pressure;
+}
+
+void JPH_SoftBodyCreationSettings_SetLinearDamping(JPH_SoftBodyCreationSettings* settings, float damping) 
+{
+    AsSoftBodyCreationSettings(settings)->mLinearDamping = damping;
+}
+
+void JPH_SoftBodyCreationSettings_SetNumIterations(JPH_SoftBodyCreationSettings* settings, uint32_t iterations) 
+{
+    AsSoftBodyCreationSettings(settings)->mNumIterations = iterations;
+}
+
+void JPH_SoftBodyCreationSettings_SetMaxLinearVelocity(JPH_SoftBodyCreationSettings* settings, float max_vel) 
+{
+    AsSoftBodyCreationSettings(settings)->mMaxLinearVelocity = max_vel;
+}
+
+void JPH_SoftBodyCreationSettings_SetGravityFactor(JPH_SoftBodyCreationSettings* settings, float gravityFactor) 
+{
+    AsSoftBodyCreationSettings(settings)->mGravityFactor = gravityFactor;
+}
+
+void JPH_SoftBodyCreationSettings_SetFriction(JPH_SoftBodyCreationSettings* settings, float friction) 
+{
+    AsSoftBodyCreationSettings(settings)->mFriction = friction;
+}
+
+void JPH_SoftBodyCreationSettings_SetRestitution(JPH_SoftBodyCreationSettings* settings, float restitution) 
+{
+    AsSoftBodyCreationSettings(settings)->mRestitution = restitution;
+}
+
+void JPH_SoftBodyCreationSettings_SetMakeRotationIdentity(JPH_SoftBodyCreationSettings* settings, bool value) 
+{
+    AsSoftBodyCreationSettings(settings)->mMakeRotationIdentity = value;
+}
+
+float JPH_SoftBodyCreationSettings_GetVertexRadius(const JPH_SoftBodyCreationSettings* settings) 
+{
+    return settings ? AsSoftBodyCreationSettings(settings)->mVertexRadius : 0.0f;
+}
+
+bool JPH_SoftBodyCreationSettings_GetMakeRotationIdentity(const JPH_SoftBodyCreationSettings* settings) 
+{
+    return settings ? AsSoftBodyCreationSettings(settings)->mMakeRotationIdentity : false;
 }
 
 /* JPH_ConstraintSettings */
@@ -5242,6 +5514,24 @@ uint32_t JPH_PhysicsSystem_GetNumActiveBodies(const JPH_PhysicsSystem* system, J
 	return system->physicsSystem->GetNumActiveBodies(static_cast<JPH::EBodyType>(type));
 }
 
+JPH_CAPI void JPH_PhysicsSystem_GetActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count)
+{
+	JPH::BodyIDVector activeBodies;
+	// The enum value is RigidBody
+	system->physicsSystem->GetActiveBodies(JPH::EBodyType::RigidBody, activeBodies);
+    
+	uint32_t copyCount = std::min(count, (uint32_t)activeBodies.size());
+	for (uint32_t i = 0; i < copyCount; i++) {
+		ids[i] = activeBodies[i].GetIndexAndSequenceNumber();
+	}
+}
+
+JPH_CAPI const JPH_BodyID* JPH_PhysicsSystem_GetActiveBodiesUnsafe(const JPH_PhysicsSystem* system, JPH_BodyType type)
+{
+    // Returns a direct pointer to Jolt's internal BodyID array
+	return reinterpret_cast<const JPH_BodyID*>(system->physicsSystem->GetActiveBodiesUnsafe(static_cast<JPH::EBodyType>(type)));
+}
+
 uint32_t JPH_PhysicsSystem_GetMaxBodies(const JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
@@ -5591,6 +5881,11 @@ void JPH_BodyInterface_RemoveAndDestroyBody(JPH_BodyInterface* bodyInterface, JP
 bool JPH_BodyInterface_IsAdded(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
 {
 	return AsBodyInterface(bodyInterface)->IsAdded(JPH::BodyID(bodyID));
+}
+
+JPH_CAPI const JPH_Body* JPH_PhysicsSystem_GetBodyPtr(const JPH_PhysicsSystem* system, JPH_BodyID bodyID)
+{
+	return reinterpret_cast<const JPH_Body*>(system->physicsSystem->GetBodyLockInterface().TryGetBody(JPH::BodyID(bodyID)));
 }
 
 JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
@@ -7435,6 +7730,51 @@ uint64_t JPH_Body_GetUserData(JPH_Body* body)
 JPH_Body* JPH_Body_GetFixedToWorldBody(void)
 {
 	return ToBody(&JPH::Body::sFixedToWorld);
+}
+
+uint32_t JPH_Body_GetSoftBodyVertexCount(const JPH_Body* body) {
+    if (!body || !AsBody(body)->IsSoftBody()) return 0;
+    auto* mp = static_cast<const JPH::SoftBodyMotionProperties*>(AsBody(body)->GetMotionProperties());
+    return (uint32_t)mp->GetVertices().size();
+}
+
+void JPH_Body_GetSoftBodyVertexPosition(const JPH_Body* body, uint32_t index, JPH_Vec3* outPos) {
+    if (!body || !outPos || !AsBody(body)->IsSoftBody()) return;
+    auto* jBody = AsBody(body);
+    auto* mp = static_cast<const JPH::SoftBodyMotionProperties*>(jBody->GetMotionProperties());
+    if (index >= mp->GetVertices().size()) return;
+
+    const auto& v = mp->GetVertices()[index];
+    JPH::RVec3 worldPos = jBody->GetCenterOfMassTransform() * v.mPosition;
+
+    outPos->x = (float)worldPos.GetX();
+    outPos->y = (float)worldPos.GetY();
+    outPos->z = (float)worldPos.GetZ();
+}
+
+void JPH_Body_GetSoftBodyVertexPositions(const JPH_Body* body, JPH_Vec3* outPositions, uint32_t capacity, uint32_t* outCount) 
+{
+    if (!body || !outPositions || !AsBody(body)->IsSoftBody()) {
+        if (outCount) *outCount = 0;
+        return;
+    }
+
+    const JPH::Body* jBody = AsBody(body);
+    auto* mp = static_cast<const JPH::SoftBodyMotionProperties*>(jBody->GetMotionProperties());
+    const JPH::Array<JPH::SoftBodyVertex>& vertices = mp->GetVertices();
+    const uint32_t numVertices = (uint32_t)vertices.size();
+    const uint32_t writeCount = (capacity < numVertices) ? capacity : numVertices;
+
+    JPH::RMat44 com_transform = jBody->GetCenterOfMassTransform();
+
+    for (uint32_t i = 0; i < writeCount; ++i) {
+        JPH::RVec3 worldPos = com_transform * vertices[i].mPosition;
+        outPositions[i].x = (float)worldPos.GetX();
+        outPositions[i].y = (float)worldPos.GetY();
+        outPositions[i].z = (float)worldPos.GetZ();
+    }
+
+    if (outCount) *outCount = numVertices; // always report true count, not writeCount
 }
 
 /* Contact Listener */
@@ -10307,6 +10647,11 @@ void JPH_VehicleTransmissionSettings_SetClutchStrength(JPH_VehicleTransmissionSe
 }
 
 /* VehicleTransmission */
+void JPH_VehicleTransmission_SetMode(JPH_VehicleTransmission* transmission, JPH_TransmissionMode mode)
+{
+    AsVehicleTransmission(transmission)->mMode = static_cast<JPH::ETransmissionMode>(mode);
+}
+
 void JPH_VehicleTransmission_Set(JPH_VehicleTransmission* transmission, int currentGear, float clutchFriction)
 {
 	AsVehicleTransmission(transmission)->Set(currentGear, clutchFriction);
@@ -10754,6 +11099,27 @@ void JPH_WheeledVehicleControllerSettings_SetDifferentials(JPH_WheeledVehicleCon
 	}
 }
 
+// Helper to ensure a wheel is driven without manual diff setup
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_AddDifferential(JPH_WheeledVehicleControllerSettings* settings, int leftWheel, int rightWheel)
+{
+    JPH_ASSERT(settings);
+    VehicleDifferentialSettings diff;
+    diff.mLeftWheel = leftWheel;
+    diff.mRightWheel = rightWheel;
+    diff.mDifferentialRatio = 3.5f; 
+    diff.mLimitedSlipRatio = 1.4f;
+    diff.mEngineTorqueRatio = 1.0f; // This is normalized automatically when multiple are added
+
+    auto* controller = AsWheeledVehicleControllerSettings(settings);
+    controller->mDifferentials.push_back(diff);
+    
+    // Ensure torque is split evenly across all differentials (e.g. 0.5 for Front, 0.5 for Rear)
+    float ratio = 1.0f / (float)controller->mDifferentials.size();
+    for (auto& d : controller->mDifferentials) {
+        d.mEngineTorqueRatio = ratio;
+    }
+}
+
 float JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(const JPH_WheeledVehicleControllerSettings* settings)
 {
 	return AsWheeledVehicleControllerSettings(settings)->mDifferentialLimitedSlipRatio;
@@ -10932,6 +11298,20 @@ JPH_CAPI void JPH_TrackedVehicleControllerSettings_SetTransmission(JPH_TrackedVe
 	JPH_ASSERT(value);
 
 	AsTrackedVehicleControllerSettings(settings)->mTransmission = *AsVehicleTransmissionSettings(value);
+}
+
+JPH_CAPI void JPH_TrackedVehicleControllerSettings_SetTrack(JPH_TrackedVehicleControllerSettings* settings, uint32_t index, const JPH_VehicleTrackSettings* track)
+{
+	JPH_ASSERT(settings);
+	JPH_ASSERT(track);
+	
+	// Jolt only supports 2 tracks (Left=0, Right=1)
+	if (index >= 2) return; 
+
+	JPH::VehicleTrackSettings joltTrack;
+	ToJolt(joltTrack, track);
+
+	AsTrackedVehicleControllerSettings(settings)->mTracks[index] = joltTrack;
 }
 
 void JPH_TrackedVehicleController_SetDriverInput(JPH_TrackedVehicleController* controller, float forward, float leftRatio, float rightRatio, float brake)

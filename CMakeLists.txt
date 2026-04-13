@@ -141,25 +141,32 @@ if (JPH_MASTER_PROJECT AND NOT CMAKE_BUILD_TYPE)
 endif ()
 
 # Search for local JoltPhysics first
-if(EXISTS "${CMAKE_SOURCE_DIR}/JoltPhysics/Build/CMakeLists.txt")
-    message(STATUS "Using local JoltPhysics from ${CMAKE_SOURCE_DIR}/JoltPhysics")
-
+if (DEFINED JOLT_PHYSICS_ROOT AND EXISTS "${JOLT_PHYSICS_ROOT}/Build/CMakeLists.txt")
+    message(STATUS "[JoltC] Using provided JOLT_PHYSICS_ROOT: ${JOLT_PHYSICS_ROOT}")
     FetchContent_Declare(
         JoltPhysics
-        SOURCE_DIR "${CMAKE_SOURCE_DIR}/JoltPhysics"
+        SOURCE_DIR "${JOLT_PHYSICS_ROOT}"
         SOURCE_SUBDIR "Build"
     )
-elseif(EXISTS "${CMAKE_SOURCE_DIR}/../JoltPhysics/Build/CMakeLists.txt")
-    message(STATUS "Using local JoltPhysics from ${CMAKE_SOURCE_DIR}/../JoltPhysics")
-
+# 2. Check for JoltPhysics nested inside JoltC
+elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/JoltPhysics/Build/CMakeLists.txt")
+    message(STATUS "[JoltC] Using local JoltPhysics from nested directory")
     FetchContent_Declare(
         JoltPhysics
-        SOURCE_DIR "${CMAKE_SOURCE_DIR}/../JoltPhysics"
+        SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/JoltPhysics"
         SOURCE_SUBDIR "Build"
     )
+# 3. Check for JoltPhysics side-by-side with JoltC
+elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../JoltPhysics/Build/CMakeLists.txt")
+    message(STATUS "[JoltC] Using local JoltPhysics from side-by-side directory")
+    FetchContent_Declare(
+        JoltPhysics
+        SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../JoltPhysics"
+        SOURCE_SUBDIR "Build"
+    )
+# 4. Fallback to GitHub
 else()
-    message(STATUS "Local Jolt not found, download from remote")
-
+    message(STATUS "[JoltC] Local Jolt not found, downloading from GitHub v5.5.0")
     FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
@@ -167,6 +174,7 @@ else()
         SOURCE_SUBDIR "Build"
     )
 endif()
+
 FetchContent_MakeAvailable(JoltPhysics)
 
 if (XCODE)

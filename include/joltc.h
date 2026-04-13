@@ -125,6 +125,7 @@ typedef struct JPH_EmptyShape							JPH_EmptyShape;
 
 typedef struct JPH_BodyCreationSettings					JPH_BodyCreationSettings;
 typedef struct JPH_SoftBodyCreationSettings				JPH_SoftBodyCreationSettings;
+typedef struct JPH_SoftBodySharedSettings 				JPH_SoftBodySharedSettings;
 typedef struct JPH_BodyInterface						JPH_BodyInterface;
 typedef struct JPH_BodyLockInterface					JPH_BodyLockInterface;
 typedef struct JPH_BroadPhaseQuery						JPH_BroadPhaseQuery;
@@ -389,6 +390,13 @@ typedef enum JPH_SoftBodyConstraintColor
 	_JPH_SoftBodyConstraintColor_Count,
 	_JPH_SoftBodyConstraintColor_Force32 = 0x7FFFFFFF
 } JPH_SoftBodyConstraintColor;
+
+typedef enum JPH_SoftBodyBendType 
+{
+    JPH_SoftBodyBendType_None,
+    JPH_SoftBodyBendType_Distance,
+    JPH_SoftBodyBendType_Dihedral
+} JPH_SoftBodyBendType;
 
 typedef enum JPH_BodyManager_ShapeColor
 {
@@ -1049,6 +1057,9 @@ JPH_CAPI JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterMas
 JPH_CAPI JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterTable_Create(
 	JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface, uint32_t numBroadPhaseLayers,
 	JPH_ObjectLayerPairFilter* objectLayerPairFilter, uint32_t numObjectLayers);
+JPH_CAPI void JPH_BroadPhaseLayerInterfaceTable_Destroy(JPH_BroadPhaseLayerInterface* bpInterface);
+JPH_CAPI void JPH_ObjectLayerPairFilterTable_Destroy(JPH_ObjectLayerPairFilter* filter);
+JPH_CAPI void JPH_ObjectVsBroadPhaseLayerFilterTable_Destroy(JPH_ObjectVsBroadPhaseLayerFilter* filter);
 
 JPH_CAPI void JPH_DrawSettings_InitDefault(JPH_DrawSettings* settings);
 
@@ -1123,6 +1134,9 @@ JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumBodies(const JPH_PhysicsSystem* system
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyType type);
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetMaxBodies(const JPH_PhysicsSystem* system);
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumConstraints(const JPH_PhysicsSystem* system);
+
+JPH_CAPI void JPH_PhysicsSystem_GetActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
+JPH_CAPI const JPH_BodyID* JPH_PhysicsSystem_GetActiveBodiesUnsafe(const JPH_PhysicsSystem* system, JPH_BodyType type);
 
 JPH_CAPI void JPH_PhysicsSystem_SetGravity(JPH_PhysicsSystem* system, const JPH_Vec3* value);
 JPH_CAPI void JPH_PhysicsSystem_GetGravity(JPH_PhysicsSystem* system, JPH_Vec3* result);
@@ -1220,6 +1234,8 @@ JPH_CAPI void JPH_Vec3_MultiplyMatrix(const JPH_Mat4* left, const JPH_Vec3* righ
 
 JPH_CAPI void JPH_Vec3_Divide(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
 JPH_CAPI void JPH_Vec3_DivideScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result);
+
+JPH_CAPI void JPH_Vec3_GetNormalizedPerpendicular(const JPH_Vec3* v, JPH_Vec3* result);
 
 JPH_CAPI void JPH_Mat4_Add(const JPH_Mat4* m1, const JPH_Mat4* m2, JPH_Mat4* result);
 JPH_CAPI void JPH_Mat4_Subtract(const JPH_Mat4* m1, const JPH_Mat4* m2, JPH_Mat4* result);
@@ -1580,9 +1596,51 @@ JPH_CAPI void JPH_BodyCreationSettings_SetInertiaMultiplier(JPH_BodyCreationSett
 JPH_CAPI void JPH_BodyCreationSettings_GetMassPropertiesOverride(const JPH_BodyCreationSettings* settings, JPH_MassProperties* result);
 JPH_CAPI void JPH_BodyCreationSettings_SetMassPropertiesOverride(JPH_BodyCreationSettings* settings, const JPH_MassProperties* massProperties);
 
+/* JPH_SoftBodySharedSettings */
+JPH_CAPI JPH_SoftBodySharedSettings* JPH_SoftBodySharedSettings_Create(void);
+JPH_CAPI void JPH_SoftBodySharedSettings_Destroy(JPH_SoftBodySharedSettings* settings);
+JPH_CAPI void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, const JPH_Vec3* position, float invMass);
+JPH_CAPI void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, uint32_t vertex1, uint32_t vertex2, uint32_t vertex3);
+JPH_CAPI void JPH_SoftBodySharedSettings_CreateConstraints(JPH_SoftBodySharedSettings* settings, float compliance, JPH_SoftBodyBendType bendType);
+JPH_CAPI void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* settings);
+/* NOTE: Must be called BEFORE CreateConstraints for correct mass-participation math. */
+JPH_CAPI void JPH_SoftBodySharedSettings_AddPinnedVertex(JPH_SoftBodySharedSettings* settings, uint32_t index);
+JPH_CAPI uint32_t JPH_SoftBodySharedSettings_GetVertexCount(const JPH_SoftBodySharedSettings* settings);
+/* Vertex data access (verification/retrieval) */
+JPH_CAPI void JPH_SoftBodySharedSettings_GetVertexPosition(const JPH_SoftBodySharedSettings* settings, uint32_t index, JPH_Vec3* outPos);
+JPH_CAPI void JPH_SoftBodySharedSettings_AddVertices(
+    JPH_SoftBodySharedSettings* settings,
+    const JPH_Vec3* positions,
+    const float* invMasses,
+    uint32_t count);
+JPH_CAPI void JPH_SoftBodySharedSettings_AddFaces(
+    JPH_SoftBodySharedSettings* settings,
+    const uint32_t* indices,
+    uint32_t face_count);
+
 /* JPH_SoftBodyCreationSettings */
 JPH_CAPI JPH_SoftBodyCreationSettings* JPH_SoftBodyCreationSettings_Create(void);
 JPH_CAPI void JPH_SoftBodyCreationSettings_Destroy(JPH_SoftBodyCreationSettings* settings);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetSharedSettings(JPH_SoftBodyCreationSettings* settings, const JPH_SoftBodySharedSettings* sharedSettings);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetVertexRadius(JPH_SoftBodyCreationSettings* settings, float radius);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetUserData(JPH_SoftBodyCreationSettings* settings, uint64_t userData);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetCollisionGroup(JPH_SoftBodyCreationSettings* settings, const JPH_CollisionGroup* group);
+
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetPosition(JPH_SoftBodyCreationSettings* settings, const JPH_RVec3* value);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetRotation(JPH_SoftBodyCreationSettings* settings, const JPH_Quat* value);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetObjectLayer(JPH_SoftBodyCreationSettings* settings, JPH_ObjectLayer value);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetAllowSleeping(JPH_SoftBodyCreationSettings* settings, bool value);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetPressure(JPH_SoftBodyCreationSettings* settings, float pressure);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetLinearDamping(JPH_SoftBodyCreationSettings* settings, float damping);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetNumIterations(JPH_SoftBodyCreationSettings* settings, uint32_t iterations);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetMaxLinearVelocity(JPH_SoftBodyCreationSettings* settings, float max_vel);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetGravityFactor(JPH_SoftBodyCreationSettings* settings, float gravityFactor);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetFriction(JPH_SoftBodyCreationSettings* settings, float friction);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetRestitution(JPH_SoftBodyCreationSettings* settings, float restitution);
+JPH_CAPI void JPH_SoftBodyCreationSettings_SetMakeRotationIdentity(JPH_SoftBodyCreationSettings* settings, bool value);
+JPH_CAPI float JPH_SoftBodyCreationSettings_GetVertexRadius(const JPH_SoftBodyCreationSettings* settings);
+JPH_CAPI bool JPH_SoftBodyCreationSettings_GetMakeRotationIdentity(const JPH_SoftBodyCreationSettings* settings);
+
 
 /* JPH_Constraint */
 JPH_CAPI void JPH_Constraint_Destroy(JPH_Constraint* constraint);
@@ -1788,6 +1846,7 @@ JPH_CAPI void JPH_BodyInterface_RemoveBody(JPH_BodyInterface* bodyInterface, JPH
 JPH_CAPI void JPH_BodyInterface_RemoveAndDestroyBody(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID);
 JPH_CAPI bool JPH_BodyInterface_IsAdded(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID);
 JPH_CAPI JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID);
+JPH_CAPI const JPH_Body* JPH_PhysicsSystem_GetBodyPtr(const JPH_PhysicsSystem* system, JPH_BodyID bodyID);
 
 JPH_CAPI void JPH_BodyInterface_SetLinearVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, const JPH_Vec3* velocity);
 JPH_CAPI void JPH_BodyInterface_GetLinearVelocity(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID, JPH_Vec3* velocity);
@@ -2151,6 +2210,10 @@ JPH_CAPI void JPH_Body_SetUserData(JPH_Body* body, uint64_t userData);
 JPH_CAPI uint64_t JPH_Body_GetUserData(JPH_Body* body);
 
 JPH_CAPI JPH_Body* JPH_Body_GetFixedToWorldBody(void);
+
+JPH_CAPI uint32_t JPH_Body_GetSoftBodyVertexCount(const JPH_Body* body);
+JPH_CAPI void     JPH_Body_GetSoftBodyVertexPosition(const JPH_Body* body, uint32_t index, JPH_Vec3* outPos);
+JPH_CAPI void 	  JPH_Body_GetSoftBodyVertexPositions(const JPH_Body* body, JPH_Vec3* outPositions, uint32_t* outCount);
 
 /* JPH_BroadPhaseLayerFilter_Procs */
 typedef struct JPH_BroadPhaseLayerFilter_Procs {
@@ -2868,6 +2931,7 @@ JPH_CAPI float JPH_VehicleTransmissionSettings_GetClutchStrength(const JPH_Vehic
 JPH_CAPI void JPH_VehicleTransmissionSettings_SetClutchStrength(JPH_VehicleTransmissionSettings* settings, float value);
 
 /* VehicleTransmission */
+JPH_CAPI void JPH_VehicleTransmission_SetMode(JPH_VehicleTransmission* transmission, JPH_TransmissionMode mode);
 JPH_CAPI void JPH_VehicleTransmission_Set(JPH_VehicleTransmission* transmission, int currentGear, float clutchFriction);
 JPH_CAPI void JPH_VehicleTransmission_Update(JPH_VehicleTransmission* transmission, float deltaTime, float currentRPM, float forwardInput, bool canShiftUp);
 JPH_CAPI int JPH_VehicleTransmission_GetCurrentGear(const JPH_VehicleTransmission* transmission);
@@ -2923,6 +2987,8 @@ JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentialsCount(JPH_Whe
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_GetDifferential(const JPH_WheeledVehicleControllerSettings* settings, uint32_t index, JPH_VehicleDifferentialSettings* result);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferential(JPH_WheeledVehicleControllerSettings* settings, uint32_t index, const JPH_VehicleDifferentialSettings* value);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentials(JPH_WheeledVehicleControllerSettings* settings, const JPH_VehicleDifferentialSettings* values, uint32_t count);
+
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_AddDifferential(JPH_WheeledVehicleControllerSettings* settings, int leftWheel, int rightWheel);
 
 JPH_CAPI float JPH_WheeledVehicleControllerSettings_GetDifferentialLimitedSlipRatio(const JPH_WheeledVehicleControllerSettings* settings);
 JPH_CAPI void JPH_WheeledVehicleControllerSettings_SetDifferentialLimitedSlipRatio(JPH_WheeledVehicleControllerSettings* settings, float value);
@@ -2991,6 +3057,7 @@ JPH_CAPI void JPH_TrackedVehicleControllerSettings_GetEngine(const JPH_TrackedVe
 JPH_CAPI void JPH_TrackedVehicleControllerSettings_SetEngine(JPH_TrackedVehicleControllerSettings* settings, const JPH_VehicleEngineSettings* value);
 JPH_CAPI const JPH_VehicleTransmissionSettings* JPH_TrackedVehicleControllerSettings_GetTransmission(const JPH_TrackedVehicleControllerSettings* settings);
 JPH_CAPI void JPH_TrackedVehicleControllerSettings_SetTransmission(JPH_TrackedVehicleControllerSettings* settings, const JPH_VehicleTransmissionSettings* value);
+JPH_CAPI void JPH_TrackedVehicleControllerSettings_SetTrack(JPH_TrackedVehicleControllerSettings* settings, uint32_t index, const JPH_VehicleTrackSettings* track);
 
 JPH_CAPI void JPH_TrackedVehicleController_SetDriverInput(JPH_TrackedVehicleController* controller, float forward, float leftRatio, float rightRatio, float brake);
 JPH_CAPI float JPH_TrackedVehicleController_GetForwardInput(const JPH_TrackedVehicleController* controller);
