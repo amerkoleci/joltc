@@ -1139,9 +1139,6 @@ JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumActiveBodies(const JPH_PhysicsSystem* 
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetMaxBodies(const JPH_PhysicsSystem* system);
 JPH_CAPI uint32_t JPH_PhysicsSystem_GetNumConstraints(const JPH_PhysicsSystem* system);
 
-JPH_CAPI void JPH_PhysicsSystem_GetActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
-JPH_CAPI const JPH_BodyID* JPH_PhysicsSystem_GetActiveBodiesUnsafe(const JPH_PhysicsSystem* system, JPH_BodyType type);
-
 JPH_CAPI void JPH_PhysicsSystem_SetGravity(JPH_PhysicsSystem* system, const JPH_Vec3* value);
 JPH_CAPI void JPH_PhysicsSystem_GetGravity(JPH_PhysicsSystem* system, JPH_Vec3* result);
 
@@ -1155,6 +1152,8 @@ JPH_CAPI void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_P
 JPH_CAPI void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener);
 
 JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
+JPH_CAPI void JPH_PhysicsSystem_GetActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyType type, JPH_BodyID* ids, uint32_t count);
+JPH_CAPI const JPH_BodyID* JPH_PhysicsSystem_GetActiveBodiesUnsafe(const JPH_PhysicsSystem* system, JPH_BodyType type);
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
 
 JPH_CAPI void JPH_PhysicsSystem_ActivateBodiesInAABox(JPH_PhysicsSystem* system, const JPH_AABox* box, JPH_ObjectLayer layer);

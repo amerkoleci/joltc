@@ -5514,24 +5514,6 @@ uint32_t JPH_PhysicsSystem_GetNumActiveBodies(const JPH_PhysicsSystem* system, J
 	return system->physicsSystem->GetNumActiveBodies(static_cast<JPH::EBodyType>(type));
 }
 
-JPH_CAPI void JPH_PhysicsSystem_GetActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count)
-{
-	JPH::BodyIDVector activeBodies;
-	// The enum value is RigidBody
-	system->physicsSystem->GetActiveBodies(JPH::EBodyType::RigidBody, activeBodies);
-    
-	uint32_t copyCount = std::min(count, (uint32_t)activeBodies.size());
-	for (uint32_t i = 0; i < copyCount; i++) {
-		ids[i] = activeBodies[i].GetIndexAndSequenceNumber();
-	}
-}
-
-JPH_CAPI const JPH_BodyID* JPH_PhysicsSystem_GetActiveBodiesUnsafe(const JPH_PhysicsSystem* system, JPH_BodyType type)
-{
-    // Returns a direct pointer to Jolt's internal BodyID array
-	return reinterpret_cast<const JPH_BodyID*>(system->physicsSystem->GetActiveBodiesUnsafe(static_cast<JPH::EBodyType>(type)));
-}
-
 uint32_t JPH_PhysicsSystem_GetMaxBodies(const JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
@@ -5633,15 +5615,33 @@ void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* id
 {
 	JPH_ASSERT(system);
 	JPH_ASSERT(ids);
-	JPH_ASSERT(count <= JPH_PhysicsSystem_GetNumBodies(system));
 
 	JPH::BodyIDVector bodies;
 	system->physicsSystem->GetBodies(bodies);
 
+	const uint32_t copyCount = std::min(count, (uint32_t)bodies.size());
 	for (uint32_t i = 0; i < count; i++)
 	{
 		ids[i] = bodies[i].GetIndexAndSequenceNumber();
 	}
+}
+
+JPH_CAPI void JPH_PhysicsSystem_GetActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyType type, JPH_BodyID* ids, uint32_t count)
+{
+	JPH::BodyIDVector activeBodies;
+	system->physicsSystem->GetActiveBodies(static_cast<JPH::EBodyType>(type), activeBodies);
+
+	const uint32_t copyCount = std::min(count, (uint32_t)activeBodies.size());
+	for (uint32_t i = 0; i < copyCount; i++) 
+	{
+		ids[i] = activeBodies[i].GetIndexAndSequenceNumber();
+	}
+}
+
+JPH_CAPI const JPH_BodyID* JPH_PhysicsSystem_GetActiveBodiesUnsafe(const JPH_PhysicsSystem* system, JPH_BodyType type)
+{
+	// Returns a direct pointer to Jolt's internal BodyID array
+	return reinterpret_cast<const JPH_BodyID*>(system->physicsSystem->GetActiveBodiesUnsafe(static_cast<JPH::EBodyType>(type)));
 }
 
 void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count)
