@@ -1034,7 +1034,7 @@ JPH_CAPI void JPH_CollideShapeResult_FreeMembers(JPH_CollideShapeResult* result)
 JPH_CAPI void JPH_CollisionEstimationResult_FreeMembers(JPH_CollisionEstimationResult* result);
 
 /* JPH_BroadPhaseLayerInterface */
-JPH_CAPI void JPH_BroadPhaseLayerInterfaceTable_Destroy(JPH_BroadPhaseLayerInterface* bpInterface);
+JPH_CAPI void JPH_BroadPhaseLayerInterface_Destroy(JPH_BroadPhaseLayerInterface* bpInterface);
 
 JPH_CAPI JPH_BroadPhaseLayerInterface* JPH_BroadPhaseLayerInterfaceMask_Create(uint32_t numBroadPhaseLayers);
 JPH_CAPI void JPH_BroadPhaseLayerInterfaceMask_ConfigureLayer(JPH_BroadPhaseLayerInterface* bpInterface, JPH_BroadPhaseLayer broadPhaseLayer, uint32_t groupsToInclude, uint32_t groupsToExclude);
@@ -1044,7 +1044,7 @@ JPH_CAPI void JPH_BroadPhaseLayerInterfaceTable_MapObjectToBroadPhaseLayer(JPH_B
 
 
 /* JPH_ObjectLayerPairFilter */
-JPH_CAPI void JPH_ObjectLayerPairFilterTable_Destroy(JPH_ObjectLayerPairFilter* filter);
+JPH_CAPI void JPH_ObjectLayerPairFilter_Destroy(JPH_ObjectLayerPairFilter* filter);
 
 JPH_CAPI JPH_ObjectLayerPairFilter* JPH_ObjectLayerPairFilterMask_Create(void);
 JPH_CAPI JPH_ObjectLayer JPH_ObjectLayerPairFilterMask_GetObjectLayer(uint32_t group, uint32_t mask);
@@ -1057,7 +1057,7 @@ JPH_CAPI void JPH_ObjectLayerPairFilterTable_EnableCollision(JPH_ObjectLayerPair
 JPH_CAPI bool JPH_ObjectLayerPairFilterTable_ShouldCollide(JPH_ObjectLayerPairFilter* objectFilter, JPH_ObjectLayer layer1, JPH_ObjectLayer layer2);
 
 /* JPH_ObjectVsBroadPhaseLayerFilter */
-JPH_CAPI void JPH_ObjectVsBroadPhaseLayerFilterTable_Destroy(JPH_ObjectVsBroadPhaseLayerFilter* filter);
+JPH_CAPI void JPH_ObjectVsBroadPhaseLayerFilter_Destroy(JPH_ObjectVsBroadPhaseLayerFilter* filter);
 
 JPH_CAPI JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterMask_Create(const JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface);
 
