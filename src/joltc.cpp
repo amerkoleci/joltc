@@ -287,6 +287,13 @@ static inline void FromJolt(const Vec3& vec, JPH_Vec3* result)
 	result->z = vec.GetZ();
 }
 
+static inline void FromJolt(const Float3& vec, JPH_Vec3* result)
+{
+	result->x = vec.x;
+	result->y = vec.y;
+	result->z = vec.z;
+}
+
 static inline void FromJolt(const Quat& quat, JPH_Quat* result)
 {
 	result->x = quat.GetX();
@@ -3767,24 +3774,125 @@ void JPH_SoftBodySharedSettings_Destroy(JPH_SoftBodySharedSettings* settings)
 	}
 }
 
-void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, const JPH_Vec3* position, float invMass)
+void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, const JPH_SoftVertex* vertex)
 {
-	JPH::SoftBodySharedSettings::Vertex v;
-	// Jolt soft body vertices are always Float3 even in Double Precision mode
-	v.mPosition = JPH::Float3((float)position->x, (float)position->y, (float)position->z);
-	v.mVelocity = JPH::Float3(0, 0, 0); // Zero out to avoid explosion
-	v.mInvMass = invMass;
+	JPH::SoftBodySharedSettings::Vertex v{};
+	v.mPosition = ToJoltFloat3(vertex->position);
+	v.mVelocity = ToJoltFloat3(vertex->velocity);
+	v.mInvMass = vertex->invMass;
 	AsSoftBodySharedSettings(settings)->mVertices.push_back(v);
 }
 
-void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, uint32_t vertex1, uint32_t vertex2, uint32_t vertex3)
+void JPH_SoftBodySharedSettings_AddVertices(JPH_SoftBodySharedSettings* settings, const JPH_SoftVertex* vertices, uint32_t count)
 {
-	JPH::SoftBodySharedSettings::Face f;
-	f.mVertex[0] = vertex1;
-	f.mVertex[1] = vertex2;
-	f.mVertex[2] = vertex3;
-	f.mMaterialIndex = 0;
+	if (!settings || !vertices || count == 0) 
+		return;
+
+	auto* s = AsSoftBodySharedSettings(settings);
+
+	// Performance: Allocate memory once for the entire batch
+	s->mVertices.reserve(s->mVertices.size() + count);
+
+	for (uint32_t i = 0; i < count; i++) 
+	{
+		JPH::SoftBodySharedSettings::Vertex v{};
+		v.mPosition = ToJoltFloat3(vertices[i].position);
+		v.mVelocity = ToJoltFloat3(vertices[i].velocity);
+		v.mInvMass = vertices[i].invMass;
+		s->mVertices.push_back(v);
+	}
+}
+
+bool JPH_SoftBodySharedSettings_RemoveVertex(JPH_SoftBodySharedSettings* settings, uint32_t index)
+{
+	if (index < AsSoftBodySharedSettings(settings)->mVertices.size()) 
+	{
+		AsSoftBodySharedSettings(settings)->mVertices.erase(AsSoftBodySharedSettings(settings)->mVertices.begin() + index);
+		return true;
+	}
+	return false;
+}
+
+uint32_t JPH_SoftBodySharedSettings_GetVertexCount(const JPH_SoftBodySharedSettings* settings)
+{
+	return (uint32_t)AsSoftBodySharedSettings(settings)->mVertices.size();
+}
+
+bool JPH_SoftBodySharedSettings_GetVertex(const JPH_SoftBodySharedSettings* settings, uint32_t index, JPH_SoftVertex* outVertex)
+{
+	auto* joltSettings = AsSoftBodySharedSettings(settings);
+	if (index < joltSettings->mVertices.size())
+	{
+		const auto& joltVertex = joltSettings->mVertices[index];
+		FromJolt(joltVertex.mPosition, &outVertex->position);
+		FromJolt(joltVertex.mVelocity, &outVertex->velocity);
+		outVertex->invMass = joltVertex.mInvMass;
+		return true;
+	}
+
+	return false;
+}
+
+void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, const JPH_SoftFace* face)
+{
+	JPH::SoftBodySharedSettings::Face f{};
+	f.mVertex[0] = face->vertex1;
+	f.mVertex[1] = face->vertex2;
+	f.mVertex[2] = face->vertex3;
+	f.mMaterialIndex = face->materialIndex;
 	AsSoftBodySharedSettings(settings)->mFaces.push_back(f);
+}
+
+void JPH_SoftBodySharedSettings_AddFaces(JPH_SoftBodySharedSettings* settings, const JPH_SoftFace* faces, uint32_t count)
+{
+	if (!settings || !faces || count == 0) 
+		return;
+
+	auto* s = AsSoftBodySharedSettings(settings);
+
+	// Performance: Avoid per-face reallocations
+	s->mFaces.reserve(s->mFaces.size() + count);
+
+	for (uint32_t i = 0; i < count; i++)
+	{
+		JPH::SoftBodySharedSettings::Face f;
+		f.mVertex[0] = faces[i].vertex1;
+		f.mVertex[1] = faces[i].vertex2;
+		f.mVertex[2] = faces[i].vertex3;
+		f.mMaterialIndex = faces[i].materialIndex;
+		s->mFaces.push_back(f);
+	}
+}
+
+bool JPH_SoftBodySharedSettings_RemoveFace(JPH_SoftBodySharedSettings* settings, uint32_t index)
+{
+	if (index < AsSoftBodySharedSettings(settings)->mFaces.size()) 
+	{
+		AsSoftBodySharedSettings(settings)->mFaces.erase(AsSoftBodySharedSettings(settings)->mFaces.begin() + index);
+		return true;
+	}
+	return false;
+}
+
+uint32_t JPH_SoftBodySharedSettings_GetFaceCount(const JPH_SoftBodySharedSettings* settings)
+{
+	return (uint32_t)AsSoftBodySharedSettings(settings)->mFaces.size();
+}
+
+bool JPH_SoftBodySharedSettings_GetFace(const JPH_SoftBodySharedSettings* settings, uint32_t index, JPH_SoftFace* outFace)
+{
+	auto* joltSettings = AsSoftBodySharedSettings(settings);
+	if (index < joltSettings->mFaces.size())
+	{
+		const auto& joltFace = joltSettings->mFaces[index];
+		outFace->vertex1 = joltFace.mVertex[0];
+		outFace->vertex2 = joltFace.mVertex[1];
+		outFace->vertex3 = joltFace.mVertex[2];
+		outFace->materialIndex = joltFace.mMaterialIndex;
+		return true;
+	}
+
+	return false;
 }
 
 void JPH_SoftBodySharedSettings_CreateConstraints(JPH_SoftBodySharedSettings* settings, float compliance, JPH_SoftBodyBendType bendType)
@@ -3793,7 +3901,8 @@ void JPH_SoftBodySharedSettings_CreateConstraints(JPH_SoftBodySharedSettings* se
 	JPH::Array<JPH::SoftBodySharedSettings::VertexAttributes> attributes;
 	attributes.resize(joltSettings->mVertices.size());
 
-	for (auto& attr : attributes) {
+	for (auto& attr : attributes) 
+	{
 		attr.mCompliance = compliance;
 		attr.mShearCompliance = compliance;
 	}
@@ -3805,74 +3914,6 @@ void JPH_SoftBodySharedSettings_CreateConstraints(JPH_SoftBodySharedSettings* se
 void JPH_SoftBodySharedSettings_Optimize(JPH_SoftBodySharedSettings* settings)
 {
 	AsSoftBodySharedSettings(settings)->Optimize();
-}
-
-void JPH_SoftBodySharedSettings_AddPinnedVertex(JPH_SoftBodySharedSettings* settings, uint32_t index)
-{
-	auto* joltSettings = AsSoftBodySharedSettings(settings);
-	if (index < joltSettings->mVertices.size()) {
-		// Setting Inverse Mass to 0 pins the vertex in space relative to center of mass
-		joltSettings->mVertices[index].mInvMass = 0.0f;
-	}
-}
-
-void JPH_SoftBodySharedSettings_GetVertexPosition(const JPH_SoftBodySharedSettings* settings, uint32_t index, JPH_Vec3* outPos)
-{
-	auto* joltSettings = AsSoftBodySharedSettings(settings);
-	if (index < joltSettings->mVertices.size()) {
-		const auto& v = joltSettings->mVertices[index].mPosition;
-		outPos->x = v.x; outPos->y = v.y; outPos->z = v.z;
-	}
-}
-
-uint32_t JPH_SoftBodySharedSettings_GetVertexCount(const JPH_SoftBodySharedSettings* settings)
-{
-	return settings ? (uint32_t)AsSoftBodySharedSettings(settings)->mVertices.size() : 0;
-}
-
-void JPH_SoftBodySharedSettings_AddVertices(
-	JPH_SoftBodySharedSettings* settings,
-	const JPH_Vec3* positions,
-	const float* invMasses,
-	uint32_t count)
-{
-	if (!settings || !positions || count == 0) return;
-
-	auto* s = AsSoftBodySharedSettings(settings);
-
-	// Performance: Allocate memory once for the entire batch
-	s->mVertices.reserve(s->mVertices.size() + count);
-
-	for (uint32_t i = 0; i < count; i++) {
-		JPH::SoftBodySharedSettings::Vertex v;
-		// Jolt Soft Body vertices are always Float3
-		v.mPosition = JPH::Float3(positions[i].x, positions[i].y, positions[i].z);
-		v.mVelocity = JPH::Float3(0, 0, 0);
-		v.mInvMass = invMasses ? invMasses[i] : 1.0f;
-		s->mVertices.push_back(v);
-	}
-}
-
-void JPH_SoftBodySharedSettings_AddFaces(
-	JPH_SoftBodySharedSettings* settings,
-	const uint32_t* indices,
-	uint32_t face_count)
-{
-	if (!settings || !indices || face_count == 0) return;
-
-	auto* s = AsSoftBodySharedSettings(settings);
-
-	// Performance: Avoid per-face reallocations
-	s->mFaces.reserve(s->mFaces.size() + face_count);
-
-	for (uint32_t i = 0; i < face_count; i++) {
-		JPH::SoftBodySharedSettings::Face f;
-		f.mVertex[0] = indices[i * 3 + 0];
-		f.mVertex[1] = indices[i * 3 + 1];
-		f.mVertex[2] = indices[i * 3 + 2];
-		f.mMaterialIndex = 0;
-		s->mFaces.push_back(f);
-	}
 }
 
 /* JPH_SoftBodyCreationSettings */
