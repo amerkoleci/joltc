@@ -224,6 +224,8 @@ DEF_MAP_DECL(VehicleConstraint, JPH_VehicleConstraint)
 
 DEF_MAP_DECL(LinearCurve, JPH_LinearCurve)
 
+DEF_MAP_DECL(TempAllocator, JPH_TempAllocator)
+
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
 
@@ -11751,6 +11753,32 @@ void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, 
 			};
 		}
 	}
+}
+
+JPH_TempAllocator *JPH_TempAllocator_Create(uint32_t size)
+{
+    return ToTempAllocator(new TempAllocatorImplWithMallocFallback(size));
+}
+
+JPH_TempAllocator *JPH_TempAllocatorMalloc_Create(void)
+{
+    return ToTempAllocator(new TempAllocatorMalloc());
+}
+
+void JPH_TempAllocator_Destroy(JPH_TempAllocator* allocator) {
+    if (allocator) delete AsTempAllocator(allocator);
+}
+
+JPH_PhysicsUpdateError
+JPH_PhysicsSystem_Update2(JPH_PhysicsSystem *system, float deltaTime, int collisionSteps, JPH_TempAllocator *tempAllocator, JPH_JobSystem *jobSystem)
+{
+    JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
+    return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, AsTempAllocator(tempAllocator), joltJobSystem));
+}
+
+void JPH_PhysicsSystem_OptimizeBroadPhase2(JPH_PhysicsSystem *system, JPH_TempAllocator *tempAllocator)
+{
+    system->physicsSystem->OptimizeBroadPhase(); // Jolt's OptimizeBroadPhase actually doesn't use TempAllocator in standard builds, but we provide this for symmetry if needed.
 }
 
 JPH_SUPPRESS_WARNING_POP
