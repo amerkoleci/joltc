@@ -11776,9 +11776,4 @@ JPH_PhysicsSystem_Update2(JPH_PhysicsSystem *system, float deltaTime, int collis
     return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, AsTempAllocator(tempAllocator), joltJobSystem));
 }
 
-void JPH_PhysicsSystem_OptimizeBroadPhase2(JPH_PhysicsSystem *system, JPH_TempAllocator *tempAllocator)
-{
-    system->physicsSystem->OptimizeBroadPhase(); // Jolt's OptimizeBroadPhase actually doesn't use TempAllocator in standard builds, but we provide this for symmetry if needed.
-}
-
 JPH_SUPPRESS_WARNING_POP
