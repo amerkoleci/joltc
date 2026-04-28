@@ -3163,6 +3163,5 @@ JPH_CAPI void JPH_TempAllocator_Destroy(JPH_TempAllocator* allocator);
 
 /* Explicit Allocator Variants */
 JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Update2(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_TempAllocator* tempAllocator, JPH_JobSystem* jobSystem);
-JPH_CAPI void JPH_PhysicsSystem_OptimizeBroadPhase2(JPH_PhysicsSystem* system, JPH_TempAllocator* tempAllocator);
 
 #endif /* JOLT_C_H_ */
