@@ -7475,7 +7475,9 @@ public:
 				&baseOffset,
 				&collideShapeResult
 			);
-
+		    // Free the heap-allocated face arrays before returning; the managed callback
+		    // receives a pointer to collideShapeResult but must not hold it past this call.
+		    JPH_CollideShapeResult_FreeMembers(&collideShapeResult);
 			return (JPH::ValidateResult)result;
 		}
 
