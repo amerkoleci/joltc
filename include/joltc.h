@@ -733,11 +733,16 @@ typedef struct JPH_CollisionEstimationResult {
 	JPH_Vec3								linearVelocity2;
 	JPH_Vec3								angularVelocity2;
 
+	JPH_Vec3								frictionPoint;
 	JPH_Vec3								tangent1;
 	JPH_Vec3								tangent2;
 
-	uint32_t								impulseCount;
-	JPH_CollisionEstimationResultImpulse* impulses;
+	float									frictionImpulse1;
+	float									frictionImpulse2;
+	float									angularFrictionImpulse;
+
+	uint32_t								contactImpulseCount;
+	float*									contactImpulses;
 } JPH_CollisionEstimationResult;
 
 typedef struct JPH_BodyActivationListener           JPH_BodyActivationListener;
@@ -979,7 +984,7 @@ typedef struct JPH_CharacterContactSettings {
 	bool canReceiveImpulses;
 } JPH_CharacterContactSettings;
 
-typedef struct JPH_CharacterVirtualContact {
+typedef struct JPH_CharacterContact {
 	uint64_t						hash;
 	JPH_BodyID						bodyB;
 	JPH_CharacterID					characterIDB;
@@ -992,13 +997,14 @@ typedef struct JPH_CharacterVirtualContact {
 	float							fraction;
 	JPH_MotionType					motionTypeB;
 	bool							isSensorB;
-	const JPH_CharacterVirtual* characterB;
+	const JPH_CharacterVirtual*		characterB;
 	uint64_t						userData;
-	const JPH_PhysicsMaterial* material;
+	const JPH_PhysicsMaterial*		material;
 	bool							hadCollision;
 	bool							wasDiscarded;
 	bool							canPushCharacter;
-} JPH_CharacterVirtualContact;
+	bool							isBackFacingContact;
+} JPH_CharacterContact;
 
 typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* message);
 typedef bool(JPH_API_CALL* JPH_AssertFailureFunc)(const char* expression, const char* message, const char* file, uint32_t line);
@@ -2498,7 +2504,7 @@ JPH_CAPI bool JPH_CharacterVirtual_SetShape(JPH_CharacterVirtual* character, con
 JPH_CAPI void JPH_CharacterVirtual_SetInnerBodyShape(JPH_CharacterVirtual* character, const JPH_Shape* shape);
 
 JPH_CAPI uint32_t JPH_CharacterVirtual_GetNumActiveContacts(JPH_CharacterVirtual* character);
-JPH_CAPI void JPH_CharacterVirtual_GetActiveContact(JPH_CharacterVirtual* character, uint32_t index, JPH_CharacterVirtualContact* result);
+JPH_CAPI void JPH_CharacterVirtual_GetActiveContact(JPH_CharacterVirtual* character, uint32_t index, JPH_CharacterContact* result);
 
 JPH_CAPI bool JPH_CharacterVirtual_HasCollidedWithBody(JPH_CharacterVirtual* character, const JPH_BodyID body);
 JPH_CAPI bool JPH_CharacterVirtual_HasCollidedWith(JPH_CharacterVirtual* character, const JPH_CharacterID other);
@@ -2514,28 +2520,20 @@ typedef struct JPH_CharacterContactListener_Procs {
 
 	bool(JPH_API_CALL* OnContactValidate)(void* userData,
 		const JPH_CharacterVirtual* character,
-		const JPH_BodyID bodyID2,
-		const JPH_SubShapeID subShapeID2);
+		const JPH_CharacterContact* contact);
 
 	bool(JPH_API_CALL* OnCharacterContactValidate)(void* userData,
 		const JPH_CharacterVirtual* character,
-		const JPH_CharacterVirtual* otherCharacter,
-		const JPH_SubShapeID subShapeID2);
+		const JPH_CharacterContact* contact);
 
 	void(JPH_API_CALL* OnContactAdded)(void* userData,
 		const JPH_CharacterVirtual* character,
-		const JPH_BodyID bodyID2,
-		const JPH_SubShapeID subShapeID2,
-		const JPH_RVec3* contactPosition,
-		const JPH_Vec3* contactNormal,
+		const JPH_CharacterContact* contact,
 		JPH_CharacterContactSettings* ioSettings);
 
 	void(JPH_API_CALL* OnContactPersisted)(void* userData,
 		const JPH_CharacterVirtual* character,
-		const JPH_BodyID bodyID2,
-		const JPH_SubShapeID subShapeID2,
-		const JPH_RVec3* contactPosition,
-		const JPH_Vec3* contactNormal,
+		const JPH_CharacterContact* contact,
 		JPH_CharacterContactSettings* ioSettings);
 
 	void(JPH_API_CALL* OnContactRemoved)(void* userData,
@@ -2545,18 +2543,12 @@ typedef struct JPH_CharacterContactListener_Procs {
 
 	void(JPH_API_CALL* OnCharacterContactAdded)(void* userData,
 		const JPH_CharacterVirtual* character,
-		const JPH_CharacterVirtual* otherCharacter,
-		const JPH_SubShapeID subShapeID2,
-		const JPH_RVec3* contactPosition,
-		const JPH_Vec3* contactNormal,
+		const JPH_CharacterContact* contact,
 		JPH_CharacterContactSettings* ioSettings);
 
 	void(JPH_API_CALL* OnCharacterContactPersisted)(void* userData,
 		const JPH_CharacterVirtual* character,
-		const JPH_CharacterVirtual* otherCharacter,
-		const JPH_SubShapeID subShapeID2,
-		const JPH_RVec3* contactPosition,
-		const JPH_Vec3* contactNormal,
+		const JPH_CharacterContact* contact,
 		JPH_CharacterContactSettings* ioSettings);
 
 	void(JPH_API_CALL* OnCharacterContactRemoved)(void* userData,

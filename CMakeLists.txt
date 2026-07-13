@@ -126,6 +126,24 @@ option(USE_STD_VECTOR "Use std::vector instead of own Array class" OFF)
 # Setting this option will compile the ObjectStream class and RTTI attribute information
 option(ENABLE_OBJECT_STREAM "Compile the ObjectStream class and RTTI attribute information" ON)
 
+# Option to compile with DirectX 12 compute
+option(JPH_USE_DX12 "Use DirectX" ON)
+
+# Option to compile with Vulkan compute
+option(JPH_USE_VK "Use Vulkan" ON)
+
+# Option to compile with Metal compute
+option(JPH_USE_MTL "Use Metal" ON)
+
+# Option to compile with CPU fallback compute
+option(JPH_USE_CPU_COMPUTE "Use CPU Compute" ON)
+
+# Option to enable shader debug symbols
+option(JPH_SHADER_DEBUG_SYMBOLS "Shader Debug Symbols" OFF)
+
+# Option to enable shader optimizations. When this is on, the shaders will be optimized for performance, otherwise they're suitable for debugging.
+option(JPH_SHADER_OPTIMIZATION "Shader Optimization" ON)
+
 option(JPH_INSTALL "Install target" ${JPH_MASTER_PROJECT})
 option(JPH_SAMPLES "Build samples" ${JPH_MASTER_PROJECT})
 
@@ -166,11 +184,11 @@ elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../JoltPhysics/Build/CMakeLists.txt")
     )
 # 4. Fallback to GitHub
 else()
-    message(STATUS "[JoltC] Local Jolt not found, downloading from GitHub v5.5.0")
+    message(STATUS "[JoltC] Local Jolt not found, downloading from GitHub v5.6.0")
     FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG v5.5.0
+        GIT_TAG v5.6.0
         SOURCE_SUBDIR "Build"
     )
 endif()

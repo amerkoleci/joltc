@@ -49,6 +49,12 @@ target_include_directories(joltc_tests
         ${CMAKE_SOURCE_DIR}/include
 )
 
+set_property(TARGET gmock PROPERTY FOLDER "tests")
+set_property(TARGET gmock_main PROPERTY FOLDER "tests")
+set_property(TARGET gtest PROPERTY FOLDER "tests")
+set_property(TARGET gtest_main PROPERTY FOLDER "tests")
+set_property(TARGET joltc_tests PROPERTY FOLDER "tests")
+
 # Add tests to CTest (skip discovery for cross-compilation or when target arch differs from host)
 include(GoogleTest)
 
