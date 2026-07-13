@@ -721,12 +721,6 @@ typedef float JPH_CollidePointCollectorCallback(void* context, const JPH_Collide
 typedef float JPH_CollideShapeCollectorCallback(void* context, const JPH_CollideShapeResult* result);
 typedef float JPH_CastShapeCollectorCallback(void* context, const JPH_ShapeCastResult* result);
 
-typedef struct JPH_CollisionEstimationResultImpulse {
-	float	contactImpulse;
-	float	frictionImpulse1;
-	float	frictionImpulse2;
-} JPH_CollisionEstimationResultImpulse;
-
 typedef struct JPH_CollisionEstimationResult {
 	JPH_Vec3								linearVelocity1;
 	JPH_Vec3								angularVelocity1;
