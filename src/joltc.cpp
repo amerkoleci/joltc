@@ -224,6 +224,8 @@ DEF_MAP_DECL(VehicleConstraint, JPH_VehicleConstraint)
 
 DEF_MAP_DECL(LinearCurve, JPH_LinearCurve)
 
+DEF_MAP_DECL(TempAllocator, JPH_TempAllocator)
+
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
 
@@ -6863,6 +6865,7 @@ public:
 		JPH_CollideShapeResult hit = FromJolt(result);
 
 		float fraction = proc(userData, &hit);
+		JPH_CollideShapeResult_FreeMembers(&hit);
 		UpdateEarlyOutFraction(fraction);
 		hadHit = true;
 	}
@@ -7287,6 +7290,7 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 			{
 				result = FromJolt(collector.mHit);
 				callback(userData, &result);
+				JPH_CollideShapeResult_FreeMembers(&result);
 			}
 
 			return collector.HadHit();
@@ -7312,6 +7316,7 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 			{
 				result = FromJolt(collector.mHit);
 				callback(userData, &result);
+				JPH_CollideShapeResult_FreeMembers(&result);
 			}
 
 			return collector.HadHit();
@@ -7945,6 +7950,8 @@ public:
 				&baseOffset,
 				&collideShapeResult
 			);
+			
+			JPH_CollideShapeResult_FreeMembers(&collideShapeResult);
 
 			return (JPH::ValidateResult)result;
 		}
@@ -11779,6 +11786,27 @@ void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, 
 			};
 		}
 	}
+}
+
+JPH_TempAllocator *JPH_TempAllocator_Create(uint32_t size)
+{
+    return ToTempAllocator(new TempAllocatorImplWithMallocFallback(size));
+}
+
+JPH_TempAllocator *JPH_TempAllocatorMalloc_Create(void)
+{
+    return ToTempAllocator(new TempAllocatorMalloc());
+}
+
+void JPH_TempAllocator_Destroy(JPH_TempAllocator* allocator) {
+    if (allocator) delete AsTempAllocator(allocator);
+}
+
+JPH_PhysicsUpdateError
+JPH_PhysicsSystem_Update2(JPH_PhysicsSystem *system, float deltaTime, int collisionSteps, JPH_TempAllocator *tempAllocator, JPH_JobSystem *jobSystem)
+{
+    JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
+    return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, AsTempAllocator(tempAllocator), joltJobSystem));
 }
 
 JPH_SUPPRESS_WARNING_POP

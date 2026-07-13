@@ -3159,4 +3159,14 @@ JPH_CAPI uint32_t JPH_LinearCurve_GetPointCount(const JPH_LinearCurve* curve);
 JPH_CAPI void JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t index, JPH_Point* result);
 JPH_CAPI void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, uint32_t* count);
 
+/* Temp Allocator */
+typedef struct JPH_TempAllocator JPH_TempAllocator;
+
+JPH_CAPI JPH_TempAllocator* JPH_TempAllocator_Create(uint32_t size);
+JPH_CAPI JPH_TempAllocator* JPH_TempAllocatorMalloc_Create(void);
+JPH_CAPI void JPH_TempAllocator_Destroy(JPH_TempAllocator* allocator);
+
+/* Explicit Allocator Variants */
+JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Update2(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_TempAllocator* tempAllocator, JPH_JobSystem* jobSystem);
+
 #endif /* JOLT_C_H_ */
