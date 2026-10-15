@@ -9486,7 +9486,7 @@ void JPH_DebugRenderer_DrawPlane(JPH_DebugRenderer* renderer, const JPH_RVec3* p
 
 void JPH_DebugRenderer_DrawWireTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color)
 {
-	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireTriangle(ToJolt(v2), ToJolt(v2), ToJolt(v3), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireTriangle(ToJolt(v1), ToJolt(v2), ToJolt(v3), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawWireSphere(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, JPH_Color color, int level)
