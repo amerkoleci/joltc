@@ -587,7 +587,7 @@ static inline JPH::CollisionGroup ToJolt(const JPH_CollisionGroup* group)
 	return result;
 }
 
-static inline void ToJolt(ContactSettings& jolt, const JPH_ContactSettings* settings)
+static inline void ToJolt(JPH::ContactSettings& jolt, const JPH_ContactSettings* settings)
 {
 	jolt.mCombinedFriction = settings->combinedFriction;
 	jolt.mCombinedRestitution = settings->combinedRestitution;
@@ -617,6 +617,7 @@ static void ToJolt(JPH::VehicleTrackSettings& joltTrack, const JPH_VehicleTrackS
 		}
 	}
 }
+
 
 void JPH_MassProperties_DecomposePrincipalMomentsOfInertia(JPH_MassProperties* properties, JPH_Mat4* rotation, JPH_Vec3* diagonal)
 {
@@ -687,13 +688,13 @@ public:
 		mConfig = *config;
 	}
 
-	JobHandle CreateJob(const char* name, JPH::ColorArg color, const JPH::JobSystem::JobFunction& callback, uint32_t dependencies = 0) override
+	JobHandle CreateJob(const char* name, JPH::ColorArg color, const JobFunction& jobFunction, uint32 numDependencies = 0) override
 	{
 		uint32_t index;
 
 		for (;;)
 		{
-			index = mJobs.ConstructObject(name, color, this, callback, dependencies);
+			index = mJobs.ConstructObject(name, color, this, jobFunction, numDependencies);
 			if (index != FixedSizeFreeList<Job>::cInvalidObjectIndex)
 				break;
 			JPH_ASSERT(false, "No jobs available!");
@@ -703,10 +704,29 @@ public:
 		Job* job = &mJobs.Get(index);
 		JobHandle handle(job);
 
-		if (dependencies == 0)
+		if (numDependencies == 0)
 			QueueJob(job);
 
 		return handle;
+	}
+
+	void CreateJobs(const char* inName, ColorArg inColor, const JobFunction& inJobFunction, JobHandle* outJobs, uint32 inNumJobs, uint32 inNumDependencies = 0) override
+	{
+		JPH_PROFILE_FUNCTION();
+
+		for (uint32 i = 0; i < inNumJobs; ++i)
+		{
+			JobHandle job = CreateJob(inName, inColor, inJobFunction, inNumDependencies);
+			outJobs[i] = job;
+		}
+
+		// If there are no dependencies, queue the jobs now
+		if (inNumDependencies == 0)
+		{
+			static_assert(sizeof(JobHandle) == sizeof(Job*));
+			QueueJobs(reinterpret_cast<Job**>(outJobs), inNumJobs);
+		}
+
 	}
 
 	void FreeJob(Job* job) override
@@ -1072,7 +1092,6 @@ void JPH_PhysicsSystem_SetPhysicsSettings(JPH_PhysicsSystem* system, JPH_Physics
 	joltSettings.mMinVelocityForRestitution = settings->minVelocityForRestitution;
 	joltSettings.mTimeBeforeSleep = settings->timeBeforeSleep;
 	joltSettings.mPointVelocitySleepThreshold = settings->pointVelocitySleepThreshold;
-	joltSettings.mDeterministicSimulation = settings->deterministicSimulation;
 	joltSettings.mConstraintWarmStart = settings->constraintWarmStart;
 	joltSettings.mUseBodyPairContactCache = settings->useBodyPairContactCache;
 	joltSettings.mUseManifoldReduction = settings->useManifoldReduction;
@@ -1104,7 +1123,6 @@ void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, JPH_Physics
 	result->minVelocityForRestitution = joltSettings.mMinVelocityForRestitution;
 	result->timeBeforeSleep = joltSettings.mTimeBeforeSleep;
 	result->pointVelocitySleepThreshold = joltSettings.mPointVelocitySleepThreshold;
-	result->deterministicSimulation = joltSettings.mDeterministicSimulation;
 	result->constraintWarmStart = joltSettings.mConstraintWarmStart;
 	result->useBodyPairContactCache = joltSettings.mUseBodyPairContactCache;
 	result->useManifoldReduction = joltSettings.mUseManifoldReduction;
@@ -3788,7 +3806,7 @@ void JPH_SoftBodySharedSettings_AddVertex(JPH_SoftBodySharedSettings* settings, 
 
 void JPH_SoftBodySharedSettings_AddVertices(JPH_SoftBodySharedSettings* settings, const JPH_SoftVertex* vertices, uint32_t count)
 {
-	if (!settings || !vertices || count == 0) 
+	if (!settings || !vertices || count == 0)
 		return;
 
 	auto* s = AsSoftBodySharedSettings(settings);
@@ -3796,7 +3814,7 @@ void JPH_SoftBodySharedSettings_AddVertices(JPH_SoftBodySharedSettings* settings
 	// Performance: Allocate memory once for the entire batch
 	s->mVertices.reserve(s->mVertices.size() + count);
 
-	for (uint32_t i = 0; i < count; i++) 
+	for (uint32_t i = 0; i < count; i++)
 	{
 		JPH::SoftBodySharedSettings::Vertex v{};
 		v.mPosition = ToJoltFloat3(vertices[i].position);
@@ -3808,7 +3826,7 @@ void JPH_SoftBodySharedSettings_AddVertices(JPH_SoftBodySharedSettings* settings
 
 bool JPH_SoftBodySharedSettings_RemoveVertex(JPH_SoftBodySharedSettings* settings, uint32_t index)
 {
-	if (index < AsSoftBodySharedSettings(settings)->mVertices.size()) 
+	if (index < AsSoftBodySharedSettings(settings)->mVertices.size())
 	{
 		AsSoftBodySharedSettings(settings)->mVertices.erase(AsSoftBodySharedSettings(settings)->mVertices.begin() + index);
 		return true;
@@ -3848,7 +3866,7 @@ void JPH_SoftBodySharedSettings_AddFace(JPH_SoftBodySharedSettings* settings, co
 
 void JPH_SoftBodySharedSettings_AddFaces(JPH_SoftBodySharedSettings* settings, const JPH_SoftFace* faces, uint32_t count)
 {
-	if (!settings || !faces || count == 0) 
+	if (!settings || !faces || count == 0)
 		return;
 
 	auto* s = AsSoftBodySharedSettings(settings);
@@ -3869,7 +3887,7 @@ void JPH_SoftBodySharedSettings_AddFaces(JPH_SoftBodySharedSettings* settings, c
 
 bool JPH_SoftBodySharedSettings_RemoveFace(JPH_SoftBodySharedSettings* settings, uint32_t index)
 {
-	if (index < AsSoftBodySharedSettings(settings)->mFaces.size()) 
+	if (index < AsSoftBodySharedSettings(settings)->mFaces.size())
 	{
 		AsSoftBodySharedSettings(settings)->mFaces.erase(AsSoftBodySharedSettings(settings)->mFaces.begin() + index);
 		return true;
@@ -3904,7 +3922,7 @@ void JPH_SoftBodySharedSettings_CreateConstraints(JPH_SoftBodySharedSettings* se
 	JPH::Array<JPH::SoftBodySharedSettings::VertexAttributes> attributes;
 	attributes.resize(joltSettings->mVertices.size());
 
-	for (auto& attr : attributes) 
+	for (auto& attr : attributes)
 	{
 		attr.mCompliance = compliance;
 		attr.mShearCompliance = compliance;
@@ -7950,7 +7968,7 @@ public:
 				&baseOffset,
 				&collideShapeResult
 			);
-			
+
 			JPH_CollideShapeResult_FreeMembers(&collideShapeResult);
 
 			return (JPH::ValidateResult)result;
@@ -10176,16 +10194,18 @@ bool JPH_SkeletonMapper_IsJointTranslationLocked(const JPH_SkeletonMapper* mappe
 }
 
 /* CollisionEstimationResult */
-void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result)
+void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, const JPH_ContactSettings* contactSettings, float minVelocityForRestitution/* = 1.0f*/, uint32_t numIterations /*= 10*/, JPH_CollisionEstimationResult* result)
 {
 	JPH_ASSERT(result);
+
+	JPH::ContactSettings joltContactSettings;
+	ToJolt(joltContactSettings, contactSettings);
 
 	JPH::CollisionEstimationResult joltResult;
 
 	JPH::EstimateCollisionResponse(*AsBody(body1), *AsBody(body2),
 		*AsContactManifold(manifold), joltResult,
-		combinedFriction,
-		combinedRestitution,
+		joltContactSettings,
 		minVelocityForRestitution,
 		numIterations);
 
@@ -10195,11 +10215,7 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 	FromJolt(joltResult.mAngularVelocity2, &result->angularVelocity2);
 
 	FromJolt(joltResult.mFrictionPoint, &result->frictionPoint);
-	FromJolt(joltResult.mTangent1, &result->tangent1);
-	FromJolt(joltResult.mTangent2, &result->tangent2);
-
-	result->frictionImpulse1 = joltResult.mFrictionImpulse1;
-	result->frictionImpulse2 = joltResult.mFrictionImpulse2;
+	FromJolt(joltResult.mFrictionImpulse, &result->frictionImpulse);
 	result->angularFrictionImpulse = joltResult.mAngularFrictionImpulse;
 
 	if (!joltResult.mContactImpulse.empty())
@@ -11788,25 +11804,25 @@ void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, 
 	}
 }
 
-JPH_TempAllocator *JPH_TempAllocator_Create(uint32_t size)
+JPH_TempAllocator* JPH_TempAllocator_Create(uint32_t size)
 {
-    return ToTempAllocator(new TempAllocatorImplWithMallocFallback(size));
+	return ToTempAllocator(new TempAllocatorImplWithMallocFallback(size));
 }
 
-JPH_TempAllocator *JPH_TempAllocatorMalloc_Create(void)
+JPH_TempAllocator* JPH_TempAllocatorMalloc_Create(void)
 {
-    return ToTempAllocator(new TempAllocatorMalloc());
+	return ToTempAllocator(new TempAllocatorMalloc());
 }
 
 void JPH_TempAllocator_Destroy(JPH_TempAllocator* allocator) {
-    if (allocator) delete AsTempAllocator(allocator);
+	if (allocator) delete AsTempAllocator(allocator);
 }
 
 JPH_PhysicsUpdateError
-JPH_PhysicsSystem_Update2(JPH_PhysicsSystem *system, float deltaTime, int collisionSteps, JPH_TempAllocator *tempAllocator, JPH_JobSystem *jobSystem)
+JPH_PhysicsSystem_Update2(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_TempAllocator* tempAllocator, JPH_JobSystem* jobSystem)
 {
-    JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
-    return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, AsTempAllocator(tempAllocator), joltJobSystem));
+	JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
+	return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, AsTempAllocator(tempAllocator), joltJobSystem));
 }
 
 JPH_SUPPRESS_WARNING_POP

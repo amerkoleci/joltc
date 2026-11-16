@@ -655,9 +655,9 @@ typedef struct JPH_CollideShapeResult {
 	JPH_SubShapeID	subShapeID2;
 	JPH_BodyID		bodyID2;
 	uint32_t		shape1FaceCount;
-	JPH_Vec3* shape1Faces;
+	JPH_Vec3*		shape1Faces;
 	uint32_t		shape2FaceCount;
-	JPH_Vec3* shape2Faces;
+	JPH_Vec3*		shape2Faces;
 } JPH_CollideShapeResult;
 
 typedef struct JPH_ShapeCastResult {
@@ -728,11 +728,7 @@ typedef struct JPH_CollisionEstimationResult {
 	JPH_Vec3								angularVelocity2;
 
 	JPH_Vec3								frictionPoint;
-	JPH_Vec3								tangent1;
-	JPH_Vec3								tangent2;
-
-	float									frictionImpulse1;
-	float									frictionImpulse2;
+	JPH_Vec3								frictionImpulse;
 	float									angularFrictionImpulse;
 
 	uint32_t								contactImpulseCount;
@@ -1115,7 +1111,6 @@ typedef struct JPH_PhysicsSettings {
 	float minVelocityForRestitution;
 	float timeBeforeSleep;
 	float pointVelocitySleepThreshold;
-	bool deterministicSimulation;
 	bool constraintWarmStart;
 	bool useBodyPairContactCache;
 	bool useManifoldReduction;
@@ -2770,7 +2765,7 @@ JPH_CAPI void JPH_Ragdoll_GetRootTransform(const JPH_Ragdoll* ragdoll, JPH_RVec3
 JPH_CAPI const JPH_RagdollSettings* JPH_Ragdoll_GetRagdollSettings(const JPH_Ragdoll* ragdoll);
 
 /* JPH_EstimateCollisionResponse */
-JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);
+JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, const JPH_ContactSettings* contactSettings, float minVelocityForRestitution/* = 1.0f*/, uint32_t numIterations /*= 10*/, JPH_CollisionEstimationResult* result);
 
 /* Vehicle */
 typedef struct JPH_WheelSettings						JPH_WheelSettings;

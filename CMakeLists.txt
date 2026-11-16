@@ -54,8 +54,8 @@ option(DOUBLE_PRECISION "Use double precision math" OFF)
 # When turning this option on, the library will be compiled with debug symbols
 option(GENERATE_DEBUG_SYMBOLS "Generate debug symbols" OFF)
 
-# When turning this option on, the library will override the default CMAKE_CXX_FLAGS_DEBUG/RELEASE values, otherwise they will use the platform defaults
-option(OVERRIDE_CXX_FLAGS "Override CMAKE_CXX_FLAGS_DEBUG/RELEASE" ON)
+# When turning this option on, the library will override the default CMAKE_CXX_FLAGS_RELEASE values, otherwise they will use the platform defaults
+option(OVERRIDE_CXX_FLAGS "Override CMAKE_CXX_FLAGS_RELEASE" ON)
 
 # When turning this option on, the library will be compiled in such a way to attempt to keep the simulation deterministic across platforms
 option(CROSS_PLATFORM_DETERMINISTIC "Cross platform deterministic" OFF)
@@ -76,8 +76,9 @@ option(CPP_EXCEPTIONS_ENABLED "Enable C++ exceptions" OFF)
 # This adds some overhead and Jolt doesn't use RTTI so by default it is off.
 option(CPP_RTTI_ENABLED "Enable C++ RTTI" OFF)
 
+# Number of bits to use in ObjectLayer. Can be 16, 32 or 64.
 # Use 32-bit object layers to support more bits in ObjectLayerPairFilterMask
-set(OBJECT_LAYER_BITS 32)
+set(OBJECT_LAYER_BITS 32 CACHE STRING "Number of bits in ObjectLayer")
 
 # Select X86 processor features to use (if everything is off it will be SSE2 compatible)
 option(USE_SSE4_1 "Enable SSE4.1" ON)
@@ -119,9 +120,6 @@ option(PROFILER_IN_DISTRIBUTION "Enable the profiler in all builds" OFF)
 
 # Setting this option will force the library to use malloc/free instead of allowing the user to override the memory allocator
 option(DISABLE_CUSTOM_ALLOCATOR "Disable support for a custom memory allocator" OFF)
-
-# Setting this option will force the library to use the STL vector instead of the custom Array class
-option(USE_STD_VECTOR "Use std::vector instead of own Array class" OFF)
 
 # Setting this option will compile the ObjectStream class and RTTI attribute information
 option(ENABLE_OBJECT_STREAM "Compile the ObjectStream class and RTTI attribute information" ON)
@@ -184,44 +182,45 @@ elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../JoltPhysics/Build/CMakeLists.txt")
     )
 # 4. Fallback to GitHub
 else()
-    message(STATUS "[JoltC] Local Jolt not found, downloading from GitHub v5.6.0")
+    message(STATUS "[JoltC] Local Jolt not found, downloading from GitHub v5.7.0")
     FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG v5.6.0
+        GIT_TAG v5.7.0
         SOURCE_SUBDIR "Build"
     )
 endif()
 
 FetchContent_MakeAvailable(JoltPhysics)
 
-if (XCODE)
-	# Ensure that we enable SSE4.2 for the x86_64 build, XCode builds multiple architectures
-	set_property(TARGET Jolt PROPERTY XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS[arch=x86_64] "$(inherited) -msse4.2 -mpopcnt")
-endif()
-
 if (MSVC)
-	# Fill in the path to the asan libraries
-	set(CLANG_LIB_PATH "\"$(VSInstallDir)\\VC\\Tools\\Llvm\\x64\\lib\\clang\\${CMAKE_CXX_COMPILER_VERSION}\\lib\\windows\"")
-
 	# 64 bit architecture
 	set(CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE "x64")
 
+	# Set runtime library
+	if (USE_STATIC_MSVC_RUNTIME_LIBRARY)
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+	endif()
+
 	# Set general compiler flags
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Gm- /MP /nologo /diagnostics:classic /FC /fp:except- /Zc:inline")
+	add_compile_options(/Zc:__cplusplus /MP /nologo /diagnostics:classic /FC /fp:except- /Zc:inline)
 
 	# Enable warnings
 	if (ENABLE_ALL_WARNINGS)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall /WX")
+		add_compile_options(/Wall /WX)
 	endif()
 
-	# Set compiler flag for disabling RTTI
+	# Optionally generate debug symbols
+	if (GENERATE_DEBUG_SYMBOLS)
+		add_compile_options(/Zi)
+	endif()
+
 	if (NOT CPP_RTTI_ENABLED)
-		# Set compiler flag for disabling RTTI
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR-")
+		# Disable RTTI
+		add_compile_options(/GR-)
 	else()
-		# Set compiler flag for enabling RTTI
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR")
+		# Enable RTTI
+		add_compile_options(/GR)
 	endif()
 
 	if (NOT CPP_EXCEPTIONS_ENABLED)
@@ -229,95 +228,126 @@ if (MSVC)
 		string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
 		# Disable warning about STL and compiler-generated types using noexcept when exceptions are disabled
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4577")
+		add_compile_options(/wd4577)
 	else()
 		# Enable exceptions
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+		add_compile_options(/EHsc)
 	endif()
 
+	if (OVERRIDE_CXX_FLAGS)
+		# No buffer security checks, enable function-level linking, enable intrinsic functions, favor fast code
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GS- /Gy /Oi /Ot")
+	endif()
+
+	# Set compiler flags for various configurations
 	set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
+	set(CMAKE_CXX_FLAGS_RELEASEASAN "-fsanitize=address /Od")
+	set(CMAKE_CXX_FLAGS_RELEASEUBSAN "-fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-sanitize-recover=all")
+	set(CMAKE_CXX_FLAGS_RELEASETSAN "${CMAKE_CXX_FLAGS_RELEASE} -fsanitize=thread")
+	set(CMAKE_CXX_FLAGS_RELEASECOVERAGE "-fprofile-instr-generate -fcoverage-mapping")
 
 	# Set linker flags
-	set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS /ignore:4221")
+	add_link_options(/SUBSYSTEM:WINDOWS /ignore:4221)
+	if (GENERATE_DEBUG_SYMBOLS)
+		add_link_options(/DEBUG)
+	endif()
 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		if (CROSS_PLATFORM_DETERMINISTIC)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:precise")
+			add_compile_options(/fp:precise)
 		else()
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast") # Clang doesn't use fast math because it cannot be turned off inside a single compilation unit
+			add_compile_options(/fp:fast) # Clang doesn't use fast math because it cannot be turned off inside a single compilation unit
 		endif()
 	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showFilenames")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments") # Clang emits warnings about unused arguments such as /MP and /GL
+		# Fill in the path to the asan libraries
+		string(REGEX MATCH "^[0-9]+" CLANG_VERSION_MAJOR "${CMAKE_CXX_COMPILER_VERSION}")
+		set(CLANG_LIB_PATH "\"$(VSInstallDir)\\VC\\Tools\\Llvm\\x64\\lib\\clang\\${CLANG_VERSION_MAJOR}\\lib\\windows\"")
+
+		add_compile_options(/showFilenames -Qunused-arguments) # Clang emits warnings about unused arguments such as /MP and /GL
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASEASAN "/SUBSYSTEM:CONSOLE /LIBPATH:${CLANG_LIB_PATH} clang_rt.asan_dynamic-x86_64.lib clang_rt.asan_dynamic_runtime_thunk-x86_64.lib")
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASEUBSAN "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LIBPATH:${CLANG_LIB_PATH}")
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASETSAN "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LIBPATH:${CLANG_LIB_PATH}")
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASECOVERAGE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LIBPATH:${CLANG_LIB_PATH}")
 	endif()
 else()
 	# Enable warnings
 	if (ENABLE_ALL_WARNINGS)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+		add_compile_options(-Wall -Werror)
 	endif()
 
-	# Set compiler flag for disabling RTTI
+	# Optionally generate debug symbols
+	if (GENERATE_DEBUG_SYMBOLS)
+		add_compile_options(-g${JPH_DEBUG_SYMBOL_FORMAT})
+	endif()
+
 	if (NOT CPP_RTTI_ENABLED)
-		# Set compiler flag for disabling RTTI
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+		# Disable RTTI
+		add_compile_options(-fno-rtti)
 	else()
-		# Set compiler flag for enabling RTTI
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti")
+		# Enable RTTI
+		add_compile_options(-frtti)
 	endif()
 
-	# Disable exception-handling
 	if (NOT CPP_EXCEPTIONS_ENABLED)
-		# Set compiler flag for disabling exception-handling
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
+		# Disable exception-handling
+		add_compile_options(-fno-exceptions)
 	else()
-		# Set compiler flag for enabling exception-handling
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+		# Enable exception-handling
+		add_compile_options(-fexceptions)
 	endif()
 
 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 		# Also disable -Wstringop-overflow or it will generate false positives that can't be disabled from code when link-time optimizations are enabled
-		# Also turn off automatic fused multiply add contractions, there doesn't seem to be a way to do this selectively through the macro JPH_PRECISE_MATH_OFF
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-stringop-overflow -ffp-contract=off")
+		# Also disable -Wno-psabi to avoid messages of the form note: parameter passing for argument of type '...' changed in GCC 7.1
+		add_compile_options(-Wno-stringop-overflow -Wno-psabi)
 	else()
-		# Do not use -ffast-math since it cannot be turned off in a single compilation unit under clang, see Core.h
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-model=precise")
-
-		# On clang 14 and later we can turn off float contraction through a pragma, older versions and deterministic versions need it off always, see Core.h
-		if (CMAKE_CXX_COMPILER_VERSION LESS 14 OR CROSS_PLATFORM_DETERMINISTIC)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-contract=off")
-		endif()
-
 		# Cross compiler flags
-		if (CROSS_COMPILE_ARM)
-			set(CMAKE_CXX_FLAGS "--target=aarch64-linux-gnu ${CMAKE_CXX_FLAGS}")
+		if (CROSS_COMPILE_ARM AND NOT ("${CROSS_COMPILE_ARM_TARGET}" STREQUAL ""))
+			add_compile_options(--target=${CROSS_COMPILE_ARM_TARGET})
+			add_link_options(--target=${CROSS_COMPILE_ARM_TARGET})
+		endif()
+	endif()
+
+	# Do not use -ffast-math since it creates too many inaccuracies under clang
+	# FMA is not compatible with cross platform determinism
+	if (CROSS_PLATFORM_DETERMINISTIC OR NOT USE_FMADD OR EMSCRIPTEN)
+		add_compile_options(-ffp-contract=off)
+	else()
+		if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^x86")
+			# On x86 our FMA intrinsics are preserved
+			add_compile_options(-ffp-contract=fast)
+		else()
+			# On ARM (and maybe other platforms) using 'fast' mode actually replaces a FMA intrinsic in Debug / when using LTO (?) with a 'mul' and an 'add' causing us to lose precision
+			add_compile_options(-ffp-contract=on)
 		endif()
 	endif()
 
 	# See https://github.com/jrouwe/JoltPhysics/issues/922. When compiling with DOUBLE_PRECISION=YES and CMAKE_OSX_DEPLOYMENT_TARGET=10.12 clang triggers a warning that we silence here.
 	if ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin" AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -faligned-allocation")
+		add_compile_options(-faligned-allocation)
 	endif()
 
 	# Set compiler flags for various configurations
-	if (OVERRIDE_CXX_FLAGS)
-		set(CMAKE_CXX_FLAGS_DEBUG "")
-		set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-	endif()
 	set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
-
-	# Set linker flags
-	if (NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows"))
-		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread")
-	endif()
+	set(CMAKE_CXX_FLAGS_RELEASEASAN "-fsanitize=address")
+	set(CMAKE_CXX_FLAGS_RELEASEUBSAN "-fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-sanitize-recover=all")
+	set(CMAKE_CXX_FLAGS_RELEASETSAN "${CMAKE_CXX_FLAGS_RELEASE} -fsanitize=thread")
+	set(CMAKE_CXX_FLAGS_RELEASECOVERAGE "-O0 -DJPH_NO_FORCE_INLINE -fprofile-instr-generate -fcoverage-mapping")
 endif()
 
 # Set linker flags
 set(CMAKE_EXE_LINKER_FLAGS_DISTRIBUTION "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
-set(CMAKE_SHARED_LINKER_FLAGS_DISTRIBUTION "${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
 
 SET_INTERPROCEDURAL_OPTIMIZATION()
 
 set(PHYSICS_REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/joltc)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable shared library when building Jolt" FORCE)
+if (XCODE)
+	# Ensure that we enable SSE4.2 for the x86_64 build, XCode builds multiple architectures
+	set_property(TARGET Jolt PROPERTY XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS[arch=x86_64] "$(inherited) -msse4.2 -mpopcnt")
+
+	# Some files compile to empty object files depending on the configuration (e.g. no profiler / debug renderer), don't warn about that
+	set_property(TARGET Jolt PROPERTY XCODE_ATTRIBUTE_OTHER_LIBTOOLFLAGS "$(inherited) -no_warning_for_no_symbols")
+endif()
 
 # Options
 if (IOS OR EMSCRIPTEN)
