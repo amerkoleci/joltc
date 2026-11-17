@@ -85,7 +85,7 @@ int main(void)
 	// Sphere
 	JPH_BodyID sphereId = {};
 	{
-		JPH_SphereShape* sphereShape = JPH_SphereShape_Create(50.0f);
+		JPH_SphereShape* sphereShape = JPH_SphereShape_Create(0.5f);
 		JPH_Vec3 spherePosition = { 0.0f, 2.0f, 0.0f };
 		JPH_BodyCreationSettings* sphereSettings = JPH_BodyCreationSettings_Create3(
 			(const JPH_Shape*)sphereShape,
