@@ -11452,7 +11452,7 @@ JPH_PhysicsUpdateError JPH_PhysicsSystem_Update2(JPH_PhysicsSystem* system, floa
 /****
 * Soft Body API
 */
-static inline SoftBodySharedSettings::Edge FromJolt(const SoftBodySharedSettings::Edge& jolt, JPH_SoftEdge* result)
+static inline void FromJolt(const SoftBodySharedSettings::Edge& jolt, JPH_SoftEdge* result)
 {
 	result->vertex1 = jolt.mVertex[0];
 	result->vertex2 = jolt.mVertex[1];
