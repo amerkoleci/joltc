@@ -876,12 +876,6 @@ void JPH_CollisionEstimationResult_FreeMembers(JPH_CollisionEstimationResult* re
 }
 
 /* JPH_BroadPhaseLayerInterface */
-void JPH_BroadPhaseLayerInterface_Destroy(JPH_BroadPhaseLayerInterface* bpInterface)
-{
-	if (bpInterface)
-		delete reinterpret_cast<JPH::BroadPhaseLayerInterface*>(bpInterface);
-}
-
 JPH_BroadPhaseLayerInterface* JPH_BroadPhaseLayerInterfaceMask_Create(uint32_t numBroadPhaseLayers)
 {
 	auto system = new BroadPhaseLayerInterfaceMask(numBroadPhaseLayers);
@@ -912,12 +906,6 @@ void JPH_BroadPhaseLayerInterfaceTable_MapObjectToBroadPhaseLayer(JPH_BroadPhase
 }
 
 /* JPH_ObjectLayerPairFilter */
-void JPH_ObjectLayerPairFilter_Destroy(JPH_ObjectLayerPairFilter* filter)
-{
-	if (filter)
-		delete reinterpret_cast<JPH::ObjectLayerPairFilter*>(filter);
-}
-
 JPH_ObjectLayerPairFilter* JPH_ObjectLayerPairFilterMask_Create(void)
 {
 	auto filter = new JPH::ObjectLayerPairFilterMask();
@@ -970,12 +958,6 @@ bool JPH_ObjectLayerPairFilterTable_ShouldCollide(JPH_ObjectLayerPairFilter* obj
 }
 
 /* JPH_ObjectVsBroadPhaseLayerFilter */
-void JPH_ObjectVsBroadPhaseLayerFilter_Destroy(JPH_ObjectVsBroadPhaseLayerFilter* filter)
-{
-	if (filter)
-		delete reinterpret_cast<JPH::ObjectVsBroadPhaseLayerFilter*>(filter);
-}
-
 JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterMask_Create(const JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface)
 {
 	auto joltBroadPhaseLayerInterface = reinterpret_cast<const JPH::BroadPhaseLayerInterfaceMask*>(broadPhaseLayerInterface);
@@ -1061,6 +1043,10 @@ void JPH_PhysicsSystem_Destroy(JPH_PhysicsSystem* system)
 	if (system)
 	{
 		s_PhysicsSystems.erase(system->physicsSystem);
+
+		system->physicsSystem->SetContactListener(nullptr);
+		system->physicsSystem->SetBodyActivationListener(nullptr);
+
 		delete system->physicsSystem;
 		delete system->broadPhaseLayerInterface;
 		delete system->objectVsBroadPhaseLayerFilter;
