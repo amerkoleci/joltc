@@ -229,6 +229,9 @@ if (MSVC)
 
 		# Disable warning about STL and compiler-generated types using noexcept when exceptions are disabled
 		add_compile_options(/wd4577)
+
+		# Disable warning about C++ exception handler used, but unwind semantics not enabled
+		add_compile_options(/wd4530)
 	else()
 		# Enable exceptions
 		add_compile_options(/EHsc)

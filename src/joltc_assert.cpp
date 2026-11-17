@@ -33,6 +33,8 @@ __pragma(warning(push, 0))
 #include "Jolt/Physics/Character/CharacterID.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "Jolt/Physics/Vehicle/VehicleTransmission.h"
+#include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
+#include "Jolt/Physics/SoftBody/SoftBodyContactListener.h"
 
 #ifdef JPH_DEBUG_RENDERER
 #include <Jolt/Renderer/DebugRendererSimple.h>
@@ -267,5 +269,17 @@ static_assert(JPH_Mesh_Shape_BuildQuality_FavorBuildSpeed == (int)JPH::MeshShape
 static_assert(JPH_TransmissionMode_Auto == (int)JPH::ETransmissionMode::Auto);
 static_assert(JPH_TransmissionMode_Manual == (int)JPH::ETransmissionMode::Manual);
 
+// SoftBodyValidateResult
+static_assert(JPH_SoftBodyValidateResult_AcceptContact == (int)JPH::SoftBodyValidateResult::AcceptContact);
+static_assert(JPH_SoftBodyValidateResult_RejectContact == (int)JPH::SoftBodyValidateResult::RejectContact);
+
+// SoftBodyValidateResult
+static_assert(JPH_SoftBodyBendType_None == (int)JPH::SoftBodySharedSettings::EBendType::None);
+static_assert(JPH_SoftBodyBendType_Distance == (int)JPH::SoftBodySharedSettings::EBendType::Distance);
+static_assert(JPH_SoftBodyBendType_Dihedral == (int)JPH::SoftBodySharedSettings::EBendType::Dihedral);
+
+static_assert(JPH_SoftBodyLRAType_None == (int)JPH::SoftBodySharedSettings::ELRAType::None);
+static_assert(JPH_SoftBodyLRAType_EuclideanDistance == (int)JPH::SoftBodySharedSettings::ELRAType::EuclideanDistance);
+static_assert(JPH_SoftBodyLRAType_GeodesicDistance == (int)JPH::SoftBodySharedSettings::ELRAType::GeodesicDistance);
 
 #endif
