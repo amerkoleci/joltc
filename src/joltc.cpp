@@ -881,6 +881,12 @@ void JPH_CollisionEstimationResult_FreeMembers(JPH_CollisionEstimationResult* re
 }
 
 /* JPH_BroadPhaseLayerInterface */
+void JPH_BroadPhaseLayerInterface_Destroy(JPH_BroadPhaseLayerInterface* bpInterface)
+{
+	if (bpInterface)
+		delete reinterpret_cast<JPH::BroadPhaseLayerInterface*>(bpInterface);
+}
+
 JPH_BroadPhaseLayerInterface* JPH_BroadPhaseLayerInterfaceMask_Create(uint32_t numBroadPhaseLayers)
 {
 	auto system = new BroadPhaseLayerInterfaceMask(numBroadPhaseLayers);
@@ -911,6 +917,12 @@ void JPH_BroadPhaseLayerInterfaceTable_MapObjectToBroadPhaseLayer(JPH_BroadPhase
 }
 
 /* JPH_ObjectLayerPairFilter */
+void JPH_ObjectLayerPairFilter_Destroy(JPH_ObjectLayerPairFilter* filter)
+{
+	if (filter)
+		delete reinterpret_cast<JPH::ObjectLayerPairFilter*>(filter);
+}
+
 JPH_ObjectLayerPairFilter* JPH_ObjectLayerPairFilterMask_Create(void)
 {
 	auto filter = new JPH::ObjectLayerPairFilterMask();
@@ -963,6 +975,12 @@ bool JPH_ObjectLayerPairFilterTable_ShouldCollide(JPH_ObjectLayerPairFilter* obj
 }
 
 /* JPH_ObjectVsBroadPhaseLayerFilter */
+void JPH_ObjectVsBroadPhaseLayerFilter_Destroy(JPH_ObjectVsBroadPhaseLayerFilter* filter)
+{
+	if (filter)
+		delete reinterpret_cast<JPH::ObjectVsBroadPhaseLayerFilter*>(filter);
+}
+
 JPH_ObjectVsBroadPhaseLayerFilter* JPH_ObjectVsBroadPhaseLayerFilterMask_Create(const JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface)
 {
 	auto joltBroadPhaseLayerInterface = reinterpret_cast<const JPH::BroadPhaseLayerInterfaceMask*>(broadPhaseLayerInterface);
@@ -1038,6 +1056,8 @@ JPH_PhysicsSystem* JPH_PhysicsSystem_Create(const JPH_PhysicsSystemSettings* set
 		*system->broadPhaseLayerInterface,
 		*system->objectVsBroadPhaseLayerFilter,
 		*system->objectLayerPairFilter);
+	system->physicsSystem->GetBroadPhaseLayerInterface();
+
 
 	s_PhysicsSystems[system->physicsSystem] = system;
 	return system;
@@ -1152,6 +1172,21 @@ const JPH_BodyLockInterface* JPH_PhysicsSystem_GetBodyLockInterface(const JPH_Ph
 const JPH_BodyLockInterface* JPH_PhysicsSystem_GetBodyLockInterfaceNoLock(const JPH_PhysicsSystem* system)
 {
 	return reinterpret_cast<const JPH_BodyLockInterface*>(&system->physicsSystem->GetBodyLockInterfaceNoLock());
+}
+
+const JPH_BroadPhaseLayerInterface* JPH_PhysicsSystem_GetBroadPhaseLayerInterface(const JPH_PhysicsSystem* system)
+{
+	return reinterpret_cast<const JPH_BroadPhaseLayerInterface*>(&system->physicsSystem->GetBroadPhaseLayerInterface());
+}
+
+const JPH_ObjectVsBroadPhaseLayerFilter* JPH_PhysicsSystem_GetObjectVsBroadPhaseLayerFilter(const JPH_PhysicsSystem* system)
+{
+	return reinterpret_cast<const JPH_ObjectVsBroadPhaseLayerFilter*>(&system->physicsSystem->GetObjectVsBroadPhaseLayerFilter());
+}
+
+const JPH_ObjectLayerPairFilter* JPH_PhysicsSystem_GetObjectLayerPairFilter(const JPH_PhysicsSystem* system)
+{
+	return reinterpret_cast<const JPH_ObjectLayerPairFilter*>(&system->physicsSystem->GetObjectLayerPairFilter());
 }
 
 /* JPH_BroadPhaseLayerFilter */
