@@ -83,7 +83,9 @@ JPH_SUPPRESS_WARNINGS
 
 #include <cstdio>
 #include <cstdarg>
+#include <atomic>
 #include <algorithm>
+#include <mutex>
 
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
@@ -191,6 +193,7 @@ DEF_MAP_DECL(Ragdoll, JPH_Ragdoll)
 DEF_MAP_DECL(GroupFilter, JPH_GroupFilter)
 DEF_MAP_DECL(GroupFilterTable, JPH_GroupFilterTable)
 
+DEF_MAP_DECL(PhysicsSystem, JPH_PhysicsSystem)
 DEF_MAP_DECL(PhysicsStepListener, JPH_PhysicsStepListener)
 
 // Vehicle
@@ -226,6 +229,7 @@ DEF_MAP_DECL(VehicleConstraint, JPH_VehicleConstraint)
 
 DEF_MAP_DECL(LinearCurve, JPH_LinearCurve)
 
+DEF_MAP_DECL(JobSystem, JPH_JobSystem)
 DEF_MAP_DECL(TempAllocator, JPH_TempAllocator)
 
 DEF_MAP_DECL(SoftBodyMotionProperties, JPH_SoftBodyMotionProperties)
@@ -679,10 +683,6 @@ static JPH::IndexedTriangle ToIndexedTriangle(const JPH_IndexedTriangle& triangl
 	return JPH::IndexedTriangle(triangle.i1, triangle.i2, triangle.i3, triangle.materialIndex, triangle.userData);
 }
 
-// 10 MB was not enough for large simulation, let's use TempAllocatorMalloc
-static bool s_initialized = false;
-static TempAllocator* s_TempAllocator = nullptr;
-
 class JobSystemCallback final : public JPH::JobSystemWithBarrier
 {
 public:
@@ -796,63 +796,49 @@ void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem)
 	delete reinterpret_cast<JPH::JobSystem*>(jobSystem);
 }
 
-bool JPH_Init()
+void JPH_RegisterDefaultAllocator(void)
 {
-	if (s_initialized)
-		return true;
-
 	JPH::RegisterDefaultAllocator();
-
-	JPH::Trace = TraceImpl;
-	JPH_IF_ENABLE_ASSERTS(JPH::AssertFailed = AssertFailedImpl;)
-
-		// Create a factory
-		JPH::Factory::sInstance = new JPH::Factory();
-
-	// Register all Jolt physics types
-	JPH::RegisterTypes();
-
-#if defined(__SANITIZE_THREAD__) || defined(ENABLE_SANITIZER)
-	// ThreadSanitizer does not understand Jolt's lock-free 8MB bump allocator
-	// and will flag cross-frame memory reuse as data races.
-	// We fall back to standard malloc/free which TSan can track perfectly.
-	s_TempAllocator = new TempAllocatorMalloc();
-#else
-	// High-performance lock-free allocator for production
-	s_TempAllocator = new TempAllocatorImplWithMallocFallback(8 * 1024 * 1024);
-#endif
-
-	s_initialized = true;
-
-	return true;
 }
 
-void JPH_Shutdown(void)
+void JPH_CreateFactory(void)
 {
-	if (!s_initialized)
+	if (JPH::Factory::sInstance)
 		return;
 
-	delete s_TempAllocator; s_TempAllocator = nullptr;
+	JPH::Factory::sInstance = new JPH::Factory();
+}
 
-	// Unregisters all types with the factory and cleans up the default material
-	JPH::UnregisterTypes();
+void JPH_DestroyFactory(void)
+{
+	if (!JPH::Factory::sInstance)
+		return;
 
-	// Destroy the factory
 	delete JPH::Factory::sInstance;
 	JPH::Factory::sInstance = nullptr;
+}
 
-	s_initialized = false;
+void JPH_RegisterTypes(void)
+{
+	JPH::RegisterTypes();
+}
+
+void JPH_UnregisterTypes(void)
+{
+	JPH::UnregisterTypes();
 }
 
 void JPH_SetTraceHandler(JPH_TraceFunc handler)
 {
 	s_TraceFunc = handler;
+	JPH::Trace = handler ? TraceImpl : nullptr;
 }
 
 void JPH_SetAssertFailureHandler(JPH_AssertFailureFunc handler)
 {
 #ifdef JPH_ENABLE_ASSERTS
 	s_AssertFailureFunc = handler;
+	JPH::AssertFailed = handler ? AssertFailedImpl : nullptr;
 #else
 	JPH_UNUSED(handler);
 #endif
@@ -1027,57 +1013,39 @@ void JPH_DrawSettings_InitDefault(JPH_DrawSettings* settings)
 }
 
 /* JPH_PhysicsSystem */
-struct JPH_PhysicsSystem final
-{
-	JPH::BroadPhaseLayerInterface* broadPhaseLayerInterface = nullptr;
-	JPH::ObjectLayerPairFilter* objectLayerPairFilter = nullptr;
-	JPH::ObjectVsBroadPhaseLayerFilter* objectVsBroadPhaseLayerFilter = nullptr;
-	JPH::PhysicsSystem* physicsSystem = nullptr;
-};
-static JPH::UnorderedMap<JPH::PhysicsSystem*, JPH_PhysicsSystem*> s_PhysicsSystems;
-
 JPH_PhysicsSystem* JPH_PhysicsSystem_Create(const JPH_PhysicsSystemSettings* settings)
 {
 	if (!settings)
 		return nullptr;
-
-	JPH_PhysicsSystem* system = new JPH_PhysicsSystem();
-	system->broadPhaseLayerInterface = reinterpret_cast<JPH::BroadPhaseLayerInterface*>(settings->broadPhaseLayerInterface);
-	system->objectLayerPairFilter = reinterpret_cast<JPH::ObjectLayerPairFilter*>(settings->objectLayerPairFilter);
-	system->objectVsBroadPhaseLayerFilter = reinterpret_cast<JPH::ObjectVsBroadPhaseLayerFilter*>(settings->objectVsBroadPhaseLayerFilter);
 
 	// Init the physics system
 	const uint maxBodies = settings->maxBodies ? settings->maxBodies : 10240;
 	const uint cNumBodyMutexes = settings->numBodyMutexes;
 	const uint maxBodyPairs = settings->maxBodyPairs ? settings->maxBodyPairs : 65536;
 	const uint maxContactConstraints = settings->maxContactConstraints ? settings->maxContactConstraints : 10240;
-	system->physicsSystem = new JPH::PhysicsSystem();
-	system->physicsSystem->Init(maxBodies, cNumBodyMutexes, maxBodyPairs, maxContactConstraints,
-		*system->broadPhaseLayerInterface,
-		*system->objectVsBroadPhaseLayerFilter,
-		*system->objectLayerPairFilter);
-	system->physicsSystem->GetBroadPhaseLayerInterface();
 
+	const JPH::BroadPhaseLayerInterface* broadPhaseLayerInterface = reinterpret_cast<const JPH::BroadPhaseLayerInterface*>(settings->broadPhaseLayerInterface);
+	const JPH::ObjectLayerPairFilter* objectLayerPairFilter = reinterpret_cast<const JPH::ObjectLayerPairFilter*>(settings->objectLayerPairFilter);
+	const JPH::ObjectVsBroadPhaseLayerFilter* objectVsBroadPhaseLayerFilter = reinterpret_cast<const JPH::ObjectVsBroadPhaseLayerFilter*>(settings->objectVsBroadPhaseLayerFilter);
 
-	s_PhysicsSystems[system->physicsSystem] = system;
-	return system;
+	JPH::PhysicsSystem* physicsSystem = new JPH::PhysicsSystem();
+	physicsSystem->Init(maxBodies, cNumBodyMutexes, maxBodyPairs, maxContactConstraints,
+		*broadPhaseLayerInterface,
+		*objectVsBroadPhaseLayerFilter,
+		*objectLayerPairFilter
+	);
+
+	return ToPhysicsSystem(physicsSystem);
 }
 
 void JPH_PhysicsSystem_Destroy(JPH_PhysicsSystem* system)
 {
 	if (system)
 	{
-		s_PhysicsSystems.erase(system->physicsSystem);
-
-		system->physicsSystem->SetContactListener(nullptr);
-		system->physicsSystem->SetBodyActivationListener(nullptr);
-
-		delete system->physicsSystem;
-		delete system->broadPhaseLayerInterface;
-		delete system->objectVsBroadPhaseLayerFilter;
-		delete system->objectLayerPairFilter;
-
-		delete system;
+		auto joltSystem = AsPhysicsSystem(system);
+		joltSystem->SetContactListener(nullptr);
+		joltSystem->SetBodyActivationListener(nullptr);
+		delete joltSystem;
 	}
 }
 
@@ -1109,12 +1077,12 @@ void JPH_PhysicsSystem_SetPhysicsSettings(JPH_PhysicsSystem* system, JPH_Physics
 	joltSettings.mUseLargeIslandSplitter = settings->useLargeIslandSplitter;
 	joltSettings.mAllowSleeping = settings->allowSleeping;
 	joltSettings.mCheckActiveEdges = settings->checkActiveEdges;
-	system->physicsSystem->SetPhysicsSettings(joltSettings);
+	AsPhysicsSystem(system)->SetPhysicsSettings(joltSettings);
 }
 
 void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, JPH_PhysicsSettings* result)
 {
-	auto joltSettings = system->physicsSystem->GetPhysicsSettings();
+	auto joltSettings = AsPhysicsSystem(system)->GetPhysicsSettings();
 	result->maxInFlightBodyPairs = joltSettings.mMaxInFlightBodyPairs;
 	result->stepListenersBatchSize = joltSettings.mStepListenersBatchSize;
 	result->stepListenerBatchesPerJob = joltSettings.mStepListenerBatchesPerJob;
@@ -1146,47 +1114,51 @@ void JPH_PhysicsSystem_OptimizeBroadPhase(JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
 
-	system->physicsSystem->OptimizeBroadPhase();
+	AsPhysicsSystem(system)->OptimizeBroadPhase();
 }
 
-JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem)
+JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_TempAllocator* tempAllocator, JPH_JobSystem* jobSystem)
 {
-	JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
-	return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, s_TempAllocator, joltJobSystem));
+	return static_cast<JPH_PhysicsUpdateError>(AsPhysicsSystem(system)->Update(
+		deltaTime, 
+		collisionSteps, 
+		AsTempAllocator(tempAllocator), 
+		AsJobSystem(jobSystem))
+		);
 }
 
 JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterface(JPH_PhysicsSystem* system)
 {
-	return reinterpret_cast<JPH_BodyInterface*>(&system->physicsSystem->GetBodyInterface());
+	return reinterpret_cast<JPH_BodyInterface*>(&AsPhysicsSystem(system)->GetBodyInterface());
 }
 
 JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterfaceNoLock(JPH_PhysicsSystem* system)
 {
-	return reinterpret_cast<JPH_BodyInterface*>(&system->physicsSystem->GetBodyInterfaceNoLock());
+	return reinterpret_cast<JPH_BodyInterface*>(&AsPhysicsSystem(system)->GetBodyInterfaceNoLock());
 }
 
 const JPH_BodyLockInterface* JPH_PhysicsSystem_GetBodyLockInterface(const JPH_PhysicsSystem* system)
 {
-	return reinterpret_cast<const JPH_BodyLockInterface*>(&system->physicsSystem->GetBodyLockInterface());
+	return reinterpret_cast<const JPH_BodyLockInterface*>(&AsPhysicsSystem(system)->GetBodyLockInterface());
 }
 const JPH_BodyLockInterface* JPH_PhysicsSystem_GetBodyLockInterfaceNoLock(const JPH_PhysicsSystem* system)
 {
-	return reinterpret_cast<const JPH_BodyLockInterface*>(&system->physicsSystem->GetBodyLockInterfaceNoLock());
+	return reinterpret_cast<const JPH_BodyLockInterface*>(&AsPhysicsSystem(system)->GetBodyLockInterfaceNoLock());
 }
 
 const JPH_BroadPhaseLayerInterface* JPH_PhysicsSystem_GetBroadPhaseLayerInterface(const JPH_PhysicsSystem* system)
 {
-	return reinterpret_cast<const JPH_BroadPhaseLayerInterface*>(&system->physicsSystem->GetBroadPhaseLayerInterface());
+	return reinterpret_cast<const JPH_BroadPhaseLayerInterface*>(&AsPhysicsSystem(system)->GetBroadPhaseLayerInterface());
 }
 
 const JPH_ObjectVsBroadPhaseLayerFilter* JPH_PhysicsSystem_GetObjectVsBroadPhaseLayerFilter(const JPH_PhysicsSystem* system)
 {
-	return reinterpret_cast<const JPH_ObjectVsBroadPhaseLayerFilter*>(&system->physicsSystem->GetObjectVsBroadPhaseLayerFilter());
+	return reinterpret_cast<const JPH_ObjectVsBroadPhaseLayerFilter*>(&AsPhysicsSystem(system)->GetObjectVsBroadPhaseLayerFilter());
 }
 
 const JPH_ObjectLayerPairFilter* JPH_PhysicsSystem_GetObjectLayerPairFilter(const JPH_PhysicsSystem* system)
 {
-	return reinterpret_cast<const JPH_ObjectLayerPairFilter*>(&system->physicsSystem->GetObjectLayerPairFilter());
+	return reinterpret_cast<const JPH_ObjectLayerPairFilter*>(&AsPhysicsSystem(system)->GetObjectLayerPairFilter());
 }
 
 /* JPH_BroadPhaseLayerFilter */
@@ -5276,20 +5248,20 @@ const JPH_BroadPhaseQuery* JPH_PhysicsSystem_GetBroadPhaseQuery(const JPH_Physic
 {
 	JPH_ASSERT(system);
 
-	return reinterpret_cast<const JPH_BroadPhaseQuery*>(&system->physicsSystem->GetBroadPhaseQuery());
+	return reinterpret_cast<const JPH_BroadPhaseQuery*>(&AsPhysicsSystem(system)->GetBroadPhaseQuery());
 }
 
 const JPH_NarrowPhaseQuery* JPH_PhysicsSystem_GetNarrowPhaseQuery(const JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
 
-	return reinterpret_cast<const JPH_NarrowPhaseQuery*>(&system->physicsSystem->GetNarrowPhaseQuery());
+	return reinterpret_cast<const JPH_NarrowPhaseQuery*>(&AsPhysicsSystem(system)->GetNarrowPhaseQuery());
 }
 const JPH_NarrowPhaseQuery* JPH_PhysicsSystem_GetNarrowPhaseQueryNoLock(const JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
 
-	return reinterpret_cast<const JPH_NarrowPhaseQuery*>(&system->physicsSystem->GetNarrowPhaseQueryNoLock());
+	return reinterpret_cast<const JPH_NarrowPhaseQuery*>(&AsPhysicsSystem(system)->GetNarrowPhaseQueryNoLock());
 }
 
 void JPH_PhysicsSystem_SetContactListener(JPH_PhysicsSystem* system, JPH_ContactListener* listener)
@@ -5297,7 +5269,7 @@ void JPH_PhysicsSystem_SetContactListener(JPH_PhysicsSystem* system, JPH_Contact
 	JPH_ASSERT(system);
 
 	auto joltListener = reinterpret_cast<JPH::ContactListener*>(listener);
-	system->physicsSystem->SetContactListener(joltListener);
+	AsPhysicsSystem(system)->SetContactListener(joltListener);
 }
 
 void JPH_PhysicsSystem_SetBodyActivationListener(JPH_PhysicsSystem* system, JPH_BodyActivationListener* listener)
@@ -5305,7 +5277,7 @@ void JPH_PhysicsSystem_SetBodyActivationListener(JPH_PhysicsSystem* system, JPH_
 	JPH_ASSERT(system);
 
 	auto joltListener = reinterpret_cast<JPH::BodyActivationListener*>(listener);
-	system->physicsSystem->SetBodyActivationListener(joltListener);
+	AsPhysicsSystem(system)->SetBodyActivationListener(joltListener);
 }
 
 void JPH_PhysicsSystem_SetSimShapeFilter(JPH_PhysicsSystem* system, const JPH_SimShapeFilter* filter)
@@ -5313,56 +5285,56 @@ void JPH_PhysicsSystem_SetSimShapeFilter(JPH_PhysicsSystem* system, const JPH_Si
 	JPH_ASSERT(system);
 
 	auto joltFilter = reinterpret_cast<const JPH::SimShapeFilter*>(filter);
-	system->physicsSystem->SetSimShapeFilter(joltFilter);
+	AsPhysicsSystem(system)->SetSimShapeFilter(joltFilter);
 }
 
 bool JPH_PhysicsSystem_WereBodiesInContact(const JPH_PhysicsSystem* system, JPH_BodyID body1, JPH_BodyID body2)
 {
 	JPH_ASSERT(system);
 
-	return system->physicsSystem->WereBodiesInContact(JPH::BodyID(body1), JPH::BodyID(body2));
+	return AsPhysicsSystem(system)->WereBodiesInContact(JPH::BodyID(body1), JPH::BodyID(body2));
 }
 
 uint32_t JPH_PhysicsSystem_GetNumBodies(const JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
 
-	return system->physicsSystem->GetNumBodies();
+	return AsPhysicsSystem(system)->GetNumBodies();
 }
 
 uint32_t JPH_PhysicsSystem_GetNumActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyType type)
 {
 	JPH_ASSERT(system);
 
-	return system->physicsSystem->GetNumActiveBodies(static_cast<JPH::EBodyType>(type));
+	return AsPhysicsSystem(system)->GetNumActiveBodies(static_cast<JPH::EBodyType>(type));
 }
 
 uint32_t JPH_PhysicsSystem_GetMaxBodies(const JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
 
-	return system->physicsSystem->GetMaxBodies();
+	return AsPhysicsSystem(system)->GetMaxBodies();
 }
 
 uint32_t JPH_PhysicsSystem_GetNumConstraints(const JPH_PhysicsSystem* system)
 {
 	JPH_ASSERT(system);
 
-	return (uint32_t)system->physicsSystem->GetConstraints().size();
+	return (uint32_t)AsPhysicsSystem(system)->GetConstraints().size();
 }
 
 void JPH_PhysicsSystem_SetGravity(JPH_PhysicsSystem* system, const JPH_Vec3* value)
 {
 	JPH_ASSERT(system);
 
-	system->physicsSystem->SetGravity(ToJolt(value));
+	AsPhysicsSystem(system)->SetGravity(ToJolt(value));
 }
 
 void JPH_PhysicsSystem_GetGravity(JPH_PhysicsSystem* system, JPH_Vec3* result)
 {
 	JPH_ASSERT(system);
 
-	auto joltVector = system->physicsSystem->GetGravity();
+	auto joltVector = AsPhysicsSystem(system)->GetGravity();
 	FromJolt(joltVector, result);
 }
 
@@ -5372,7 +5344,7 @@ void JPH_PhysicsSystem_AddConstraint(JPH_PhysicsSystem* system, JPH_Constraint* 
 	JPH_ASSERT(constraint);
 
 	auto joltConstraint = reinterpret_cast<JPH::Constraint*>(constraint);
-	system->physicsSystem->AddConstraint(joltConstraint);
+	AsPhysicsSystem(system)->AddConstraint(joltConstraint);
 }
 
 void JPH_PhysicsSystem_RemoveConstraint(JPH_PhysicsSystem* system, JPH_Constraint* constraint)
@@ -5381,7 +5353,7 @@ void JPH_PhysicsSystem_RemoveConstraint(JPH_PhysicsSystem* system, JPH_Constrain
 	JPH_ASSERT(constraint);
 
 	auto joltConstraint = reinterpret_cast<JPH::Constraint*>(constraint);
-	system->physicsSystem->RemoveConstraint(joltConstraint);
+	AsPhysicsSystem(system)->RemoveConstraint(joltConstraint);
 }
 
 void JPH_PhysicsSystem_AddConstraints(JPH_PhysicsSystem* system, JPH_Constraint** constraints, uint32_t count)
@@ -5398,7 +5370,7 @@ void JPH_PhysicsSystem_AddConstraints(JPH_PhysicsSystem* system, JPH_Constraint*
 		joltConstraints.push_back(joltConstraint);
 	}
 
-	system->physicsSystem->AddConstraints(joltConstraints.data(), (int)count);
+	AsPhysicsSystem(system)->AddConstraints(joltConstraints.data(), (int)count);
 }
 
 void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH_Constraint** constraints, uint32_t count)
@@ -5415,7 +5387,7 @@ void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH_Constrai
 		joltConstraints.push_back(joltConstraint);
 	}
 
-	system->physicsSystem->RemoveConstraints(joltConstraints.data(), (int)count);
+	AsPhysicsSystem(system)->RemoveConstraints(joltConstraints.data(), (int)count);
 }
 
 void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
@@ -5423,7 +5395,7 @@ void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsSte
 	JPH_ASSERT(system);
 	JPH_ASSERT(listener);
 
-	system->physicsSystem->AddStepListener(AsPhysicsStepListener(listener));
+	AsPhysicsSystem(system)->AddStepListener(AsPhysicsStepListener(listener));
 }
 
 void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
@@ -5431,7 +5403,7 @@ void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_Physics
 	JPH_ASSERT(system);
 	JPH_ASSERT(listener);
 
-	system->physicsSystem->RemoveStepListener(AsPhysicsStepListener(listener));
+	AsPhysicsSystem(system)->RemoveStepListener(AsPhysicsStepListener(listener));
 }
 
 void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count)
@@ -5440,7 +5412,7 @@ void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* id
 	JPH_ASSERT(ids);
 
 	JPH::BodyIDVector bodies;
-	system->physicsSystem->GetBodies(bodies);
+	AsPhysicsSystem(system)->GetBodies(bodies);
 
 	const uint32_t copyCount = std::min(count, (uint32_t)bodies.size());
 	for (uint32_t i = 0; i < count; i++)
@@ -5452,7 +5424,7 @@ void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* id
 JPH_CAPI void JPH_PhysicsSystem_GetActiveBodies(const JPH_PhysicsSystem* system, JPH_BodyType type, JPH_BodyID* ids, uint32_t count)
 {
 	JPH::BodyIDVector activeBodies;
-	system->physicsSystem->GetActiveBodies(static_cast<JPH::EBodyType>(type), activeBodies);
+	AsPhysicsSystem(system)->GetActiveBodies(static_cast<JPH::EBodyType>(type), activeBodies);
 
 	const uint32_t copyCount = std::min(count, (uint32_t)activeBodies.size());
 	for (uint32_t i = 0; i < copyCount; i++)
@@ -5464,14 +5436,14 @@ JPH_CAPI void JPH_PhysicsSystem_GetActiveBodies(const JPH_PhysicsSystem* system,
 JPH_CAPI const JPH_BodyID* JPH_PhysicsSystem_GetActiveBodiesUnsafe(const JPH_PhysicsSystem* system, JPH_BodyType type)
 {
 	// Returns a direct pointer to Jolt's internal BodyID array
-	return reinterpret_cast<const JPH_BodyID*>(system->physicsSystem->GetActiveBodiesUnsafe(static_cast<JPH::EBodyType>(type)));
+	return reinterpret_cast<const JPH_BodyID*>(AsPhysicsSystem(system)->GetActiveBodiesUnsafe(static_cast<JPH::EBodyType>(type)));
 }
 
 void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count)
 {
 	JPH_ASSERT(constraints);
 
-	JPH::Constraints list = system->physicsSystem->GetConstraints();
+	JPH::Constraints list = AsPhysicsSystem(system)->GetConstraints();
 
 	for (uint32_t i = 0; i < count && i < list.size(); i++)
 	{
@@ -5483,10 +5455,10 @@ void JPH_PhysicsSystem_ActivateBodiesInAABox(JPH_PhysicsSystem* system, const JP
 {
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
-	system->physicsSystem->GetBodyInterface().ActivateBodiesInAABox(
+	AsPhysicsSystem(system)->GetBodyInterface().ActivateBodiesInAABox(
 		ToJolt(box),
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
-		system->physicsSystem->GetDefaultLayerFilter(joltLayer)
+		AsPhysicsSystem(system)->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultLayerFilter(joltLayer)
 	);
 }
 
@@ -5524,22 +5496,22 @@ void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSetti
 {
 	BodyManager::DrawSettings joltSettings = ToJolt(settings);
 	const BodyDrawFilter* bodyDrawFilter = (bodyFilter != nullptr) ? (reinterpret_cast<const BodyDrawFilter*>(bodyFilter)) : nullptr;
-	system->physicsSystem->DrawBodies(joltSettings, reinterpret_cast<DebugRenderer*>(renderer), bodyDrawFilter);
+	AsPhysicsSystem(system)->DrawBodies(joltSettings, reinterpret_cast<DebugRenderer*>(renderer), bodyDrawFilter);
 }
 
 void JPH_PhysicsSystem_DrawConstraints(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer)
 {
-	system->physicsSystem->DrawConstraints(reinterpret_cast<DebugRenderer*>(renderer));
+	AsPhysicsSystem(system)->DrawConstraints(reinterpret_cast<DebugRenderer*>(renderer));
 }
 
 void JPH_PhysicsSystem_DrawConstraintLimits(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer)
 {
-	system->physicsSystem->DrawConstraintLimits(reinterpret_cast<DebugRenderer*>(renderer));
+	AsPhysicsSystem(system)->DrawConstraintLimits(reinterpret_cast<DebugRenderer*>(renderer));
 }
 
 void JPH_PhysicsSystem_DrawConstraintReferenceFrame(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer)
 {
-	system->physicsSystem->DrawConstraintReferenceFrame(reinterpret_cast<DebugRenderer*>(renderer));
+	AsPhysicsSystem(system)->DrawConstraintReferenceFrame(reinterpret_cast<DebugRenderer*>(renderer));
 }
 #endif
 
@@ -5565,7 +5537,7 @@ public:
 			context.deltaTime = inContext.mDeltaTime;
 			context.isFirstStep = inContext.mIsFirstStep;
 			context.isLastStep = inContext.mIsLastStep;
-			context.physicsSystem = s_PhysicsSystems[inContext.mPhysicsSystem];
+			context.physicsSystem = ToPhysicsSystem(inContext.mPhysicsSystem);
 			return s_Procs->OnStep(userData, &context);
 		}
 	}
@@ -5708,7 +5680,7 @@ bool JPH_BodyInterface_IsAdded(JPH_BodyInterface* bodyInterface, JPH_BodyID body
 
 JPH_CAPI const JPH_Body* JPH_PhysicsSystem_GetBodyPtr(const JPH_PhysicsSystem* system, JPH_BodyID bodyID)
 {
-	return reinterpret_cast<const JPH_Body*>(system->physicsSystem->GetBodyLockInterface().TryGetBody(JPH::BodyID(bodyID)));
+	return reinterpret_cast<const JPH_Body*>(AsPhysicsSystem(system)->GetBodyLockInterface().TryGetBody(JPH::BodyID(bodyID)));
 }
 
 JPH_BodyType JPH_BodyInterface_GetBodyType(JPH_BodyInterface* bodyInterface, JPH_BodyID bodyID)
@@ -7982,7 +7954,8 @@ JPH_Character* JPH_Character_Create(const JPH_CharacterSettings* settings,
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
 		userData,
-		system->physicsSystem);
+		AsPhysicsSystem(system)
+	);
 	joltCharacter->AddRef();
 
 	return reinterpret_cast<JPH_Character*>(joltCharacter);
@@ -8189,7 +8162,8 @@ JPH_CharacterVirtual* JPH_CharacterVirtual_Create(const JPH_CharacterVirtualSett
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
 		userData,
-		system->physicsSystem);
+		AsPhysicsSystem(system)
+	);
 	joltCharacter->AddRef();
 
 	return ToCharacterVirtual(joltCharacter);
@@ -8382,23 +8356,25 @@ void JPH_CharacterVirtual_FinishTrackingContactChanges(JPH_CharacterVirtual* cha
 
 void JPH_CharacterVirtual_Update(JPH_CharacterVirtual* character,
 	float deltaTime, JPH_ObjectLayer layer, JPH_PhysicsSystem* system,
-	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter,
+	JPH_TempAllocator* tempAllocator)
 {
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
+	auto joltTempAllocator = AsTempAllocator(tempAllocator);
 
 	AsCharacterVirtual(character)->Update(deltaTime,
-		system->physicsSystem->GetGravity(),
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
-		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetGravity(),
+		AsPhysicsSystem(system)->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultLayerFilter(joltLayer),
 		ToJolt(bodyFilter),
 		ToJolt(shapeFilter),
-		*s_TempAllocator
+		*joltTempAllocator
 	);
 }
 
 void JPH_CharacterVirtual_ExtendedUpdate(JPH_CharacterVirtual* character, float deltaTime,
 	const JPH_ExtendedUpdateSettings* settings, JPH_ObjectLayer layer, JPH_PhysicsSystem* system,
-	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, JPH_TempAllocator* tempAllocator)
 {
 	JPH_ASSERT(settings);
 
@@ -8414,29 +8390,30 @@ void JPH_CharacterVirtual_ExtendedUpdate(JPH_CharacterVirtual* character, float 
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
 	AsCharacterVirtual(character)->ExtendedUpdate(deltaTime,
-		system->physicsSystem->GetGravity(),
+		AsPhysicsSystem(system)->GetGravity(),
 		joltSettings,
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
-		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultLayerFilter(joltLayer),
 		ToJolt(bodyFilter),
 		ToJolt(shapeFilter),
-		*s_TempAllocator
+		*AsTempAllocator(tempAllocator)
 	);
 }
 
 void JPH_CharacterVirtual_RefreshContacts(JPH_CharacterVirtual* character,
 	JPH_ObjectLayer layer,
 	JPH_PhysicsSystem* system,
-	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, JPH_TempAllocator* tempAllocator)
 {
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
+	auto joltTempAllocator = AsTempAllocator(tempAllocator);
 
 	AsCharacterVirtual(character)->RefreshContacts(
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
-		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultLayerFilter(joltLayer),
 		ToJolt(bodyFilter),
 		ToJolt(shapeFilter),
-		*s_TempAllocator
+		*joltTempAllocator
 	);
 }
 
@@ -8453,7 +8430,8 @@ bool JPH_CharacterVirtual_WalkStairs(JPH_CharacterVirtual* character, float delt
 	JPH_ObjectLayer layer,
 	JPH_PhysicsSystem* system,
 	const JPH_BodyFilter* bodyFilter,
-	const JPH_ShapeFilter* shapeFilter)
+	const JPH_ShapeFilter* shapeFilter, 
+	JPH_TempAllocator* tempAllocator)
 {
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
@@ -8463,27 +8441,27 @@ bool JPH_CharacterVirtual_WalkStairs(JPH_CharacterVirtual* character, float delt
 		ToJolt(stepForward),
 		ToJolt(stepForwardTest),
 		ToJolt(stepDownExtra),
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
-		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultLayerFilter(joltLayer),
 		ToJolt(bodyFilter),
 		ToJolt(shapeFilter),
-		*s_TempAllocator
+		*AsTempAllocator(tempAllocator)
 	);
 }
 
 bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character, const JPH_Vec3* stepDown,
 	JPH_ObjectLayer layer, JPH_PhysicsSystem* system,
-	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter)
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, JPH_TempAllocator* tempAllocator)
 {
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 
 	return AsCharacterVirtual(character)->StickToFloor(
 		ToJolt(stepDown),
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
-		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultLayerFilter(joltLayer),
 		ToJolt(bodyFilter),
 		ToJolt(shapeFilter),
-		*s_TempAllocator
+		*AsTempAllocator(tempAllocator)
 	);
 }
 
@@ -8498,17 +8476,18 @@ bool JPH_CharacterVirtual_SetShape(JPH_CharacterVirtual* character,
 	JPH_ObjectLayer layer,
 	JPH_PhysicsSystem* system,
 	const JPH_BodyFilter* bodyFilter,
-	const JPH_ShapeFilter* shapeFilter)
+	const JPH_ShapeFilter* shapeFilter,
+	JPH_TempAllocator* tempAllocator)
 {
 	auto joltLayer = static_cast<JPH::ObjectLayer>(layer);
 	return AsCharacterVirtual(character)->SetShape(
 		AsShape(shape),
 		maxPenetrationDepth,
-		system->physicsSystem->GetDefaultBroadPhaseLayerFilter(joltLayer),
-		system->physicsSystem->GetDefaultLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultBroadPhaseLayerFilter(joltLayer),
+		AsPhysicsSystem(system)->GetDefaultLayerFilter(joltLayer),
 		ToJolt(bodyFilter),
 		ToJolt(shapeFilter),
-		*s_TempAllocator
+		*AsTempAllocator(tempAllocator)
 	);
 }
 
@@ -9509,7 +9488,7 @@ void JPH_RagdollSettings_SetPartToParent(JPH_RagdollSettings* settings, int part
 
 JPH_Ragdoll* JPH_RagdollSettings_CreateRagdoll(JPH_RagdollSettings* settings, JPH_PhysicsSystem* system, JPH_CollisionGroupID collisionGroup, uint64_t userData)
 {
-	Ragdoll* ragdoll = AsRagdollSettings(settings)->CreateRagdoll(collisionGroup, userData, system->physicsSystem);
+	Ragdoll* ragdoll = AsRagdollSettings(settings)->CreateRagdoll(collisionGroup, userData, AsPhysicsSystem(system));
 	ragdoll->AddRef();
 
 	return ToRagdoll(ragdoll);
@@ -11464,7 +11443,25 @@ void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, 
 	}
 }
 
-JPH_TempAllocator* JPH_TempAllocator_Create(uint32_t size)
+JPH_TempAllocator* JPH_TempAllocator_CreateDefault(void)
+{
+#if defined(__SANITIZE_THREAD__) || defined(ENABLE_SANITIZER)
+	// ThreadSanitizer does not understand Jolt's lock-free 8MB bump allocator
+	// and will flag cross-frame memory reuse as data races.
+	// We fall back to standard malloc/free which TSan can track perfectly.
+	return ToTempAllocator(new TempAllocatorMalloc());
+#else
+	// High-performance lock-free allocator for production
+	return ToTempAllocator(new TempAllocatorImplWithMallocFallback(8 * 1024 * 1024));
+#endif
+}
+
+JPH_TempAllocator* JPH_TempAllocatorImpl_Create(uint32_t size)
+{
+	return ToTempAllocator(new TempAllocatorImpl(size));
+}
+
+JPH_TempAllocator* JPH_TempAllocatorImplWithMallocFallback_Create(uint32_t size)
 {
 	return ToTempAllocator(new TempAllocatorImplWithMallocFallback(size));
 }
@@ -11474,14 +11471,18 @@ JPH_TempAllocator* JPH_TempAllocatorMalloc_Create(void)
 	return ToTempAllocator(new TempAllocatorMalloc());
 }
 
-void JPH_TempAllocator_Destroy(JPH_TempAllocator* allocator) {
-	if (allocator) delete AsTempAllocator(allocator);
+void JPH_TempAllocator_Destroy(JPH_TempAllocator* allocator)
+{
+	if (allocator)
+	{
+		delete AsTempAllocator(allocator);
+	}
 }
 
 JPH_PhysicsUpdateError JPH_PhysicsSystem_Update2(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_TempAllocator* tempAllocator, JPH_JobSystem* jobSystem)
 {
 	JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
-	return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, AsTempAllocator(tempAllocator), joltJobSystem));
+	return static_cast<JPH_PhysicsUpdateError>(AsPhysicsSystem(system)->Update(deltaTime, collisionSteps, AsTempAllocator(tempAllocator), joltJobSystem));
 }
 
 /****
@@ -12665,21 +12666,22 @@ void JPH_SoftBodyMotionProperties_SkinVertices(JPH_SoftBodyMotionProperties* pro
 	if (!properties || (jointCount > 0 && !jointMatrices))
 		return;
 
-	JPH::TempAllocator* allocator = tempAllocator ? AsTempAllocator(tempAllocator) : s_TempAllocator;
-	if (!allocator)
-		return;
-
 	JPH::RMat44 joltCenterOfMassTransform = centerOfMassTransform ? ToJolt(centerOfMassTransform) : JPH::RMat44::sIdentity();
 	const JPH::Mat44* joltJointMatrices = jointMatrices ? reinterpret_cast<const JPH::Mat44*>(jointMatrices) : nullptr;
-	AsSoftBodyMotionProperties(properties)->SkinVertices(joltCenterOfMassTransform, joltJointMatrices, static_cast<JPH::uint>(jointCount), hardSkinAll, *allocator);
+	AsSoftBodyMotionProperties(properties)->SkinVertices(joltCenterOfMassTransform, 
+		joltJointMatrices, 
+		static_cast<JPH::uint>(jointCount),
+		hardSkinAll, 
+		*AsTempAllocator(tempAllocator)
+	);
 }
 
 void JPH_SoftBodyMotionProperties_CustomUpdate(JPH_SoftBodyMotionProperties* properties, float deltaTime, JPH_Body* body, JPH_PhysicsSystem* system)
 {
-	if (!properties || !body || !system || !system->physicsSystem)
+	if (!properties || !body || !system)
 		return;
 
-	AsSoftBodyMotionProperties(properties)->CustomUpdate(deltaTime, *AsBody(body), *system->physicsSystem);
+	AsSoftBodyMotionProperties(properties)->CustomUpdate(deltaTime, *AsBody(body), *AsPhysicsSystem(system));
 }
 
 /* SoftBodyManifold */
@@ -12869,7 +12871,7 @@ void JPH_PhysicsSystem_SetSoftBodyContactListener(JPH_PhysicsSystem* system, JPH
 	JPH_ASSERT(system);
 
 	auto joltListener = reinterpret_cast<JPH::SoftBodyContactListener*>(listener);
-	system->physicsSystem->SetSoftBodyContactListener(joltListener);
+	AsPhysicsSystem(system)->SetSoftBodyContactListener(joltListener);
 }
 
 JPH_SUPPRESS_WARNING_POP

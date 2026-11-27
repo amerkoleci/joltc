@@ -30,12 +30,16 @@ namespace BroadPhaseLayers
 
 int main(void)
 {
-	if (!JPH_Init())
-		return 1;
+	JPH_RegisterDefaultAllocator();
+	JPH_CreateFactory();
+
+	// Register all Jolt physics types
+	JPH_RegisterTypes();
 
 	JPH_SetTraceHandler(TraceImpl);
 	//JPH_SetAssertFailureHandler(JPH_AssertFailureFunc handler);
 
+	JPH_TempAllocator* tempAllocator = JPH_TempAllocator_CreateDefault();
 	JPH_JobSystem* jobSystem = JPH_JobSystemThreadPool_Create(nullptr);
 
 	// We use only 2 layers: one for non-moving objects and one for moving objects
@@ -153,7 +157,7 @@ int main(void)
 		const int cCollisionSteps = 1;
 
 		// Step the world
-		JPH_PhysicsSystem_Update(system, cDeltaTime, cCollisionSteps, jobSystem);
+		JPH_PhysicsSystem_Update(system, cDeltaTime, cCollisionSteps, tempAllocator, jobSystem);
 	}
 
 	// Remove the destroy sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
@@ -162,9 +166,17 @@ int main(void)
 	// Remove and destroy the floor
 	JPH_BodyInterface_RemoveAndDestroyBody(bodyInterface, floorId);
 
-	JPH_JobSystem_Destroy(jobSystem);
-
 	JPH_PhysicsSystem_Destroy(system);
-	JPH_Shutdown();
+	JPH_ObjectLayerPairFilter_Destroy(objectLayerPairFilterTable);
+	JPH_BroadPhaseLayerInterface_Destroy(broadPhaseLayerInterfaceTable);
+	JPH_ObjectVsBroadPhaseLayerFilter_Destroy(objectVsBroadPhaseLayerFilter);
+
+	JPH_JobSystem_Destroy(jobSystem);
+	JPH_TempAllocator_Destroy(tempAllocator);
+	// Unregisters all types with the factory and cleans up the default material
+	JPH_UnregisterTypes();
+
+	// Destroy the factory
+	JPH_DestroyFactory();
 	return 0;
 }

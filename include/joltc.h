@@ -61,6 +61,7 @@ typedef uint32_t JPH_CollisionSubGroupID;
 typedef uint32_t JPH_CharacterID;
 
 /* Forward declarations */
+typedef struct JPH_TempAllocator						JPH_TempAllocator;
 typedef struct JPH_BroadPhaseLayerInterface				JPH_BroadPhaseLayerInterface;
 typedef struct JPH_ObjectVsBroadPhaseLayerFilter		JPH_ObjectVsBroadPhaseLayerFilter;
 typedef struct JPH_ObjectLayerPairFilter				JPH_ObjectLayerPairFilter;
@@ -1017,8 +1018,11 @@ JPH_CAPI JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPool
 JPH_CAPI JPH_JobSystem* JPH_JobSystemCallback_Create(const JPH_JobSystemConfig* config);
 JPH_CAPI void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem);
 
-JPH_CAPI bool JPH_Init(void);
-JPH_CAPI void JPH_Shutdown(void);
+JPH_CAPI void JPH_RegisterDefaultAllocator(void);
+JPH_CAPI void JPH_CreateFactory(void);
+JPH_CAPI void JPH_DestroyFactory(void);
+JPH_CAPI void JPH_RegisterTypes(void);
+JPH_CAPI void JPH_UnregisterTypes(void);
 JPH_CAPI void JPH_SetTraceHandler(JPH_TraceFunc handler);
 JPH_CAPI void JPH_SetAssertFailureHandler(JPH_AssertFailureFunc handler);
 
@@ -1066,9 +1070,9 @@ typedef struct JPH_PhysicsSystemSettings {
 	uint32_t maxBodyPairs; /* 65536 */
 	uint32_t maxContactConstraints; /* 10240 */
 	uint32_t _padding;
-	JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface;
-	JPH_ObjectLayerPairFilter* objectLayerPairFilter;
-	JPH_ObjectVsBroadPhaseLayerFilter* objectVsBroadPhaseLayerFilter;
+	const JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface;
+	const JPH_ObjectLayerPairFilter* objectLayerPairFilter;
+	const JPH_ObjectVsBroadPhaseLayerFilter* objectVsBroadPhaseLayerFilter;
 } JPH_PhysicsSystemSettings;
 
 typedef struct JPH_PhysicsSettings {
@@ -1107,7 +1111,7 @@ JPH_CAPI void JPH_PhysicsSystem_SetPhysicsSettings(JPH_PhysicsSystem* system, JP
 JPH_CAPI void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, JPH_PhysicsSettings* result);
 
 JPH_CAPI void JPH_PhysicsSystem_OptimizeBroadPhase(JPH_PhysicsSystem* system);
-JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem);
+JPH_CAPI JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_TempAllocator* tempAllocator, JPH_JobSystem* jobSystem);
 
 JPH_CAPI JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterface(JPH_PhysicsSystem* system);
 JPH_CAPI JPH_BodyInterface* JPH_PhysicsSystem_GetBodyInterfaceNoLock(JPH_PhysicsSystem* system);
@@ -1164,9 +1168,8 @@ typedef struct JPH_PhysicsStepListenerContext {
 	float					deltaTime;
 	JPH_Bool				isFirstStep;
 	JPH_Bool				isLastStep;
-	JPH_PhysicsSystem* physicsSystem;
+	JPH_PhysicsSystem*		physicsSystem;
 } JPH_PhysicsStepListenerContext;
-
 
 typedef struct JPH_PhysicsStepListener_Procs {
 	void(JPH_API_CALL* OnStep)(void* userData, const JPH_PhysicsStepListenerContext* context);
@@ -2379,24 +2382,34 @@ JPH_CAPI JPH_BodyID JPH_CharacterVirtual_GetInnerBodyID(const JPH_CharacterVirtu
 JPH_CAPI void JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(JPH_CharacterVirtual* character, const JPH_Vec3* desiredVelocity, JPH_Vec3* velocity);
 JPH_CAPI void JPH_CharacterVirtual_StartTrackingContactChanges(JPH_CharacterVirtual* character);
 JPH_CAPI void JPH_CharacterVirtual_FinishTrackingContactChanges(JPH_CharacterVirtual* character);
-JPH_CAPI void JPH_CharacterVirtual_Update(JPH_CharacterVirtual* character, float deltaTime, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
+
+JPH_CAPI void JPH_CharacterVirtual_Update(JPH_CharacterVirtual* character, float deltaTime, JPH_ObjectLayer layer, 
+	JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, 
+	JPH_TempAllocator* tempAllocator
+);
 
 JPH_CAPI void JPH_CharacterVirtual_ExtendedUpdate(JPH_CharacterVirtual* character, float deltaTime,
-	const JPH_ExtendedUpdateSettings* settings, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
-JPH_CAPI void JPH_CharacterVirtual_RefreshContacts(JPH_CharacterVirtual* character, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
+	const JPH_ExtendedUpdateSettings* settings, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, 
+	JPH_TempAllocator* tempAllocator
+);
+JPH_CAPI void JPH_CharacterVirtual_RefreshContacts(JPH_CharacterVirtual* character, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, JPH_TempAllocator* tempAllocator);
 
 JPH_CAPI bool JPH_CharacterVirtual_CanWalkStairs(JPH_CharacterVirtual* character, const JPH_Vec3* linearVelocity);
 JPH_CAPI bool JPH_CharacterVirtual_WalkStairs(JPH_CharacterVirtual* character, float deltaTime,
 	const JPH_Vec3* stepUp, const JPH_Vec3* stepForward, const JPH_Vec3* stepForwardTest, const JPH_Vec3* stepDownExtra,
 	JPH_ObjectLayer layer, JPH_PhysicsSystem* system,
-	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, 
+	JPH_TempAllocator* tempAllocator
+);
 
 JPH_CAPI bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character, const JPH_Vec3* stepDown,
 	JPH_ObjectLayer layer, JPH_PhysicsSystem* system,
-	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
+	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, 
+	JPH_TempAllocator* tempAllocator
+);
 
 JPH_CAPI void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character);
-JPH_CAPI bool JPH_CharacterVirtual_SetShape(JPH_CharacterVirtual* character, const JPH_Shape* shape, float maxPenetrationDepth, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
+JPH_CAPI bool JPH_CharacterVirtual_SetShape(JPH_CharacterVirtual* character, const JPH_Shape* shape, float maxPenetrationDepth, JPH_ObjectLayer layer, JPH_PhysicsSystem* system, const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter, JPH_TempAllocator* tempAllocator);
 JPH_CAPI void JPH_CharacterVirtual_SetInnerBodyShape(JPH_CharacterVirtual* character, const JPH_Shape* shape);
 
 JPH_CAPI uint32_t JPH_CharacterVirtual_GetNumActiveContacts(JPH_CharacterVirtual* character);
@@ -3056,9 +3069,9 @@ JPH_CAPI void JPH_LinearCurve_GetPoint(const JPH_LinearCurve* curve, uint32_t in
 JPH_CAPI void JPH_LinearCurve_GetPoints(const JPH_LinearCurve* curve, JPH_Point* points, uint32_t* count);
 
 /* Temp Allocator */
-typedef struct JPH_TempAllocator JPH_TempAllocator;
-
-JPH_CAPI JPH_TempAllocator* JPH_TempAllocator_Create(uint32_t size);
+JPH_CAPI JPH_TempAllocator* JPH_TempAllocator_CreateDefault(void);
+JPH_CAPI JPH_TempAllocator* JPH_TempAllocatorImpl_Create(uint32_t size);
+JPH_CAPI JPH_TempAllocator* JPH_TempAllocatorImplWithMallocFallback_Create(uint32_t size);
 JPH_CAPI JPH_TempAllocator* JPH_TempAllocatorMalloc_Create(void);
 JPH_CAPI void JPH_TempAllocator_Destroy(JPH_TempAllocator* allocator);
 
