@@ -83,9 +83,7 @@ JPH_SUPPRESS_WARNINGS
 
 #include <cstdio>
 #include <cstdarg>
-#include <atomic>
 #include <algorithm>
-#include <mutex>
 
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
