@@ -28,8 +28,15 @@ protected:
     JPH_Body* body2 = nullptr;
     JPH_BodyID bodyId1, bodyId2;
 
-    void SetUp() override {
-        ASSERT_TRUE(JPH_Init());
+    void SetUp() override 
+    {
+        JPH_RegisterDefaultAllocator();
+
+        // Create a factory
+        JPH_CreateFactory();
+
+        // Register all Jolt physics types
+        JPH_RegisterTypes();
 
         bpLayer = JPH_BroadPhaseLayerInterfaceTable_Create(ObjectLayers::NUM_LAYERS, BroadPhaseLayers::NUM_LAYERS);
         JPH_BroadPhaseLayerInterfaceTable_MapObjectToBroadPhaseLayer(bpLayer, ObjectLayers::NON_MOVING, BroadPhaseLayers::NON_MOVING);
@@ -76,18 +83,28 @@ protected:
     }
 
     void TearDown() override {
-        if (physicsSystem) {
+        if (physicsSystem) 
+        {
             JPH_BodyInterface_RemoveBody(bodyInterface, bodyId1);
             JPH_BodyInterface_RemoveBody(bodyInterface, bodyId2);
             JPH_BodyInterface_DestroyBody(bodyInterface, bodyId1);
             JPH_BodyInterface_DestroyBody(bodyInterface, bodyId2);
             JPH_PhysicsSystem_Destroy(physicsSystem);
+            JPH_ObjectLayerPairFilter_Destroy(objPairFilter);
+            JPH_BroadPhaseLayerInterface_Destroy(bpLayer);
+            JPH_ObjectVsBroadPhaseLayerFilter_Destroy(objVsBpFilter);
         }
-        JPH_Shutdown();
+
+        // Unregisters all types with the factory and cleans up the default material
+        JPH_UnregisterTypes();
+
+        // Destroy the factory
+        JPH_DestroyFactory();
     }
 };
 
-TEST_F(ConstraintTest, FixedConstraint_Create) {
+TEST_F(ConstraintTest, FixedConstraint_Create) 
+{
     JPH_FixedConstraintSettings settings;
     JPH_FixedConstraintSettings_Init(&settings);
 
@@ -103,7 +120,8 @@ TEST_F(ConstraintTest, FixedConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, DistanceConstraint_Create) {
+TEST_F(ConstraintTest, DistanceConstraint_Create)
+{
     JPH_DistanceConstraintSettings settings;
     JPH_DistanceConstraintSettings_Init(&settings);
 
@@ -115,7 +133,8 @@ TEST_F(ConstraintTest, DistanceConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, DistanceConstraint_SetDistance) {
+TEST_F(ConstraintTest, DistanceConstraint_SetDistance)
+{
     JPH_DistanceConstraintSettings settings;
     JPH_DistanceConstraintSettings_Init(&settings);
 
@@ -129,7 +148,8 @@ TEST_F(ConstraintTest, DistanceConstraint_SetDistance) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, PointConstraint_Create) {
+TEST_F(ConstraintTest, PointConstraint_Create)
+{
     JPH_PointConstraintSettings settings;
     JPH_PointConstraintSettings_Init(&settings);
 
@@ -145,7 +165,8 @@ TEST_F(ConstraintTest, PointConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, HingeConstraint_Create) {
+TEST_F(ConstraintTest, HingeConstraint_Create)
+{
     JPH_HingeConstraintSettings settings;
     JPH_HingeConstraintSettings_Init(&settings);
 
@@ -160,7 +181,8 @@ TEST_F(ConstraintTest, HingeConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, HingeConstraint_Limits) {
+TEST_F(ConstraintTest, HingeConstraint_Limits) 
+{
     JPH_HingeConstraintSettings settings;
     JPH_HingeConstraintSettings_Init(&settings);
 
@@ -175,7 +197,8 @@ TEST_F(ConstraintTest, HingeConstraint_Limits) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, HingeConstraint_Motor) {
+TEST_F(ConstraintTest, HingeConstraint_Motor) 
+{
     JPH_HingeConstraintSettings settings;
     JPH_HingeConstraintSettings_Init(&settings);
 
@@ -191,7 +214,8 @@ TEST_F(ConstraintTest, HingeConstraint_Motor) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, SliderConstraint_Create) {
+TEST_F(ConstraintTest, SliderConstraint_Create)
+{
     JPH_SliderConstraintSettings settings;
     JPH_SliderConstraintSettings_Init(&settings);
 
@@ -206,7 +230,8 @@ TEST_F(ConstraintTest, SliderConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, SliderConstraint_Limits) {
+TEST_F(ConstraintTest, SliderConstraint_Limits) 
+{
     JPH_SliderConstraintSettings settings;
     JPH_SliderConstraintSettings_Init(&settings);
 
@@ -221,7 +246,8 @@ TEST_F(ConstraintTest, SliderConstraint_Limits) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, ConeConstraint_Create) {
+TEST_F(ConstraintTest, ConeConstraint_Create)
+{
     JPH_ConeConstraintSettings settings;
     JPH_ConeConstraintSettings_Init(&settings);
 
@@ -237,7 +263,8 @@ TEST_F(ConstraintTest, ConeConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, SwingTwistConstraint_Create) {
+TEST_F(ConstraintTest, SwingTwistConstraint_Create)
+{
     JPH_SwingTwistConstraintSettings settings;
     JPH_SwingTwistConstraintSettings_Init(&settings);
 
@@ -252,7 +279,8 @@ TEST_F(ConstraintTest, SwingTwistConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, SixDOFConstraint_Create) {
+TEST_F(ConstraintTest, SixDOFConstraint_Create)
+{
     JPH_SixDOFConstraintSettings settings;
     JPH_SixDOFConstraintSettings_Init(&settings);
 
@@ -264,7 +292,8 @@ TEST_F(ConstraintTest, SixDOFConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, SixDOFConstraintSettings_Axes) {
+TEST_F(ConstraintTest, SixDOFConstraintSettings_Axes)
+{
     JPH_SixDOFConstraintSettings settings;
     JPH_SixDOFConstraintSettings_Init(&settings);
 
@@ -277,7 +306,8 @@ TEST_F(ConstraintTest, SixDOFConstraintSettings_Axes) {
     JPH_SixDOFConstraintSettings_SetLimitedAxis(&settings, JPH_SixDOFConstraintAxis_TranslationZ, -1.0f, 1.0f);
 }
 
-TEST_F(ConstraintTest, GearConstraint_Create) {
+TEST_F(ConstraintTest, GearConstraint_Create) 
+{
     JPH_GearConstraintSettings settings;
     JPH_GearConstraintSettings_Init(&settings);
 
@@ -292,7 +322,8 @@ TEST_F(ConstraintTest, GearConstraint_Create) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, Constraint_EnableDisable) {
+TEST_F(ConstraintTest, Constraint_EnableDisable) 
+{
     JPH_FixedConstraintSettings settings;
     JPH_FixedConstraintSettings_Init(&settings);
 
@@ -310,7 +341,8 @@ TEST_F(ConstraintTest, Constraint_EnableDisable) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, Constraint_UserData) {
+TEST_F(ConstraintTest, Constraint_UserData)
+{
     JPH_FixedConstraintSettings settings;
     JPH_FixedConstraintSettings_Init(&settings);
 
@@ -323,7 +355,8 @@ TEST_F(ConstraintTest, Constraint_UserData) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, Constraint_Priority) {
+TEST_F(ConstraintTest, Constraint_Priority)
+{
     JPH_FixedConstraintSettings settings;
     JPH_FixedConstraintSettings_Init(&settings);
 
@@ -336,7 +369,8 @@ TEST_F(ConstraintTest, Constraint_Priority) {
     JPH_Constraint_Destroy((JPH_Constraint*)constraint);
 }
 
-TEST_F(ConstraintTest, TwoBodyConstraint_GetBodies) {
+TEST_F(ConstraintTest, TwoBodyConstraint_GetBodies)
+{
     JPH_FixedConstraintSettings settings;
     JPH_FixedConstraintSettings_Init(&settings);
 

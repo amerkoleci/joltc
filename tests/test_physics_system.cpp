@@ -19,14 +19,25 @@ namespace ObjectLayers {
 
 class PhysicsSystemTest : public ::testing::Test {
 protected:
+	JPH_TempAllocator* tempAllocator = nullptr;
     JPH_JobSystem* jobSystem = nullptr;
     JPH_BroadPhaseLayerInterface* broadPhaseLayerInterface = nullptr;
     JPH_ObjectVsBroadPhaseLayerFilter* objectVsBroadPhaseLayerFilter = nullptr;
     JPH_ObjectLayerPairFilter* objectLayerPairFilter = nullptr;
     JPH_PhysicsSystem* physicsSystem = nullptr;
 
-    void SetUp() override {
-        ASSERT_TRUE(JPH_Init());
+    void SetUp() override 
+    {
+        JPH_RegisterDefaultAllocator();
+
+        // Create a factory
+        JPH_CreateFactory();
+
+        // Register all Jolt physics types
+        JPH_RegisterTypes();
+
+		tempAllocator = JPH_TempAllocator_CreateDefault();
+        ASSERT_NE(tempAllocator, nullptr);
 
         jobSystem = JPH_JobSystemThreadPool_Create(nullptr);
         ASSERT_NE(jobSystem, nullptr);
@@ -59,10 +70,32 @@ protected:
         ASSERT_NE(physicsSystem, nullptr);
     }
 
-    void TearDown() override {
-        if (physicsSystem) JPH_PhysicsSystem_Destroy(physicsSystem);
-        if (jobSystem) JPH_JobSystem_Destroy(jobSystem);
-        JPH_Shutdown();
+    void TearDown() override 
+    {
+        if (physicsSystem)
+        {
+            JPH_PhysicsSystem_Destroy(physicsSystem);
+
+            JPH_ObjectLayerPairFilter_Destroy(objectLayerPairFilter);
+            JPH_BroadPhaseLayerInterface_Destroy(broadPhaseLayerInterface);
+            JPH_ObjectVsBroadPhaseLayerFilter_Destroy(objectVsBroadPhaseLayerFilter);
+        }
+
+        if (jobSystem)
+        {
+            JPH_JobSystem_Destroy(jobSystem);
+        }
+
+        if(tempAllocator)
+        {
+            JPH_TempAllocator_Destroy(tempAllocator);
+        }
+
+        // Unregisters all types with the factory and cleans up the default material
+        JPH_UnregisterTypes();
+
+        // Destroy the factory
+        JPH_DestroyFactory();
     }
 };
 
@@ -415,7 +448,7 @@ TEST_F(PhysicsSystemTest, Update_FallingBody) {
     JPH_BodyInterface_GetPosition(bodyInterface, bodyId, &initialPos);
 
     JPH_PhysicsSystem_OptimizeBroadPhase(physicsSystem);
-    JPH_PhysicsUpdateError error = JPH_PhysicsSystem_Update(physicsSystem, 1.0f / 60.0f, 1, jobSystem);
+    JPH_PhysicsUpdateError error = JPH_PhysicsSystem_Update(physicsSystem, 1.0f / 60.0f, 1, tempAllocator, jobSystem);
     EXPECT_EQ(error, JPH_PhysicsUpdateError_None);
 
     JPH_RVec3 newPos;

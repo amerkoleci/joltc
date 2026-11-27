@@ -24,8 +24,15 @@ protected:
     JPH_ObjectLayerPairFilter* objPairFilter = nullptr;
     JPH_ObjectVsBroadPhaseLayerFilter* objVsBpFilter = nullptr;
 
-    void SetUp() override {
-        ASSERT_TRUE(JPH_Init());
+    void SetUp() override 
+    {
+        JPH_RegisterDefaultAllocator();
+
+        // Create a factory
+        JPH_CreateFactory();
+
+        // Register all Jolt physics types
+        JPH_RegisterTypes();
 
         bpLayer = JPH_BroadPhaseLayerInterfaceTable_Create(ObjectLayers::NUM_LAYERS, BroadPhaseLayers::NUM_LAYERS);
         JPH_BroadPhaseLayerInterfaceTable_MapObjectToBroadPhaseLayer(bpLayer, ObjectLayers::NON_MOVING, BroadPhaseLayers::NON_MOVING);
@@ -51,9 +58,21 @@ protected:
         bodyInterface = JPH_PhysicsSystem_GetBodyInterface(physicsSystem);
     }
 
-    void TearDown() override {
-        if (physicsSystem) JPH_PhysicsSystem_Destroy(physicsSystem);
-        JPH_Shutdown();
+    void TearDown() override
+    {
+        if (physicsSystem)
+        {
+            JPH_PhysicsSystem_Destroy(physicsSystem);
+            JPH_ObjectLayerPairFilter_Destroy(objPairFilter);
+            JPH_BroadPhaseLayerInterface_Destroy(bpLayer);
+            JPH_ObjectVsBroadPhaseLayerFilter_Destroy(objVsBpFilter);
+        }
+
+        // Unregisters all types with the factory and cleans up the default material
+        JPH_UnregisterTypes();
+
+        // Destroy the factory
+        JPH_DestroyFactory();
     }
 
     JPH_BodyID CreateSphereBody(float x, float y, float z, float radius, JPH_MotionType motionType, JPH_ObjectLayer layer) {

@@ -23,8 +23,15 @@ protected:
     JPH_ObjectLayerPairFilter* objPairFilter = nullptr;
     JPH_ObjectVsBroadPhaseLayerFilter* objVsBpFilter = nullptr;
 
-    void SetUp() override {
-        ASSERT_TRUE(JPH_Init());
+    void SetUp() override 
+    {
+        JPH_RegisterDefaultAllocator();
+
+        // Create a factory
+        JPH_CreateFactory();
+
+        // Register all Jolt physics types
+        JPH_RegisterTypes();
 
         bpLayer = JPH_BroadPhaseLayerInterfaceTable_Create(ObjectLayers::NUM_LAYERS, BroadPhaseLayers::NUM_LAYERS);
         JPH_BroadPhaseLayerInterfaceTable_MapObjectToBroadPhaseLayer(bpLayer, ObjectLayers::NON_MOVING, BroadPhaseLayers::NON_MOVING);
@@ -49,19 +56,34 @@ protected:
         physicsSystem = JPH_PhysicsSystem_Create(&settings);
     }
 
-    void TearDown() override {
-        if (physicsSystem) JPH_PhysicsSystem_Destroy(physicsSystem);
-        JPH_Shutdown();
+    void TearDown() override
+    {
+        if (physicsSystem)
+        {
+            JPH_PhysicsSystem_Destroy(physicsSystem);
+        }
+
+        JPH_ObjectLayerPairFilter_Destroy(objPairFilter);
+        JPH_BroadPhaseLayerInterface_Destroy(bpLayer);
+        JPH_ObjectVsBroadPhaseLayerFilter_Destroy(objVsBpFilter);
+
+        // Unregisters all types with the factory and cleans up the default material
+        JPH_UnregisterTypes();
+
+        // Destroy the factory
+        JPH_DestroyFactory();
     }
 };
 
-TEST_F(CharacterTest, CharacterSettings_Init) {
+TEST_F(CharacterTest, CharacterSettings_Init)
+{
     JPH_CharacterSettings settings;
     JPH_CharacterSettings_Init(&settings);
     EXPECT_NE(settings.base.up.y, 0.0f);
 }
 
-TEST_F(CharacterTest, Character_Create) {
+TEST_F(CharacterTest, Character_Create)
+{
     JPH_CapsuleShape* shape = JPH_CapsuleShape_Create(0.5f, 0.3f);
     ASSERT_NE(shape, nullptr);
 
@@ -85,7 +107,8 @@ TEST_F(CharacterTest, Character_Create) {
     JPH_Shape_Destroy((JPH_Shape*)shape);
 }
 
-TEST_F(CharacterTest, Character_PositionAndRotation) {
+TEST_F(CharacterTest, Character_PositionAndRotation)
+{
     JPH_CapsuleShape* shape = JPH_CapsuleShape_Create(0.5f, 0.3f);
     JPH_CharacterSettings settings;
     JPH_CharacterSettings_Init(&settings);
@@ -115,7 +138,8 @@ TEST_F(CharacterTest, Character_PositionAndRotation) {
     JPH_Shape_Destroy((JPH_Shape*)shape);
 }
 
-TEST_F(CharacterTest, Character_Velocity) {
+TEST_F(CharacterTest, Character_Velocity)
+{
     JPH_CapsuleShape* shape = JPH_CapsuleShape_Create(0.5f, 0.3f);
     JPH_CharacterSettings settings;
     JPH_CharacterSettings_Init(&settings);
@@ -139,7 +163,8 @@ TEST_F(CharacterTest, Character_Velocity) {
     JPH_Shape_Destroy((JPH_Shape*)shape);
 }
 
-TEST_F(CharacterTest, CharacterVirtualSettings_Init) {
+TEST_F(CharacterTest, CharacterVirtualSettings_Init)
+{
     JPH_CharacterVirtualSettings settings;
     JPH_CharacterVirtualSettings_Init(&settings);
     EXPECT_GT(settings.mass, 0.0f);

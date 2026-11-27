@@ -4,52 +4,50 @@
 #include <gtest/gtest.h>
 #include "joltc.h"
 
-class CoreTest : public ::testing::Test {
+class CoreTest : public ::testing::Test
+{
 protected:
     void SetUp() override {}
     void TearDown() override {}
 };
 
 // ============================================================================
-// Init/Shutdown Tests
-// ============================================================================
-
-TEST_F(CoreTest, Init_Shutdown) {
-    EXPECT_TRUE(JPH_Init());
-    JPH_Shutdown();
-}
-
-TEST_F(CoreTest, Init_Multiple_Times) {
-    // First init
-    EXPECT_TRUE(JPH_Init());
-    JPH_Shutdown();
-
-    // Second init should also work
-    EXPECT_TRUE(JPH_Init());
-    JPH_Shutdown();
-}
-
-// ============================================================================
 // JobSystem Tests
 // ============================================================================
 
-class JobSystemTest : public ::testing::Test {
+class JobSystemTest : public ::testing::Test
+{
 protected:
-    void SetUp() override {
-        ASSERT_TRUE(JPH_Init());
+    void SetUp() override 
+    {
+        JPH_RegisterDefaultAllocator();
+
+        // Create a factory
+        JPH_CreateFactory();
+
+        // Register all Jolt physics types
+        JPH_RegisterTypes();
     }
-    void TearDown() override {
-        JPH_Shutdown();
+
+    void TearDown() override
+    {
+        // Unregisters all types with the factory and cleans up the default material
+        JPH_UnregisterTypes();
+
+        // Destroy the factory
+        JPH_DestroyFactory();
     }
 };
 
-TEST_F(JobSystemTest, ThreadPool_Create_Default) {
+TEST_F(JobSystemTest, ThreadPool_Create_Default)
+{
     JPH_JobSystem* jobSystem = JPH_JobSystemThreadPool_Create(nullptr);
     ASSERT_NE(jobSystem, nullptr);
     JPH_JobSystem_Destroy(jobSystem);
 }
 
-TEST_F(JobSystemTest, ThreadPool_Create_WithConfig) {
+TEST_F(JobSystemTest, ThreadPool_Create_WithConfig)
+{
     JobSystemThreadPoolConfig config = {};
     config.maxJobs = JPH_MAX_PHYSICS_JOBS;
     config.maxBarriers = JPH_MAX_PHYSICS_BARRIERS;

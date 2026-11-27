@@ -7,11 +7,24 @@
 
 class ShapesTest : public ::testing::Test {
 protected:
-    void SetUp() override {
-        ASSERT_TRUE(JPH_Init());
+    void SetUp() override
+    {
+        JPH_RegisterDefaultAllocator();
+
+        // Create a factory
+        JPH_CreateFactory();
+
+        // Register all Jolt physics types
+        JPH_RegisterTypes();
     }
-    void TearDown() override {
-        JPH_Shutdown();
+
+    void TearDown() override
+    {
+        // Unregisters all types with the factory and cleans up the default material
+        JPH_UnregisterTypes();
+
+        // Destroy the factory
+        JPH_DestroyFactory();
     }
 };
 
